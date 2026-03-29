@@ -1,0 +1,13 @@
+Options -MultiViews -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Jika yang diakses adalah file asli (contoh: gambar, CSS), biarkan lewat
+    RewriteCond %{REQUEST_FILENAME} !-f
+    # Jika yang diakses adalah folder asli, biarkan lewat
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Selain itu, paksa semua URL masuk ke index.php (Front Controller)
+    RewriteRule ^ index.php [L]
+</IfModule>
