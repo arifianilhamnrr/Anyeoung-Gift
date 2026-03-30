@@ -54,5 +54,8 @@ $router->post('/api/payment-methods', 'PaymentMethodController@store');
 $router->get('/api/settings', 'StoreSettingController@index');
 $router->post('/api/settings', 'StoreSettingController@update');
 $router->get('/api/orders/details', 'OrderController@details');
+$router->get('/api/products/details', 'ProductController@details');
+$router->post('/api/products/update', 'ProductController@update');
+$router->post('/api/payment-methods/update', 'PaymentMethodController@update');
 
 $router->run();

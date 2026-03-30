@@ -42,4 +42,22 @@ class PaymentMethodModel extends Model {
         
         return $this->execute();
     }
+
+    public function updateMethod($id, $name, $type, $info) {
+        $this->query("UPDATE payment_methods SET name = :name, type = :type, account_info = :info WHERE id = :id");
+        $this->bind(':id', $id);
+        $this->bind(':name', $name);
+        $this->bind(':type', $type);
+        
+        // 🛡️ BUNGKUS TEKS MENJADI JSON (Sama seperti saat Add)
+        if ($info === null || trim($info) === '') {
+            $jsonInfo = '{}'; 
+        } else {
+            $jsonInfo = json_encode(['info' => trim($info)]); 
+        }
+        
+        $this->bind(':info', $jsonInfo);
+        
+        return $this->execute();
+    }
 }

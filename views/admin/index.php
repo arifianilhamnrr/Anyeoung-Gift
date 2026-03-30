@@ -135,8 +135,15 @@
                         <div>
                             <label class="block text-sm text-gray-400 font-medium mb-1.5">Harga Dasar (Rp)</label>
                             <input type="number" id="p_price"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
+                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition disabled:opacity-50 disabled:bg-dark-hover disabled:cursor-not-allowed"
                                 required>
+
+                            <label class="flex items-center gap-2 mt-2 cursor-pointer w-max group">
+                                <input type="checkbox" id="p_is_dynamic" onchange="toggleDynamicPrice()"
+                                    class="w-4 h-4 accent-gold-500 rounded cursor-pointer">
+                                <span class="text-xs text-gray-400 group-hover:text-gray-300 transition">Harga Dinamis
+                                    (Atur di Opsi)</span>
+                            </label>
                         </div>
                     </div>
                     <div>
@@ -183,6 +190,20 @@
                     class="bg-dark-hover border border-dark-border text-gray-400 w-8 h-8 rounded-full hover:text-white hover:bg-red-500/20 transition">&times;</button>
             </div>
             <div id="order-detail-content" class="text-gray-300 space-y-4"></div>
+        </div>
+    </div>
+    <!-- detail produk button -->
+    <div id="productDetailModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-dark-surface w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 custom-scrollbar">
+            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
+                <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">📦 Detail Produk</h3>
+                <button onclick="closeProductDetailModal()"
+                    class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 transition">&times;</button>
+            </div>
+            <div id="product-detail-content" class="text-gray-300">
+            </div>
         </div>
     </div>
 
@@ -270,11 +291,18 @@
         const BASE_URL = '<?= BASE_URL ?>';
 
         const views = {
-            // Dashboard dan Orders tetap menggunakan partials php
-            dashboard: `<?php ob_start(); include __DIR__ . '/partials/dashboard.php'; echo str_replace('`', '\\`', ob_get_clean()); ?>`,
-            orders: `<?php ob_start(); include __DIR__ . '/partials/orders.php'; echo str_replace('`', '\\`', ob_get_clean()); ?>`,
+            dashboard: `<?php ob_start();
+            include __DIR__ . '/partials/dashboard.php';
+            echo str_replace('`', '\\`', ob_get_clean()); ?>`,
             
-            // VIEW PRODUCTS KITA UBAH MENJADI HTML LANGSUNG DI SINI
+            orders: `<?php ob_start();
+            include __DIR__ . '/partials/orders.php';
+            echo str_replace('`', '\\`', ob_get_clean()); ?>`,
+
+            payments: `<?php ob_start();
+            include __DIR__ . '/partials/payments.php';
+            echo str_replace('`', '\\`', ob_get_clean()); ?>`,
+
             products: `
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 animate-fade-in-up">
                     <div>
@@ -302,22 +330,7 @@
                     </table>
                 </div>
             `,
-            
-            // VIEW PAYMENTS
-            payments: `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 animate-fade-in-up">
-                    <div><h2 class="text-2xl font-bold text-gray-100 mb-1">Metode Pembayaran</h2><p class="text-gray-400 text-sm">Kelola opsi pembayaran (QRIS, COD, Bank) yang tersedia di toko.</p></div>
-                    <button onclick="openPaymentMethodModal()" class="bg-gold-500 text-gray-900 px-5 py-2.5 rounded-lg font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition flex items-center gap-2 whitespace-nowrap"><span class="text-xl leading-none">+</span> Tambah Metode</button>
-                </div>
-                <div class="bg-dark-surface rounded-xl border border-dark-border overflow-x-auto shadow-md animate-fade-in-up">
-                    <table class="w-full text-left border-collapse min-w-[700px] whitespace-nowrap">
-                        <thead><tr class="bg-black/20 text-gray-400 text-sm border-b-2 border-dark-border"><th class="p-4 font-semibold">Nama Metode</th><th class="p-4 font-semibold">Tipe</th><th class="p-4 font-semibold">Info / Rekening</th><th class="p-4 font-semibold">Status</th></tr></thead>
-                        <tbody id="payments-table-body"><tr><td colspan="4" class="text-center p-10 text-gray-500">Memuat data...</td></tr></tbody>
-                    </table>
-                </div>
-            `,
-            
-            // VIEW SETTINGS
+
             settings: `
                 <div class="animate-fade-in-up max-w-2xl mx-auto">
                     <div class="mb-6">
@@ -423,20 +436,159 @@
             } catch (e) { console.error(e); }
         }
 
+        // ==========================================
         // --- PRODUCTS ---
+        // ==========================================
         let optionCounter = 0;
-        function openProductModal() { toggleModal('productModal', true); document.getElementById('productForm').reset(); document.getElementById('optionsContainer').innerHTML = ''; optionCounter = 0; document.getElementById('imagePreview').classList.add('hidden'); document.getElementById('uploadText').classList.remove('hidden'); }
+        let editProductId = null;
+
+        function toggleDynamicPrice() {
+            const isDynamic = document.getElementById('p_is_dynamic').checked;
+            const priceInput = document.getElementById('p_price');
+            if (isDynamic) {
+                priceInput.disabled = true;
+                priceInput.required = false;
+                priceInput.value = ''; // Kosongkan nilainya
+            } else {
+                priceInput.disabled = false;
+                priceInput.required = true;
+            }
+        }
+
+        function openProductModal() {
+            editProductId = null;
+            document.querySelector('#productModal h3').innerHTML = '🛍️ Tambah Produk';
+            document.getElementById('btnSaveProduct').innerHTML = '💾 Simpan Produk Baru';
+
+            toggleModal('productModal', true);
+            document.getElementById('productForm').reset();
+            document.getElementById('optionsContainer').innerHTML = '';
+            optionCounter = 0;
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('uploadText').classList.remove('hidden');
+            document.getElementById('p_is_dynamic').checked = false;
+            toggleDynamicPrice();
+        }
+
+        async function openEditProductModal(id) {
+            editProductId = id;
+            document.querySelector('#productModal h3').innerHTML = '✏️ Edit Produk';
+            document.getElementById('btnSaveProduct').innerHTML = '💾 Perbarui Produk';
+
+            toggleModal('productModal', true);
+            document.getElementById('productForm').reset();
+            document.getElementById('optionsContainer').innerHTML = '<div class="text-center text-gold-500 animate-pulse">Memuat data produk...</div>';
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('uploadText').classList.remove('hidden');
+
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/details?id=${id}`);
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    const p = result.data;
+                    document.getElementById('p_name').value = p.name;
+                    document.getElementById('p_category').value = p.category;
+                    document.getElementById('p_price').value = p.base_price;
+
+                    if (p.base_price == 0 || !p.base_price) {
+                        document.getElementById('p_price').value = '';
+                        document.getElementById('p_is_dynamic').checked = true;
+                    } else {
+                        document.getElementById('p_price').value = p.base_price;
+                        document.getElementById('p_is_dynamic').checked = false;
+                    }
+                    toggleDynamicPrice();
+
+                    // FIX BUG: Pengecekan gambar yang lebih aman
+                    if (p.image && p.image !== '') {
+                        document.getElementById('imagePreview').src = `${BASE_URL}/uploads/products/${p.image}`;
+                        document.getElementById('imagePreview').classList.remove('hidden');
+                        document.getElementById('uploadText').classList.add('hidden');
+                    }
+
+                    document.getElementById('optionsContainer').innerHTML = '';
+                    optionCounter = 0;
+                    if (p.options && p.options.length > 0) {
+                        p.options.forEach(opt => {
+                            const optId = optionCounter++;
+                            const groupHtml = `<div class="option-group bg-dark-base p-4 rounded-xl border border-dark-border relative overflow-hidden group" id="opt_group_${optId}"><div class="absolute top-0 left-0 w-1 h-full bg-gold-500"></div><div class="flex flex-col sm:flex-row gap-4 mb-4 items-end"><div class="flex-1 w-full"><label class="block text-xs text-gray-400 font-medium tracking-wide mb-1.5">Nama Opsi</label><input type="text" class="opt-name w-full p-2.5 bg-dark-surface border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition" value="${opt.option_name}" required></div><button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-500/10 text-red-500 border border-red-500/30 px-4 py-2.5 rounded-lg hover:bg-red-500 hover:text-white transition font-bold text-sm h-[42px]">Hapus</button></div><div class="values-container ml-2 pl-4 border-l-2 border-dark-border space-y-3"></div><button type="button" onclick="addOptionValue(${optId})" class="mt-4 ml-2 text-gray-400 border border-dashed border-dark-border px-3 py-1.5 rounded-md text-xs hover:text-gold-500 hover:border-gold-500 transition">+ Pilihan Harga</button></div>`;
+                            document.getElementById('optionsContainer').insertAdjacentHTML('beforeend', groupHtml);
+
+                            const valContainer = document.querySelector(`#opt_group_${optId} .values-container`);
+                            opt.values.forEach(v => {
+                                valContainer.insertAdjacentHTML('beforeend', `<div class="option-value flex gap-3 items-center"><div class="flex-[2]"><input type="text" class="val-name w-full p-2 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" value="${v.value_name}" required></div><div class="flex-1 relative"><span class="absolute left-3 top-2 text-gray-500 text-sm">+Rp</span><input type="number" class="val-price w-full p-2 pl-9 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" value="${v.additional_price}" required></div><button type="button" onclick="this.parentElement.remove()" class="text-gray-500 hover:text-red-500 text-xl font-bold px-2">&times;</button></div>`);
+                            });
+                        });
+                    }
+                }
+            } catch (e) { showToast('Gagal memuat data edit', 'error'); }
+        }
+
         function closeProductModal() { toggleModal('productModal', false); }
         function previewImage(input) { const preview = document.getElementById('imagePreview'); const uploadText = document.getElementById('uploadText'); if (input.files && input.files[0]) { const reader = new FileReader(); reader.onload = function (e) { preview.src = e.target.result; preview.classList.remove('hidden'); uploadText.classList.add('hidden'); }; reader.readAsDataURL(input.files[0]); } }
-        function addOptionGroup() { const container = document.getElementById('optionsContainer'); const optId = optionCounter++; container.insertAdjacentHTML('beforeend', `<div class="option-group bg-dark-base p-4 rounded-xl border border-dark-border relative overflow-hidden group"><div class="absolute top-0 left-0 w-1 h-full bg-gold-500"></div><div class="flex flex-col sm:flex-row gap-4 mb-4 items-end"><div class="flex-1 w-full"><label class="block text-xs text-gray-400 font-medium tracking-wide mb-1.5">Nama Opsi</label><input type="text" class="opt-name w-full p-2.5 bg-dark-surface border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required></div><button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-500/10 text-red-500 border border-red-500/30 px-4 py-2.5 rounded-lg hover:bg-red-500 hover:text-white transition font-bold text-sm h-[42px]">Hapus</button></div><div class="values-container ml-2 pl-4 border-l-2 border-dark-border space-y-3"></div><button type="button" onclick="addOptionValue(${optId})" class="mt-4 ml-2 text-gray-400 border border-dashed border-dark-border px-3 py-1.5 rounded-md text-xs hover:text-gold-500 hover:border-gold-500 transition">+ Pilihan Harga</button></div>`); addOptionValue(optId); }
-        function addOptionValue(optId) { const valContainer = document.querySelector(`#opt_${optId} .values-container`); if (!valContainer) return; valContainer.insertAdjacentHTML('beforeend', `<div class="option-value flex gap-3 items-center"><div class="flex-[2]"><input type="text" class="val-name w-full p-2 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" placeholder="Nama Pilihan" required></div><div class="flex-1 relative"><span class="absolute left-3 top-2 text-gray-500 text-sm">+Rp</span><input type="number" class="val-price w-full p-2 pl-9 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" value="0" required></div><button type="button" onclick="this.parentElement.remove()" class="text-gray-500 hover:text-red-500 text-xl font-bold px-2">&times;</button></div>`); }
+        function addOptionGroup() { const container = document.getElementById('optionsContainer'); const optId = optionCounter++; container.insertAdjacentHTML('beforeend', `<div class="option-group bg-dark-base p-4 rounded-xl border border-dark-border relative overflow-hidden group" id="opt_group_${optId}"><div class="absolute top-0 left-0 w-1 h-full bg-gold-500"></div><div class="flex flex-col sm:flex-row gap-4 mb-4 items-end"><div class="flex-1 w-full"><label class="block text-xs text-gray-400 font-medium tracking-wide mb-1.5">Nama Opsi</label><input type="text" class="opt-name w-full p-2.5 bg-dark-surface border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required></div><button type="button" onclick="this.parentElement.parentElement.remove()" class="bg-red-500/10 text-red-500 border border-red-500/30 px-4 py-2.5 rounded-lg hover:bg-red-500 hover:text-white transition font-bold text-sm h-[42px]">Hapus</button></div><div class="values-container ml-2 pl-4 border-l-2 border-dark-border space-y-3"></div><button type="button" onclick="addOptionValue(${optId})" class="mt-4 ml-2 text-gray-400 border border-dashed border-dark-border px-3 py-1.5 rounded-md text-xs hover:text-gold-500 hover:border-gold-500 transition">+ Pilihan Harga</button></div>`); addOptionValue(optId); }
+        function addOptionValue(optId) { const valContainer = document.querySelector(`#opt_group_${optId} .values-container`); if (!valContainer) return; valContainer.insertAdjacentHTML('beforeend', `<div class="option-value flex gap-3 items-center"><div class="flex-[2]"><input type="text" class="val-name w-full p-2 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" placeholder="Nama Pilihan" required></div><div class="flex-1 relative"><span class="absolute left-3 top-2 text-gray-500 text-sm">+Rp</span><input type="number" class="val-price w-full p-2 pl-9 bg-dark-surface border border-dark-border text-gray-200 rounded-md text-sm outline-none" value="0" required></div><button type="button" onclick="this.parentElement.remove()" class="text-gray-500 hover:text-red-500 text-xl font-bold px-2">&times;</button></div>`); }
 
+        // Fungsi Pintar: Simpan Baru ATAU Perbarui (Tergantung mode)
         async function submitProductForm(e) {
-            e.preventDefault(); const btn = document.getElementById('btnSaveProduct'); btn.innerText = 'Menyimpan...'; btn.disabled = true;
-            const payload = { name: document.getElementById('p_name').value, category: document.getElementById('p_category').value, base_price: parseInt(document.getElementById('p_price').value), options: [] };
-            document.querySelectorAll('.option-group').forEach(group => { const optName = group.querySelector('.opt-name').value; const values = []; group.querySelectorAll('.option-value').forEach(val => { values.push({ value_name: val.querySelector('.val-name').value, additional_price: parseInt(val.querySelector('.val-price').value) || 0 }); }); if (values.length > 0) payload.options.push({ option_name: optName, values: values }); });
-            const formData = new FormData(); formData.append('product_data', JSON.stringify(payload)); const imageInput = document.getElementById('p_image'); if (imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
-            try { const res = await fetch(`${BASE_URL}/api/products`, { method: 'POST', body: formData }); const data = await res.json(); if (data.status === 'success') { showToast('Produk disimpan!', 'success'); closeProductModal(); loadProductsData(); } else showToast(data.message, 'error'); } catch (err) { showToast('Error', 'error'); } finally { btn.innerText = '💾 Simpan Produk ke Database'; btn.disabled = false; }
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveProduct');
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+
+            // 1. AMBIL STATUS CHECKBOX DINAMIS (Ini yang tadi hilang!)
+            const dynamicCheckbox = document.getElementById('p_is_dynamic');
+            const isDynamic = dynamicCheckbox ? dynamicCheckbox.checked : false;
+
+            // 2. SUSUN DATA PRODUK
+            const payload = {
+                name: document.getElementById('p_name').value,
+                category: document.getElementById('p_category').value,
+                // Jika dinamis kirim 0, jika tidak kirim angka di input
+                base_price: isDynamic ? 0 : (parseInt(document.getElementById('p_price').value) || 0),
+                options: []
+            };
+
+            // 3. SUSUN OPSI KUSTOMISASI
+            document.querySelectorAll('.option-group').forEach(group => {
+                const optName = group.querySelector('.opt-name').value;
+                const values = [];
+                group.querySelectorAll('.option-value').forEach(val => {
+                    values.push({ value_name: val.querySelector('.val-name').value, additional_price: parseInt(val.querySelector('.val-price').value) || 0 });
+                });
+                if (values.length > 0) payload.options.push({ option_name: optName, values: values });
+            });
+
+            // 4. BUNGKUS KE FORMDATA (Untuk support gambar)
+            const formData = new FormData();
+            formData.append('product_data', JSON.stringify(payload));
+            const imageInput = document.getElementById('p_image');
+            if (imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
+
+            // Cek apakah mode Edit atau Tambah Baru
+            if (editProductId) {
+                formData.append('product_id', editProductId);
+            }
+
+            const apiUrl = editProductId ? `${BASE_URL}/api/products/update` : `${BASE_URL}/api/products`;
+
+            // 5. KIRIM KE SERVER
+            try {
+                const res = await fetch(apiUrl, { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast(data.message || 'Produk tersimpan!', 'success');
+                    closeProductModal();
+                    loadProductsData();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (err) {
+                showToast('Error Jaringan', 'error');
+            } finally {
+                btn.innerText = editProductId ? '💾 Perbarui Produk' : '💾 Simpan Produk Baru';
+                btn.disabled = false;
+            }
         }
 
         async function loadProductsData() {
@@ -448,11 +600,20 @@
                     else {
                         result.data.forEach(p => {
                             let isActive = p.is_active == 1;
+
+                            // MENGEMBALIKAN TOMBOL DETAIL DAN EDIT YANG HILANG
+                            let actionBtns = `
+                                <button onclick="openProductDetailModal(${p.id})" class="bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">🔍 Detail</button>
+                                <button onclick="openEditProductModal(${p.id})" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 hover:bg-yellow-500 hover:text-gray-900 px-3 py-1.5 rounded-md text-xs font-bold transition">✏️ Edit</button>
+                                <button onclick="toggleProductStatus(${p.id}, ${isActive ? 0 : 1})" class="border px-3 py-1.5 rounded-md text-xs font-bold transition ${isActive ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500 hover:text-white'}">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>
+                                <button onclick="deleteProduct(${p.id})" class="border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">Hapus</button>
+                            `;
+
                             html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
-                                <td class="p-4"><div class="font-bold text-gray-200">${p.name}</div><div class="text-xs text-gray-500 mt-1">${p.total_options} Opsi</div></td>
+                                <td class="p-4"><div class="font-bold text-gray-200">${p.name}</div><div class="text-xs text-gray-500 mt-1">${p.total_options || 0} Opsi</div></td>
                                 <td class="p-4 capitalize text-gray-300">${p.category}</td><td class="p-4 font-bold">${p.base_price ? 'Rp ' + parseInt(p.base_price).toLocaleString('id-ID') : 'Dinamis'}</td>
                                 <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
-                                <td class="p-4 flex items-center justify-center gap-2"><button onclick="toggleProductStatus(${p.id}, ${isActive ? 0 : 1})" class="border px-3 py-1.5 rounded-md text-xs font-bold transition ${isActive ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500 hover:text-white'}">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button><button onclick="deleteProduct(${p.id})" class="border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">Hapus</button></td>
+                                <td class="p-4 flex items-center justify-center gap-2">${actionBtns}</td>
                             </tr>`;
                         });
                     }
@@ -464,6 +625,73 @@
         async function toggleProductStatus(id, status) { if (!confirm(`Yakin ubah status?`)) return; try { const res = await fetch(`${BASE_URL}/api/products/toggle-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) }); const data = await res.json(); if (data.status === 'success') { showToast('Status diubah', 'success'); loadProductsData(); } } catch (e) { } }
         async function deleteProduct(id) { if (!confirm('Hapus permanen produk ini?')) return; try { const res = await fetch(`${BASE_URL}/api/products/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); const data = await res.json(); if (data.status === 'success') { showToast('Produk dihapus', 'success'); loadProductsData(); } else showToast(data.message, 'error'); } catch (e) { } }
 
+        function openProductDetailModal(id) {
+            document.getElementById('product-detail-content').innerHTML = `<div class="animate-pulse h-40 bg-dark-hover rounded-xl w-full"></div>`;
+            toggleModal('productDetailModal', true);
+            fetchProductDetails(id);
+        }
+        function closeProductDetailModal() { toggleModal('productDetailModal', false); }
+
+        async function fetchProductDetails(id) {
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/details?id=${id}`);
+                const result = await res.json();
+
+                if (result.status === 'success') {
+                    const p = result.data;
+
+                    // FIX BUG: Pengecekan gambar yang lebih aman
+                    let imgUrl;
+                    if (p.image && p.image !== '') {
+                        imgUrl = `${BASE_URL}/uploads/products/${p.image}`;
+                    } else {
+                        imgUrl = `https://via.placeholder.com/400x400/1E1E1E/555555?text=No+Image`;
+                    }
+
+                    let html = `
+                        <div class="flex flex-col md:flex-row gap-6 mb-8">
+                            <div class="w-full md:w-1/2 shrink-0">
+                                <img src="${imgUrl}" alt="${p.name}" 
+                                    class="w-full h-auto rounded-xl border-4 border-dark-border object-cover aspect-square shadow-2xl transition-transform duration-300 hover:scale-105"
+                                    onerror="this.src='https://via.placeholder.com/400x400/1E1E1E/red?text=Image+Not+Found'">
+                                <p class="text-xs text-gray-600 mt-2 text-center">Ukuran disarankan: Persegi (1:1)</p>
+                            </div>
+                            
+                            <div class="w-full md:w-1/2 flex flex-col justify-between py-2">
+                                <div>
+                                    <div class="inline-block px-3 py-1 bg-gold-500/10 border border-gold-500/30 rounded-full text-xs text-gold-500 mb-3 capitalize tracking-wider">${p.category}</div>
+                                    <h4 class="text-3xl font-extrabold text-gray-100 mb-3 leading-tight">${p.name}</h4>
+                                    <p class="text-xs text-gray-500 mb-1">Harga Dasar:</p>
+                                    <div class="text-4xl font-black text-gold-500 mb-6">Rp ${parseInt(p.base_price).toLocaleString('id-ID')}</div>
+                                </div>
+                                
+                                <div class="bg-dark-base border border-dark-border p-4 rounded-xl text-sm text-gray-400">
+                                    <div class="flex justify-between items-center mb-2"><span>Status di Toko:</span> ${p.is_active ? '<span class="px-2 py-0.5 bg-green-500/10 text-green-500 border border-green-500/30 rounded text-xs font-bold">Aktif</span>' : '<span class="px-2 py-0.5 bg-red-500/10 text-red-500 border border-red-500/30 rounded text-xs font-bold">Nonaktif</span>'}</div>
+                                    <div class="flex justify-between items-center"><span>ID Produk:</span> <span class="font-mono text-xs text-gray-600">PROD-${String(p.id).padStart(4, '0')}</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    if (p.options && p.options.length > 0) {
+                        html += `<h5 class="font-bold text-gray-200 mb-4 flex items-center gap-2 text-lg"><span class="text-xl">⚙️</span> Opsi Kustomisasi</h5><div class="grid grid-cols-1 md:grid-cols-2 gap-4">`;
+                        p.options.forEach(opt => {
+                            let vals = opt.values.map(v => `<span class="inline-block bg-dark-base border border-dark-border px-3 py-1.5 rounded-lg text-sm text-gray-300 shadow-sm">${v.value_name} <b class="text-gold-500 ml-1">(+Rp ${parseInt(v.additional_price).toLocaleString('id-ID')})</b></span>`).join(' ');
+                            html += `<div class="bg-dark-hover border border-dark-border p-5 rounded-2xl relative overflow-hidden"><div class="absolute top-0 right-0 w-20 h-20 bg-gold-500/5 rounded-full blur-2xl"></div><div class="text-xs uppercase tracking-wider text-gray-500 font-bold mb-3 relative z-10">${opt.option_name}</div><div class="flex flex-wrap gap-2 relative z-10">${vals}</div></div>`;
+                        });
+                        html += `</div>`;
+                    } else {
+                        html += `<div class="text-sm text-gray-500 italic p-10 bg-dark-base rounded-xl border border-dark-border text-center">Produk ini tidak memiliki opsi kustomisasi tambahan.</div>`;
+                    }
+
+                    document.getElementById('product-detail-content').innerHTML = html;
+                } else {
+                    document.getElementById('product-detail-content').innerHTML = `<div class="text-red-500 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/20">${result.message}</div>`;
+                }
+            } catch (e) {
+                document.getElementById('product-detail-content').innerHTML = `<div class="text-red-500 text-center py-10 bg-red-500/10 rounded-xl border border-red-500/20">Gagal mengambil data produk.</div>`;
+            }
+        }
         // --- ORDERS ---
         async function loadOrdersData() {
             if (document.getElementById('orders-table-body')) document.getElementById('orders-table-body').innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="6" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
@@ -519,17 +747,42 @@
             } catch (e) { document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">Error. Pastikan rute '/api/orders/details' sudah terdaftar di Router.</div>`; }
         }
 
+        // ==========================================
         // --- PAYMENT METHODS ---
+        // ==========================================
+        let paymentMethodsList = []; // Simpan data sementara di memori
+        let editPaymentId = null;    // Penanda mode Edit
+
         async function loadPaymentsData() {
-            if (document.getElementById('payments-table-body')) document.getElementById('payments-table-body').innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="4" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
+            if (document.getElementById('payments-table-body')) document.getElementById('payments-table-body').innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="5" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
             try {
-                const res = await fetch(`${BASE_URL}/api/payment-methods`); const result = await res.json(); let html = '';
+                const res = await fetch(`${BASE_URL}/api/payment-methods`);
+                const result = await res.json();
+                let html = '';
+
                 if (result.status === 'success') {
-                    if (result.data.length === 0) html = `<tr><td colspan="4" class="text-center p-10 text-gray-500">Belum ada metode pembayaran.</td></tr>`;
-                    else {
+                    paymentMethodsList = result.data; // Simpan data ke variabel global
+
+                    if (result.data.length === 0) {
+                        html = `<tr><td colspan="5" class="text-center p-10 text-gray-500">Belum ada metode pembayaran.</td></tr>`;
+                    } else {
                         result.data.forEach(m => {
                             let isActive = m.is_active == 1;
-                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover"><td class="p-4 font-bold text-gray-200">${m.name}</td><td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${m.type}</td><td class="p-4 text-gold-500 font-mono text-sm">${m.account_info || '-'}</td><td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td></tr>`;
+
+                            // TOMBOL AKSI BARU (Edit, Aktifkan/Nonaktifkan, Hapus)
+                            let actionBtns = `
+                                <button onclick="openEditPaymentMethodModal(${m.id})" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 hover:bg-yellow-500 hover:text-gray-900 px-3 py-1.5 rounded-md text-xs font-bold transition">✏️ Edit</button>
+                                <button class="border px-3 py-1.5 rounded-md text-xs font-bold transition ${isActive ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500 hover:text-white'}">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>
+                                <button class="border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">Hapus</button>
+                            `;
+
+                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
+                                <td class="p-4 font-bold text-gray-200">${m.name}</td>
+                                <td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${m.type}</td>
+                                <td class="p-4 text-gold-500 font-mono text-sm">${m.account_info || '-'}</td>
+                                <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
+                                <td class="p-4 flex items-center justify-center gap-2">${actionBtns}</td>
+                            </tr>`;
                         });
                     }
                     if (document.getElementById('payments-table-body')) document.getElementById('payments-table-body').innerHTML = html;
@@ -537,15 +790,76 @@
             } catch (e) { console.error(e); }
         }
 
-        function openPaymentMethodModal() { toggleModal('paymentMethodModal', true); document.getElementById('paymentMethodForm').reset(); }
+        // Mode Tambah Baru
+        function openPaymentMethodModal() {
+            editPaymentId = null;
+            document.querySelector('#paymentMethodModal h3').innerHTML = '💳 Tambah Metode';
+            document.getElementById('btnSavePaymentMethod').innerHTML = '💾 Simpan Metode';
+
+            document.getElementById('paymentMethodForm').reset();
+            toggleModal('paymentMethodModal', true);
+        }
+
+        // Mode Edit
+        function openEditPaymentMethodModal(id) {
+            // Cari data metode dari memori berdasarkan ID
+            const method = paymentMethodsList.find(m => m.id === id);
+            if (!method) return;
+
+            editPaymentId = id;
+            document.querySelector('#paymentMethodModal h3').innerHTML = '✏️ Edit Metode';
+            document.getElementById('btnSavePaymentMethod').innerHTML = '💾 Perbarui Metode';
+
+            // Isi form dengan data lama
+            document.getElementById('pm_name').value = method.name;
+            document.getElementById('pm_type').value = method.type;
+            document.getElementById('pm_info').value = method.account_info || '';
+
+            toggleModal('paymentMethodModal', true);
+        }
+
         function closePaymentMethodModal() { toggleModal('paymentMethodModal', false); }
+
+        // Fungsi Pintar: Simpan Baru ATAU Perbarui
         async function submitPaymentMethod(e) {
-            e.preventDefault(); const btn = document.getElementById('btnSavePaymentMethod'); btn.innerText = 'Menyimpan...'; btn.disabled = true;
+            e.preventDefault();
+            const btn = document.getElementById('btnSavePaymentMethod');
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+
+            const payload = {
+                name: document.getElementById('pm_name').value,
+                type: document.getElementById('pm_type').value,
+                account_info: document.getElementById('pm_info').value
+            };
+
+            // Jika mode Edit, tambahkan ID ke payload
+            if (editPaymentId) {
+                payload.id = editPaymentId;
+            }
+
+            const apiUrl = editPaymentId ? `${BASE_URL}/api/payment-methods/update` : `${BASE_URL}/api/payment-methods`;
+
             try {
-                const res = await fetch(`${BASE_URL}/api/payment-methods`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: document.getElementById('pm_name').value, type: document.getElementById('pm_type').value, account_info: document.getElementById('pm_info').value }) });
+                const res = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
                 const data = await res.json();
-                if (data.status === 'success') { showToast('Metode ditambahkan!', 'success'); closePaymentMethodModal(); loadPaymentsData(); } else showToast(data.message, 'error');
-            } catch (e) { showToast('Error jaringan', 'error'); } finally { btn.innerText = '💾 Simpan Metode'; btn.disabled = false; }
+
+                if (data.status === 'success') {
+                    showToast(data.message || 'Metode berhasil disimpan!', 'success');
+                    closePaymentMethodModal();
+                    loadPaymentsData();
+                } else {
+                    showToast(data.message, 'error');
+                }
+            } catch (e) {
+                showToast('Error jaringan', 'error');
+            } finally {
+                btn.innerText = editPaymentId ? '💾 Perbarui Metode' : '💾 Simpan Metode';
+                btn.disabled = false;
+            }
         }
 
         // --- STORE SETTINGS ---

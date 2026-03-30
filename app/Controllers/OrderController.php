@@ -92,4 +92,31 @@ class OrderController extends Controller {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    // Endpoint API: GET /api/orders/details
+    public function details() {
+        // 🔒 Keamanan: Pastikan Admin sudah login
+        if (!isset($_SESSION['admin_logged_in'])) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'Unauthorized.'], 401);
+        }
+
+        $orderId = $_GET['id'] ?? null;
+        
+        if (!$orderId) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'ID pesanan tidak ditemukan.'], 400);
+        }
+
+        try {
+            // Panggil fungsi di Model untuk mengambil isi keranjang
+            $orderModel = new \App\Models\OrderModel();
+            $data = $orderModel->getOrderDetails($orderId);
+
+            return $this->jsonResponse([
+                'status' => 'success',
+                'data' => $data
+            ]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

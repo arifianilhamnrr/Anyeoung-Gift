@@ -31,4 +31,24 @@ class PaymentMethodController extends Controller {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
     }
+
+    // Endpoint API: POST /api/payment-methods/update
+    public function update() {
+        if (!isset($_SESSION['admin_logged_in'])) return $this->jsonResponse(['status' => 'error'], 401);
+        
+        $data = $this->getJsonInput();
+        
+        if (empty($data['id']) || empty($data['name']) || empty($data['type'])) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'ID, Nama, dan Tipe wajib diisi!'], 400);
+        }
+
+        try {
+            $model = new PaymentMethodModel();
+            $model->updateMethod($data['id'], $data['name'], $data['type'], $data['account_info'] ?? '');
+            
+            return $this->jsonResponse(['status' => 'success', 'message' => 'Metode Pembayaran berhasil diperbarui!']);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

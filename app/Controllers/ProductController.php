@@ -134,4 +134,55 @@ class ProductController extends Controller
             ], 500);
         }
     }
+
+    // Endpoint API: GET /api/products/details
+    public function details() {
+        if (!isset($_SESSION['admin_logged_in'])) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'Unauthorized.'], 401);
+        }
+
+        $id = $_GET['id'] ?? null;
+        if (!$id) return $this->jsonResponse(['status' => 'error', 'message' => 'ID produk diperlukan'], 400);
+
+        try {
+            $model = new ProductModel();
+            $data = $model->getProductDetails($id);
+            
+            if (!$data) return $this->jsonResponse(['status' => 'error', 'message' => 'Produk tidak ditemukan'], 404);
+            
+            return $this->jsonResponse(['status' => 'success', 'data' => $data]);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // Endpoint API: POST /api/products/update
+    public function update() {
+        if (!isset($_SESSION['admin_logged_in'])) return $this->jsonResponse(['status' => 'error'], 401);
+        
+        $productData = json_decode($_POST['product_data'] ?? '{}', true);
+        $productId = $_POST['product_id'] ?? null;
+
+        if (!$productId || empty($productData['name'])) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'Data tidak lengkap'], 400);
+        }
+
+        $imageName = null;
+        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            $uploadDir = __DIR__ . '/../../public/uploads/products/';
+            if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+            
+            $ext = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+            $imageName = time() . '_' . uniqid() . '.' . $ext;
+            move_uploaded_file($_FILES['image']['tmp_name'], $uploadDir . $imageName);
+        }
+
+        try {
+            $model = new ProductModel();
+            $model->updateProduct($productId, $productData, $imageName);
+            return $this->jsonResponse(['status' => 'success', 'message' => 'Produk berhasil diperbarui!']);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
 }

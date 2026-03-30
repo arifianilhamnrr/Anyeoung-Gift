@@ -93,4 +93,80 @@ class ProductModel extends Model
             throw new \Exception($e->getMessage());
         }
     }
+
+
+    // detail on page product
+    public function getProductDetails($id) {
+        // Ambil data produk utama
+        $this->query("SELECT * FROM products WHERE id = :id");
+        $this->bind(':id', $id);
+        $product = $this->single();
+        
+        if (!$product) return null;
+
+        // Ambil nama grup opsinya
+        $this->query("SELECT * FROM product_options WHERE product_id = :id");
+        $this->bind(':id', $id);
+        $options = $this->resultSet();
+
+        // Ambil nilai pilihan harganya untuk setiap grup opsi
+        foreach ($options as &$opt) {
+            $this->query("SELECT * FROM product_option_values WHERE option_id = :opt_id");
+            $this->bind(':opt_id', $opt['id']);
+            $opt['values'] = $this->resultSet();
+        }
+        
+        $product['options'] = $options;
+        return $product;
+    }
+
+    // Fungsi Update Produk
+    public function updateProduct($id, $data, $imageName = null) {
+        // 1. Update data utama produk
+        $sql = "UPDATE products SET name = :name, category = :category, base_price = :base_price";
+        if ($imageName) $sql .= ", image = :image";
+        $sql .= " WHERE id = :id";
+        
+        $this->query($sql);
+        $this->bind(':name', $data['name']);
+        $this->bind(':category', $data['category']);
+        $this->bind(':base_price', $data['base_price']);
+        $this->bind(':id', $id);
+        if ($imageName) $this->bind(':image', $imageName);
+        $this->execute();
+
+        // 2. Trik Jitu Update Opsi: Hapus opsi lama, masukkan opsi baru (lebih aman & bersih)
+        $this->query("SELECT id FROM product_options WHERE product_id = :id");
+        $this->bind(':id', $id);
+        $oldOptions = $this->resultSet();
+        
+        foreach($oldOptions as $opt) {
+            $this->query("DELETE FROM product_option_values WHERE option_id = :opt_id");
+            $this->bind(':opt_id', $opt['id']);
+            $this->execute();
+        }
+        $this->query("DELETE FROM product_options WHERE product_id = :id");
+        $this->bind(':id', $id);
+        $this->execute();
+
+        // 3. Masukkan opsi yang baru di-edit
+        if (!empty($data['options'])) {
+            foreach ($data['options'] as $opt) {
+                $this->query("INSERT INTO product_options (product_id, option_name, option_type) VALUES (:pid, :name, 'single')");
+                $this->bind(':pid', $id);
+                $this->bind(':name', $opt['option_name']);
+                $this->execute();
+                $optionId = $this->lastInsertId();
+
+                foreach ($opt['values'] as $val) {
+                    $this->query("INSERT INTO product_option_values (option_id, value_name, additional_price) VALUES (:oid, :vname, :vprice)");
+                    $this->bind(':oid', $optionId);
+                    $this->bind(':vname', $val['value_name']);
+                    $this->bind(':vprice', $val['additional_price'] ?? 0);
+                    $this->execute();
+                }
+            }
+        }
+        return true;
+    }
 }

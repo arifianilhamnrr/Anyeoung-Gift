@@ -103,4 +103,26 @@ class OrderModel extends Model
         $this->bind(':id', $orderId);
         return $this->execute();
     }
+
+    public function getOrderDetails($orderId) {
+        // 1. Ambil daftar produk yang dibeli di pesanan ini
+        $this->query("SELECT * FROM order_items WHERE order_id = :order_id");
+        $this->bind(':order_id', $orderId);
+        $items = $this->resultSet();
+
+        // 2. Ambil opsi kustomisasi (ukuran, warna, dll) untuk tiap produk
+        foreach ($items as &$item) {
+            // Sesuaikan nama kolom dengan yang diharapkan Javascript
+            $item['product_name'] = $item['product_name_snapshot'];
+            $item['price_at_time'] = $item['base_price'];
+            $item['quantity'] = 1; // Karena di tabel order_items tidak ada kolom quantity, kita set 1
+
+            // Tarik opsi tambahannya
+            $this->query("SELECT option_name_snapshot as option_name, option_value_snapshot as value_name, additional_price FROM order_item_options WHERE order_item_id = :item_id");
+            $this->bind(':item_id', $item['id']);
+            $item['options'] = $this->resultSet();
+        }
+
+        return $items;
+    }
 }
