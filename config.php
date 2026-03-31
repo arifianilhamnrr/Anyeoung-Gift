@@ -5,8 +5,8 @@ define('BASE_URL', 'http://localhost/anyeong-gift/public');
 // Konfigurasi Database MariaDB
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');
-define('DB_PASS', 'vqgtgbgt');
-define('DB_NAME', 'anyeong_gift');
+define('DB_PASS', '');
+define('DB_NAME', 'anyeoung_gift');
 
 // Konfigurasi Aplikasi
 define('APP_NAME', 'Anyeong Gift Admin');

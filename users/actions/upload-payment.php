@@ -70,7 +70,8 @@ if ($fileSize > $maxSize) {
     exit;
 }
 
-$uploadDir = dirname(__DIR__, 2) . '/uploads/payments/';
+// 🔥 PERUBAHAN DI SINI: Path diubah mengarah ke folder public/uploads/payments/
+$uploadDir = dirname(__DIR__, 2) . '/public/uploads/payments/';
 
 if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0777, true);
@@ -93,6 +94,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$order['payment_id']]);
 $oldPayment = $stmt->fetch();
 
+// Hapus file lama jika ada (juga diarahkan ke path public)
 if ($oldPayment && !empty($oldPayment['proof_image'])) {
     $oldPath = $uploadDir . $oldPayment['proof_image'];
     if (is_file($oldPath)) {

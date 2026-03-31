@@ -1,4 +1,5 @@
 <?php
+// Ambil data produk dan gambar utamanya
 $stmt = $pdo->query("
     SELECT p.*, 
            (SELECT image_path 
@@ -13,14 +14,12 @@ $stmt = $pdo->query("
 ");
 
 $products = $stmt->fetchAll();
-$productName = 'Custom Hampers';
 
+// Ambil settingan toko untuk nomor WA Admin
 $stmt = $pdo->query("SELECT * FROM store_settings LIMIT 1");
 $storeSetting = $stmt->fetch();
-
-$message = str_replace('{{product_name}}', $productName, $storeSetting['whatsapp_message_template']);
-$waLink = 'https://wa.me/' . $storeSetting['whatsapp_admin'] . '?text=' . urlencode($message);
 ?>
+
 <section class="mb-12 text-center px-4 pt-10">
     <h1 class="text-3xl md:text-5xl font-title text-gold mb-4 drop-shadow-lg">
         Hadiah Spesial
@@ -33,6 +32,22 @@ $waLink = 'https://wa.me/' . $storeSetting['whatsapp_admin'] . '?text=' . urlenc
 <section class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8 px-2 md:px-0">
 
     <?php foreach ($products as $product): ?>
+        <?php
+        // --- 1. PERBAIKAN LOGIC WA ---
+        // Pindah ke sini agar nama produk di chat WA beda-beda tiap barang
+        $waLink = '#';
+        if ($product['product_type'] === 'chat_only') {
+            $message = str_replace('{{product_name}}', $product['name'], $storeSetting['whatsapp_message_template']);
+            $waLink = 'https://wa.me/' . $storeSetting['whatsapp_admin'] . '?text=' . urlencode($message);
+        }
+
+        // --- 2. PERBAIKAN PATH GAMBAR ---
+        // Fungsi basename() dipakai buat ngambil NAMA FILE-nya aja, jaga-jaga kalau di DB keinput full path
+        $imgFile = basename($product['main_image'] ?? 'default.jpg');
+
+        // Karena jalannya dari users/index.php, kita keluar dulu (../) baru masuk ke public/
+        $imageSrc = "../public/uploads/products/" . $imgFile;
+        ?>
 
         <div
             class="group flex flex-col h-full bg-black/40 backdrop-blur-md border border-gold/20 rounded-xl overflow-hidden hover:border-gold/60 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-1 transition-all duration-300">
@@ -42,8 +57,7 @@ $waLink = 'https://wa.me/' . $storeSetting['whatsapp_admin'] . '?text=' . urlenc
                     class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-500 z-10">
                 </div>
 
-                <img src="../uploads/products/<?= $product['main_image'] ?? 'default.jpg'; ?>"
-                    alt="<?= htmlspecialchars($product['name']); ?>"
+                <img src="<?= htmlspecialchars($imageSrc); ?>" alt="<?= htmlspecialchars($product['name']); ?>"
                     class="w-full h-full object-cover group-hover:scale-110 transition duration-700 ease-in-out">
             </div>
 
@@ -68,7 +82,7 @@ $waLink = 'https://wa.me/' . $storeSetting['whatsapp_admin'] . '?text=' . urlenc
 
                 <div class="mt-auto">
                     <?php if ($product['product_type'] === 'chat_only'): ?>
-                        <a href="<?= $waLink; ?>" target="_blank"
+                        <a href="<?= htmlspecialchars($waLink); ?>" target="_blank"
                             class="block text-center bg-gold/90 text-black text-xs md:text-base py-2 rounded-lg font-medium hover:bg-gold hover:shadow-lg hover:shadow-gold/30 transition-all duration-300">
                             Hubungi Admin
                         </a>

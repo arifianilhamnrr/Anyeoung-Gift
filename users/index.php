@@ -1,6 +1,17 @@
 <?php
 require_once '../config/database.php';
 
+try {
+    $pdo->exec("
+        UPDATE orders 
+        SET status = 'cancelled' 
+        WHERE status = 'waiting_payment' 
+        AND created_at <= DATE_SUB(NOW(), INTERVAL 24 HOUR)
+    ");
+} catch (PDOException $e) {
+    // Abaikan error agar tidak mengganggu halaman utama jika ada masalah
+}
+
 if (!isset($_SESSION)) {
     session_start();
 }
@@ -65,9 +76,7 @@ $use_sidebar = in_array($page, ['profile', 'orders', 'addresses']);
         <div class="max-w-7xl mx-auto px-4 py-8">
 
             <?php if ($use_sidebar): ?>
-                <div class="flex gap-8">
-                    <?php include 'components/sidebar.php'; ?>
-
+                <div class="flex gap-0">
                     <main class="flex-1">
                         <?php include "pages/$page.php"; ?>
                     </main>
