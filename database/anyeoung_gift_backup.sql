@@ -36,7 +36,7 @@ CREATE TABLE `addresses` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `addresses_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -45,7 +45,7 @@ CREATE TABLE `addresses` (
 
 LOCK TABLES `addresses` WRITE;
 /*!40000 ALTER TABLE `addresses` DISABLE KEYS */;
-INSERT INTO `addresses` VALUES (1,1,'user','Arifian Ilham Nur Riandana','085174472744','Karangpucung, Kertanegara, Purbalingga',NULL,1,'2026-03-28 03:27:53','2026-03-28 03:27:53'),(2,1,'user','abskha','6734546465','asdnlasdl',NULL,0,'2026-03-28 03:29:55','2026-03-28 03:29:55'),(3,NULL,'store','Anyeoung Gift Store','6281234567890','Jalan Raya Karangpucung, Kertanegara, Purbalingga, Jawa Tengah','Ambil pesanan langsung di toko.',1,'2026-03-29 06:17:10','2026-03-29 06:58:09');
+INSERT INTO `addresses` VALUES (1,1,'user','Arifian Ilham Nur Riandana','085174472744','Karangpucung, Kertanegara, Purbalingga',NULL,0,'2026-03-28 03:27:53','2026-03-31 01:40:49'),(3,NULL,'store','Anyeoung Gift Store','6281234567890','Jalan Raya Karangpucung, Kertanegara, Purbalingga, Jawa Tengah','Ambil pesanan langsung di toko.',1,'2026-03-29 06:17:10','2026-03-29 06:58:09'),(4,1,'user','Testing','0812345678','Karangpucung, Kertanegara, Purbalingga','Saya ambil nanti sore ya',1,'2026-03-31 01:40:49','2026-03-31 01:40:49');
 /*!40000 ALTER TABLE `addresses` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -66,7 +66,7 @@ CREATE TABLE `order_item_options` (
   PRIMARY KEY (`id`),
   KEY `order_item_id` (`order_item_id`),
   CONSTRAINT `order_item_options_ibfk_1` FOREIGN KEY (`order_item_id`) REFERENCES `order_items` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=35 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -75,7 +75,7 @@ CREATE TABLE `order_item_options` (
 
 LOCK TABLES `order_item_options` WRITE;
 /*!40000 ALTER TABLE `order_item_options` DISABLE KEYS */;
-INSERT INTO `order_item_options` VALUES (1,7,'Jumlah Tangkai','20 tangkai',0,NULL),(2,7,'Glitter','Ya',0,NULL),(3,7,'Warna','Merah & Pink',0,NULL),(4,7,'Aksesoris','Mahkota Small',0,NULL),(5,7,'Tulisan Pita','-',0,'testing'),(6,7,'Tulisan Custom','-',0,'testing');
+INSERT INTO `order_item_options` VALUES (1,7,'Jumlah Tangkai','20 tangkai',0,NULL),(2,7,'Glitter','Ya',0,NULL),(3,7,'Warna','Merah & Pink',0,NULL),(4,7,'Aksesoris','Mahkota Small',0,NULL),(5,7,'Tulisan Pita','-',0,'testing'),(6,7,'Tulisan Custom','-',0,'testing'),(7,8,'Jumlah Tangkai','15 tangkai',0,NULL),(8,8,'Glitter','Ya',0,NULL),(9,8,'Warna','Biru & Pink',0,NULL),(10,8,'Aksesoris','Mahkota Small',0,NULL),(11,9,'Jumlah Tangkai','25 tangkai',0,NULL),(12,9,'Glitter','Ya',0,NULL),(13,9,'Warna','Biru',0,NULL),(14,9,'Aksesoris','Mahkota Large',0,NULL),(15,10,'Jumlah Tangkai','15 tangkai',0,NULL),(16,10,'Glitter','Ya',0,NULL),(17,10,'Warna','Merah & Pink',0,NULL),(18,10,'Aksesoris','Mahkota Large',0,NULL),(19,10,'Tulisan Pita','-',0,'testing 123'),(20,10,'Tulisan Custom','-',0,'testing 123'),(21,11,'Model','Bouquet Uang Biasa',0,NULL),(22,11,'Jumlah Lembar','20 lembar',0,NULL),(23,11,'Nominal Uang','Rp50.000',0,NULL),(24,12,'Jumlah Tangkai','15 tangkai',0,NULL),(25,12,'Glitter','Ya',0,NULL),(26,12,'Warna','Biru & Pink',0,NULL),(27,12,'Aksesoris','Mahkota Small',0,NULL),(28,12,'Tulisan Pita','-',0,'asfa'),(29,12,'Tulisan Custom','-',0,'asfa'),(30,13,'Aksesoris','Coklat',0,NULL),(31,16,'Aksesoris','Lampu',0,NULL),(32,17,'Model','Bouquet Uang Bunga',0,NULL),(33,17,'Jumlah Lembar','20 lembar',0,NULL),(34,17,'Nominal Uang','Rp10.000',0,NULL);
 /*!40000 ALTER TABLE `order_item_options` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -96,7 +96,7 @@ CREATE TABLE `order_items` (
   PRIMARY KEY (`id`),
   KEY `order_id` (`order_id`),
   CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +105,7 @@ CREATE TABLE `order_items` (
 
 LOCK TABLES `order_items` WRITE;
 /*!40000 ALTER TABLE `order_items` DISABLE KEYS */;
-INSERT INTO `order_items` VALUES (1,1,6,'Hampers Boneka',0,120000),(2,2,6,'Hampers Boneka',0,135000),(3,3,6,'Hampers Boneka',0,120000),(4,4,3,'Bouquet Uang',0,520000),(5,4,2,'Bouquet Satin',0,80000),(6,5,2,'Bouquet Satin',0,77000),(7,6,2,'Bouquet Satin',0,72000);
+INSERT INTO `order_items` VALUES (1,1,6,'Hampers Boneka',0,120000),(2,2,6,'Hampers Boneka',0,135000),(3,3,6,'Hampers Boneka',0,120000),(4,4,3,'Bouquet Uang',0,520000),(5,4,2,'Bouquet Satin',0,80000),(6,5,2,'Bouquet Satin',0,77000),(7,6,2,'Bouquet Satin',0,72000),(8,7,2,'Bouquet Satin',0,60000),(9,8,2,'Bouquet Satin',0,95000),(10,9,2,'Bouquet Satin',0,70000),(11,10,3,'Bouquet Uang',0,1010000),(12,11,2,'Bouquet Satin',0,60000),(13,12,6,'Hampers Boneka',0,135000),(14,13,5,'Hampers Hijab B',0,185000),(15,14,5,'Hampers Hijab B',0,185000),(16,15,6,'Hampers Boneka',0,130000),(17,16,3,'Bouquet Uang',0,220000);
 /*!40000 ALTER TABLE `order_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -126,7 +126,7 @@ CREATE TABLE `orders` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -135,7 +135,7 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (1,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-28 03:36:38'),(2,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',135000,'cancelled','2026-03-29 04:31:36'),(3,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-29 04:37:14'),(4,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',600000,'cancelled','2026-03-29 04:59:33'),(5,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',77000,'cancelled','2026-03-29 05:01:38'),(6,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',72000,'waiting_payment','2026-03-29 05:27:39');
+INSERT INTO `orders` VALUES (1,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-28 03:36:38'),(2,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',135000,'cancelled','2026-03-29 04:31:36'),(3,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-29 04:37:14'),(4,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',600000,'cancelled','2026-03-29 04:59:33'),(5,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',77000,'cancelled','2026-03-29 05:01:38'),(6,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',72000,'cancelled','2026-03-29 05:27:39'),(7,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',60000,'cancelled','2026-03-31 01:15:12'),(8,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',95000,'cancelled','2026-03-31 01:16:09'),(9,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',70000,'cancelled','2026-03-31 01:19:10'),(10,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',1010000,'waiting_payment','2026-03-31 01:28:49'),(11,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',60000,'cancelled','2026-03-31 01:44:29'),(12,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',135000,'waiting_payment','2026-03-31 02:02:40'),(13,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'waiting_payment','2026-03-31 02:08:40'),(14,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'waiting_payment','2026-03-31 02:28:21'),(15,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',130000,'waiting_payment','2026-03-31 04:13:09'),(16,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',220000,'paid','2026-03-31 04:27:12');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -188,7 +188,7 @@ CREATE TABLE `payments` (
   KEY `payment_method_id` (`payment_method_id`),
   CONSTRAINT `payments_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
   CONSTRAINT `payments_ibfk_2` FOREIGN KEY (`payment_method_id`) REFERENCES `payment_methods` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,7 +197,7 @@ CREATE TABLE `payments` (
 
 LOCK TABLES `payments` WRITE;
 /*!40000 ALTER TABLE `payments` DISABLE KEYS */;
-INSERT INTO `payments` VALUES (1,1,1,120000,'rejected',NULL,NULL,'2026-03-28 03:36:38'),(2,2,1,135000,'rejected','payment_2_1774760108.png','2026-03-29 04:55:08','2026-03-29 04:31:36'),(3,3,1,120000,'rejected',NULL,NULL,'2026-03-29 04:37:14'),(4,4,2,600000,'rejected',NULL,NULL,'2026-03-29 04:59:33'),(5,5,2,77000,'rejected',NULL,NULL,'2026-03-29 05:01:38'),(6,6,2,72000,'pending',NULL,NULL,'2026-03-29 05:27:39');
+INSERT INTO `payments` VALUES (1,1,1,120000,'rejected',NULL,NULL,'2026-03-28 03:36:38'),(2,2,1,135000,'rejected','payment_2_1774760108.png','2026-03-29 04:55:08','2026-03-29 04:31:36'),(3,3,1,120000,'rejected',NULL,NULL,'2026-03-29 04:37:14'),(4,4,2,600000,'rejected',NULL,NULL,'2026-03-29 04:59:33'),(5,5,2,77000,'rejected',NULL,NULL,'2026-03-29 05:01:38'),(6,6,2,72000,'rejected',NULL,NULL,'2026-03-29 05:27:39'),(7,7,1,60000,'rejected',NULL,NULL,'2026-03-31 01:15:12'),(8,8,1,95000,'rejected',NULL,NULL,'2026-03-31 01:16:09'),(9,9,1,70000,'rejected',NULL,NULL,'2026-03-31 01:19:10'),(10,10,1,1010000,'pending','payment_10_1774921635.jpg','2026-03-31 01:47:15','2026-03-31 01:28:49'),(11,11,1,60000,'rejected',NULL,NULL,'2026-03-31 01:44:29'),(12,12,1,135000,'pending',NULL,NULL,'2026-03-31 02:02:40'),(13,13,1,185000,'pending','payment_13_1774923211.jpg','2026-03-31 02:13:31','2026-03-31 02:08:40'),(14,14,1,185000,'pending',NULL,NULL,'2026-03-31 02:28:21'),(15,15,1,130000,'pending','payment_15_1774930421.png','2026-03-31 04:13:41','2026-03-31 04:13:09'),(16,16,1,220000,'pending',NULL,NULL,'2026-03-31 04:27:12');
 /*!40000 ALTER TABLE `payments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -251,7 +251,7 @@ CREATE TABLE `product_images` (
   KEY `option_value_id` (`option_value_id`),
   CONSTRAINT `product_images_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
   CONSTRAINT `product_images_ibfk_2` FOREIGN KEY (`option_value_id`) REFERENCES `product_option_values` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -260,6 +260,7 @@ CREATE TABLE `product_images` (
 
 LOCK TABLES `product_images` WRITE;
 /*!40000 ALTER TABLE `product_images` DISABLE KEYS */;
+INSERT INTO `product_images` VALUES (1,2,NULL,'public/uploads/products/bouquet-satin-utama.jpg',1,1,'2026-03-31 00:52:28'),(2,2,NULL,'public/uploads/products/bouquet-satin-detail.jpg',0,2,'2026-03-31 00:52:28'),(3,3,NULL,'public/uploads/products/bouquet-uang-utama.jpg',1,1,'2026-03-31 00:52:28'),(4,4,NULL,'public/uploads/products/hampers-hijab-a-utama.jpg',1,1,'2026-03-31 00:52:28'),(5,5,NULL,'public/uploads/products/hampers-hijab-b-utama.jpg',1,1,'2026-03-31 00:52:28'),(6,6,NULL,'public/uploads/products/hampers-boneka-utama.jpg',1,1,'2026-03-31 00:52:28'),(7,6,NULL,'public/uploads/products/hampers-boneka-detail.jpg',0,2,'2026-03-31 00:52:28'),(8,7,NULL,'public/uploads/products/custom-hampers-utama.jpg',1,1,'2026-03-31 00:52:28');
 /*!40000 ALTER TABLE `product_images` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -378,7 +379,7 @@ CREATE TABLE `store_settings` (
 
 LOCK TABLES `store_settings` WRITE;
 /*!40000 ALTER TABLE `store_settings` DISABLE KEYS */;
-INSERT INTO `store_settings` VALUES (1,'Anyeoung Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.','2026-03-29 06:07:06','2026-03-29 06:07:06');
+INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.','2026-03-29 06:07:06','2026-03-31 04:35:53');
 /*!40000 ALTER TABLE `store_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -399,7 +400,7 @@ CREATE TABLE `users` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -408,7 +409,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'arifian ilham nur r','arifianilhamnurriandana@gmail.com','$2y$10$H4yzIc.VP08QMz3S8s3l6OkBUM2BpHSO.yILOxE6DKSj0qLanZ79W','user','2026-03-28 02:37:19','2026-03-29 06:03:08'),(2,'testing aja','akhsjdkah@gmail.cp','$2y$10$59wjbgXCbprJ0xJYLtzTR.NIgNz8GSvmwYoPOVtzMsAP89zH9LCDm','user','2026-03-28 02:46:43','2026-03-28 02:46:43'),(3,'Super Admin','super@anyeong.com','bee5688aea66a47460b19c76f8f199c6b9585eb726f8322b1429793863609ca2','admin','2026-03-31 00:27:52','2026-03-31 00:27:52');
+INSERT INTO `users` VALUES (1,'arifian ilham nur r','arifianilhamnurriandana@gmail.com','$2y$10$H4yzIc.VP08QMz3S8s3l6OkBUM2BpHSO.yILOxE6DKSj0qLanZ79W','user','2026-03-28 02:37:19','2026-03-29 06:03:08'),(2,'testing aja','akhsjdkah@gmail.cp','$2y$10$59wjbgXCbprJ0xJYLtzTR.NIgNz8GSvmwYoPOVtzMsAP89zH9LCDm','user','2026-03-28 02:46:43','2026-03-28 02:46:43'),(3,'Super Admin','super@anyeong.com','bee5688aea66a47460b19c76f8f199c6b9585eb726f8322b1429793863609ca2','admin','2026-03-31 00:27:52','2026-03-31 00:27:52'),(4,'Knalpot DK Speed','testing@test.com','$2y$10$CtsNqqn9VM1DLGHLqNwYgef38gG1ryCfaDHxET6cdKoNXo9zIHdGy','user','2026-03-31 03:28:07','2026-03-31 03:28:07');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -421,4 +422,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-31  7:39:20
+-- Dump completed on 2026-03-31 11:55:39
