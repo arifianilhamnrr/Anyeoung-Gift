@@ -19,7 +19,7 @@ $storeAddress = $stmt->fetch();
         <!-- BRAND -->
         <div>
             <h3 class="font-title text-gold text-lg mb-3">
-                <?= htmlspecialchars($store['store_name'] ?? 'Anyeoung Gift'); ?>
+                <?= htmlspecialchars($store['store_name'] ?? 'Anyeong-Gift'); ?>
             </h3>
             <p class="text-gray-400">
                 Hadiah spesial untuk momen spesial Anda.
@@ -81,7 +81,7 @@ $storeAddress = $stmt->fetch();
     </div>
 
     <div class="text-center text-xs py-4 border-t border-gold text-gray-500">
-        © <?= date('Y'); ?> <?= htmlspecialchars($store['store_name'] ?? 'Anyeoung Gift'); ?>. All rights reserved.
+        © <?= date('Y'); ?> <?= htmlspecialchars($store['store_name'] ?? 'Anyeong-Gift'); ?>. All rights reserved.
     </div>
 </footer>
 

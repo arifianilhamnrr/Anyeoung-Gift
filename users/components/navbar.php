@@ -8,7 +8,7 @@ $currentPage = $_GET['page'] ?? 'home';
 
         <a href="index.php?page=home"
             class="text-2xl font-title text-gold drop-shadow-sm hover:scale-105 transition-transform">
-            Anyeoung Gift
+            Anyeong Gift
         </a>
 
         <div class="hidden md:flex items-center space-x-8 text-sm font-medium">

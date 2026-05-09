@@ -1,0 +1,34 @@
+/* Import Tailwind utamanya */
+@import "tailwindcss";
+
+/* Masukkan semua konfigurasi kamu di dalam @theme */
+@theme {
+  /* --- Colors: Gold --- */
+  --color-gold-400: #FBBF24;
+  --color-gold-500: #F59E0B;
+  --color-gold-600: #D97706;
+
+  /* --- Colors: Dark --- */
+  --color-dark-base: #121212;
+  --color-dark-surface: #1E1E1E;
+  --color-dark-hover: #2C2C2C;
+  --color-dark-border: #333333;
+
+  /* --- Font Family --- */
+  --font-sans: "Segoe UI", sans-serif;
+
+  /* --- Animations --- */
+  --animate-fade-in-up: fade-in-up 0.4s ease-out;
+}
+
+/* Untuk Keyframes di v4, ditulis pakai CSS standar di luar @theme */
+@keyframes fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

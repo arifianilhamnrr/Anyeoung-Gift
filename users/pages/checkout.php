@@ -41,7 +41,6 @@ foreach ($cart as $item) {
     $grandTotal += (int) $item['price'];
 }
 
-// Ambil item default untuk ditampilkan di preview (index 0)
 $selectedAddressId = !empty($addresses) ? $addresses[0]['id'] : null;
 $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
 ?>

@@ -3,23 +3,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Anyeoung Gift</title>
+    <title>Anyeong Gift</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <script src="https://cdn.tailwindcss.com"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        gold: '#D4AF37',
-                        darkbg: '#0F0F0F'
-                    }
-                }
-            }
-        }
-    </script>
+    <!-- <script src="https://cdn.tailwindcss.com"></script> //css tailwind cdn link -->
+    <link href="../assets/css/main.css" rel="stylesheet">
 
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Poppins:wght@300;400;500&display=swap"
