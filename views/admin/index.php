@@ -126,6 +126,28 @@
             width: 0.9rem;
             height: 0.9rem;
         }
+
+        /* Sticky modal header. Compensates for the parent modal panel's
+           padding (p-6 mobile, md:p-8 desktop) so the header sits flush
+           with the top edge while content scrolls underneath. */
+        .modal-header {
+            position: sticky;
+            top: -1.5rem;
+            z-index: 20;
+            background: rgba(30, 30, 30, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            margin: -1.5rem -1.5rem 1.5rem -1.5rem;
+            padding: 1.25rem 1.5rem 1rem 1.5rem;
+            border-bottom: 1px solid #333333;
+        }
+        @media (min-width: 768px) {
+            .modal-header {
+                top: -2rem;
+                margin: -2rem -2rem 1.5rem -2rem;
+                padding: 1.5rem 2rem 1rem 2rem;
+            }
+        }
     </style>
 </head>
 
@@ -220,7 +242,7 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
             class="bg-dark-surface w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 custom-scrollbar relative">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
+            <div class="modal-header flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">🛍️ Tambah Produk</h3>
                 <button onclick="closeProductModal()"
                     class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 flex justify-center items-center transition">&times;</button>
@@ -287,15 +309,26 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
             class="bg-dark-surface w-full max-w-3xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 custom-scrollbar">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
-                <div>
+            <div class="modal-header flex justify-between items-center gap-3">
+                <div class="min-w-0">
                     <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">🧾 Detail <span
                             id="detail-order-id"
                             class="text-gold-500 bg-gold-500/10 px-2 py-1 rounded-md text-sm"></span></h3>
                     <p id="detail-customer-info" class="text-gray-400 text-sm mt-1"></p>
                 </div>
-                <button onclick="closeOrderDetailModal()"
-                    class="bg-dark-hover border border-dark-border text-gray-400 w-8 h-8 rounded-full hover:text-white hover:bg-red-500/20 transition">&times;</button>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button onclick="printInvoice()" id="btnPrintInvoice"
+                        class="hidden sm:inline-flex items-center gap-2 bg-gold-500/10 text-gold-500 border border-gold-500/30 hover:bg-gold-500 hover:text-gray-900 px-3 py-2 rounded-lg text-xs font-bold transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>
+                        Cetak Invoice
+                    </button>
+                    <button onclick="printInvoice()" aria-label="Cetak Invoice"
+                        class="sm:hidden bg-gold-500/10 text-gold-500 border border-gold-500/30 hover:bg-gold-500 hover:text-gray-900 w-9 h-9 rounded-lg flex justify-center items-center transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M6 9V4h12v5M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2M6 14h12v7H6z"/></svg>
+                    </button>
+                    <button onclick="closeOrderDetailModal()"
+                        class="bg-dark-hover border border-dark-border text-gray-400 w-9 h-9 rounded-full hover:text-white hover:bg-red-500/20 transition flex justify-center items-center">&times;</button>
+                </div>
             </div>
             <div id="order-detail-content" class="text-gray-300 space-y-4"></div>
         </div>
@@ -305,7 +338,7 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
             class="bg-dark-surface w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 custom-scrollbar">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
+            <div class="modal-header flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">📦 Detail Produk</h3>
                 <button onclick="closeProductDetailModal()"
                     class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 transition">&times;</button>
@@ -319,7 +352,7 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
             class="bg-dark-surface w-full max-w-sm rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 relative">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
+            <div class="modal-header flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-100 flex items-center gap-2">💳 Pembayaran</h3>
                 <button onclick="closePaymentModal()"
                     class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 transition">&times;</button>
@@ -361,7 +394,7 @@
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
             class="bg-dark-surface w-full max-w-md rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 relative">
-            <div class="flex justify-between items-center mb-6 pb-4 border-b border-dark-border">
+            <div class="modal-header flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-100">💳 Tambah Metode</h3>
                 <button onclick="closePaymentMethodModal()"
                     class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 transition">&times;</button>
@@ -1082,8 +1115,13 @@
             `;
         }
 
+        // Holds the most recently loaded order detail payload so the
+        // "Cetak Invoice" button can render an invoice without refetching.
+        let currentInvoiceData = null;
+
         async function fetchOrderDetails(orderId) {
             const container = document.getElementById('order-detail-content');
+            currentInvoiceData = null;
             try {
                 const res = await fetch(`${BASE_URL}/api/orders/details?id=${orderId}`);
                 const result = await res.json();
@@ -1094,6 +1132,13 @@
 
                 const items = result.data || [];
                 const grandTotal = items.reduce((sum, it) => sum + (parseInt(it.subtotal) || 0), 0);
+                currentInvoiceData = {
+                    orderId,
+                    items,
+                    grandTotal,
+                    order: result.order || null,
+                    payment: result.payment || null
+                };
                 const itemsHtml = items.length === 0
                     ? `<div class="text-center py-6 text-gray-500 border border-dashed border-dark-border rounded-xl">Tidak ada detail item.</div>`
                     : items.map(renderOrderItem).join('');
@@ -1116,6 +1161,143 @@
             } catch (e) {
                 container.innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">Error. Pastikan rute '/api/orders/details' sudah terdaftar di Router.</div>`;
             }
+        }
+
+        function printInvoice() {
+            if (!currentInvoiceData) {
+                showToast('Data invoice belum siap', 'error');
+                return;
+            }
+            const { orderId, items, grandTotal, order, payment } = currentInvoiceData;
+            const invoiceNo = 'AG-' + String(orderId).padStart(4, '0');
+            const printedAt = new Date().toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const orderDate = order && order.created_at
+                ? new Date(order.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : printedAt;
+            const address = (order && order.address) || {};
+            const customerName = address.recipient_name || (order && order.customer_name) || 'Anonim';
+            const customerPhone = address.whatsapp_number || '-';
+            const customerAddress = address.address_text || '';
+            const customerEmail = (order && order.customer_email) ? order.customer_email : '';
+            const customerNotes = address.notes || '';
+            const paymentMethodLabel = payment && payment.method_name
+                ? payment.method_name
+                : ((payment && (payment.method_type || '').toLowerCase() === 'onsite') ? 'Bayar di Tempat' : '-');
+            const paymentStatusLabel = (() => {
+                if (!payment) return '-';
+                const s = (payment.status || '').toLowerCase();
+                if (s === 'confirmed') return 'Lunas';
+                if (s === 'rejected') return 'Ditolak';
+                return 'Menunggu Verifikasi';
+            })();
+            const itemsRows = items.map((item) => {
+                const optionLines = (item.options || []).map((opt) => {
+                    const hasCustom = opt.custom_value !== null && opt.custom_value !== undefined && String(opt.custom_value).trim() !== '';
+                    const value = hasCustom ? opt.custom_value : (opt.value_name || '-');
+                    const extra = parseInt(opt.additional_price) || 0;
+                    const extraStr = extra > 0 ? ` (+${formatRupiah(extra)})` : '';
+                    return `<div class="opt"><span>${escapeHtml(opt.option_name)}:</span> ${escapeHtml(value)}${extraStr}</div>`;
+                }).join('');
+                return `
+                    <tr>
+                        <td>
+                            <div class="iname">${escapeHtml(item.product_name || '-')}</div>
+                            ${optionLines ? `<div class="opts">${optionLines}</div>` : ''}
+                        </td>
+                        <td class="qty">${item.quantity || 1}</td>
+                        <td class="right">${formatRupiah(item.subtotal)}</td>
+                    </tr>`;
+            }).join('');
+
+            const win = window.open('', '_blank', 'width=820,height=1000');
+            if (!win) { showToast('Pop-up diblokir browser', 'error'); return; }
+            const storeName = <?= json_encode($_SESSION['admin_name'] ?? 'Anyeong Gift') ?>;
+            win.document.write(`<!doctype html>
+<html lang="id"><head><meta charset="utf-8" />
+<title>Invoice ${invoiceNo}</title>
+<style>
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; color: #111; margin: 0; padding: 24px; background: #fff; }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    .head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #111; padding-bottom: 12px; margin-bottom: 18px; }
+    .brand { font-size: 22px; font-weight: 800; letter-spacing: 1px; }
+    .brand small { display: block; font-size: 11px; font-weight: 500; color: #555; letter-spacing: 2px; text-transform: uppercase; }
+    .meta { text-align: right; font-size: 12px; color: #333; }
+    .meta .no { font-size: 16px; font-weight: 700; color: #000; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .card { border: 1px solid #ddd; border-radius: 6px; padding: 12px 14px; }
+    .card h4 { margin: 0 0 6px 0; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: #666; }
+    .card p { margin: 2px 0; font-size: 13px; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+    thead th { background: #111; color: #fff; text-align: left; padding: 8px 10px; font-size: 12px; letter-spacing: 0.5px; }
+    thead th.qty, thead th.right { text-align: center; }
+    thead th.right { text-align: right; }
+    tbody td { padding: 10px; border-bottom: 1px solid #eee; font-size: 13px; vertical-align: top; }
+    tbody td.qty { text-align: center; }
+    tbody td.right { text-align: right; white-space: nowrap; }
+    .iname { font-weight: 700; }
+    .opts { margin-top: 4px; color: #555; font-size: 12px; }
+    .opt { padding-left: 8px; }
+    .total-row { display: flex; justify-content: flex-end; }
+    .total { min-width: 280px; border-top: 2px solid #111; padding-top: 10px; }
+    .total .line { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; }
+    .total .grand { font-size: 16px; font-weight: 800; border-top: 1px dashed #aaa; margin-top: 6px; padding-top: 6px; }
+    .foot { margin-top: 26px; text-align: center; font-size: 11px; color: #666; }
+    @media print {
+        body { padding: 0; }
+        .wrap { max-width: none; }
+    }
+</style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="head">
+            <div class="brand">${escapeHtml(storeName)}<small>Invoice Pesanan</small></div>
+            <div class="meta">
+                <div class="no">${invoiceNo}</div>
+                <div>Tanggal Pesanan: ${escapeHtml(orderDate)}</div>
+                <div>Dicetak: ${escapeHtml(printedAt)}</div>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="card">
+                <h4>Pemesan</h4>
+                <p><strong>${escapeHtml(customerName)}</strong></p>
+                <p>${escapeHtml(customerPhone)}</p>
+                ${customerEmail ? `<p>${escapeHtml(customerEmail)}</p>` : ''}
+                ${customerAddress ? `<p style="margin-top:6px;white-space:pre-line">${escapeHtml(customerAddress)}</p>` : ''}
+                ${customerNotes ? `<p style="margin-top:6px;font-style:italic;color:#555">Catatan: ${escapeHtml(customerNotes)}</p>` : ''}
+            </div>
+            <div class="card">
+                <h4>Pembayaran</h4>
+                <p><strong>${escapeHtml(paymentMethodLabel)}</strong></p>
+                <p>Status: ${escapeHtml(paymentStatusLabel)}</p>
+                ${payment && payment.paid_at ? `<p>Diunggah: ${escapeHtml(new Date(payment.paid_at).toLocaleString('id-ID'))}</p>` : ''}
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th class="qty">Qty</th>
+                    <th class="right">Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>${itemsRows || '<tr><td colspan="3" style="text-align:center;color:#666;padding:18px">Tidak ada item.</td></tr>'}</tbody>
+        </table>
+        <div class="total-row">
+            <div class="total">
+                <div class="line"><span>Subtotal</span><span>${formatRupiah(grandTotal)}</span></div>
+                <div class="line grand"><span>Total</span><span>${formatRupiah(grandTotal)}</span></div>
+            </div>
+        </div>
+        <div class="foot">Terima kasih telah berbelanja di Anyeong Gift.</div>
+    </div>
+    <script>
+        window.addEventListener('load', () => { setTimeout(() => window.print(), 250); });
+    <\/script>
+</body></html>`);
+            win.document.close();
         }
 
         // ==========================================
