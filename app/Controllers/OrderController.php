@@ -111,11 +111,13 @@ class OrderController extends Controller {
             $orderModel = new \App\Models\OrderModel();
             $items = $orderModel->getOrderDetails($orderId);
             $order = $orderModel->getOrderHeader($orderId);
+            $payment = $orderModel->getOrderPayment($orderId);
 
             return $this->jsonResponse([
                 'status' => 'success',
                 'data' => $items,
-                'order' => $order
+                'order' => $order,
+                'payment' => $payment
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
