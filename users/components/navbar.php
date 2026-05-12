@@ -4,12 +4,23 @@ $currentPage = $_GET['page'] ?? 'home';
 ?>
 
 <nav class="fixed top-0 left-0 w-full z-[90] bg-black/60 backdrop-blur-xl border-b border-gold/20 shadow-lg">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+    <div class="max-w-7xl mx-auto px-4 py-4 grid grid-cols-3 items-center md:flex md:justify-between">
 
-        <a href="index.php?page=home"
-            class="text-2xl font-title text-gold drop-shadow-sm hover:scale-105 transition-transform">
-            Anyeong Gift
-        </a>
+        <div class="flex justify-start md:hidden">
+            <button id="menuBtn" class="text-gold focus:outline-none hover:text-yellow-400 transition-colors p-1">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
+                    </path>
+                </svg>
+            </button>
+        </div>
+
+        <div class="flex justify-center md:justify-start">
+            <a href="index.php?page=home"
+                class="text-2xl font-title text-gold drop-shadow-sm hover:scale-105 transition-transform whitespace-nowrap">
+                Anyeong Gift
+            </a>
+        </div>
 
         <div class="hidden md:flex items-center space-x-8 text-sm font-medium">
             <a href="index.php?page=home"
@@ -26,12 +37,8 @@ $currentPage = $_GET['page'] ?? 'home';
             <a href="actions/logout.php" class="text-red-500 hover:text-red-400 font-bold transition">Keluar</a>
         </div>
 
-        <button id="menuBtn" class="md:hidden text-gold focus:outline-none hover:text-yellow-400 transition-colors p-1">
-            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16">
-                </path>
-            </svg>
-        </button>
+        <div class="flex justify-end md:hidden" aria-hidden="true">
+        </div>
     </div>
 </nav>
 

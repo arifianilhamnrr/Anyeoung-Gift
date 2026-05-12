@@ -797,24 +797,82 @@
             `;
         }
 
+        function formatRupiah(amount) {
+            const n = parseInt(amount);
+            return 'Rp ' + (isNaN(n) ? '0' : n.toLocaleString('id-ID'));
+        }
+
+        function renderItemOption(opt) {
+            // custom_value menyimpan input teks bebas (mis. tulisan pita) — tampilkan
+            // sebagai nilai utama dan abaikan placeholder '-' di option_value_snapshot.
+            const hasCustom = opt.custom_value !== null && opt.custom_value !== undefined && String(opt.custom_value).trim() !== '';
+            const displayValue = hasCustom ? opt.custom_value : (opt.value_name || '-');
+            const extraPrice = parseInt(opt.additional_price) || 0;
+            const priceTag = extraPrice > 0
+                ? ` <span class="text-gold-500 font-semibold">(+${formatRupiah(extraPrice)})</span>`
+                : '';
+            return `<li class="flex items-start gap-2"><span class="text-gold-500/70 mt-0.5">•</span><span class="text-gray-400"><span class="text-gray-500">${escapeHtml(opt.option_name)}:</span> <span class="text-gray-200">${escapeHtml(displayValue)}</span>${priceTag}</span></li>`;
+        }
+
+        function renderOrderItem(item) {
+            const optionsList = (item.options && item.options.length > 0)
+                ? `<ul class="mt-3 space-y-1 text-xs border-l-2 border-gold-500/30 pl-3">${item.options.map(renderItemOption).join('')}</ul>`
+                : '';
+
+            const basePriceLine = (parseInt(item.price_at_time) || 0) > 0
+                ? `<div class="text-sm text-gray-500 mt-0.5">Harga Dasar: ${formatRupiah(item.price_at_time)}</div>`
+                : '';
+
+            return `
+                <div class="bg-dark-base border border-dark-border p-4 rounded-xl hover:border-gold-500/30 transition duration-300">
+                    <div class="flex justify-between items-start gap-3">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-100 text-lg break-words">${escapeHtml(item.product_name)}</h4>
+                            ${basePriceLine}
+                        </div>
+                        <div class="text-right shrink-0">
+                            <div class="text-xs text-gray-500 mb-1">Subtotal</div>
+                            <div class="font-bold text-gold-500 text-lg">${formatRupiah(item.subtotal)}</div>
+                        </div>
+                    </div>
+                    ${optionsList}
+                </div>
+            `;
+        }
+
         async function fetchOrderDetails(orderId) {
+            const container = document.getElementById('order-detail-content');
             try {
-                const res = await fetch(`${BASE_URL}/api/orders/details?id=${orderId}`); const result = await res.json();
-                if (result.status === 'success') {
-                    let html = '<div class="space-y-4">';
-                    html += renderCustomerContactSection(result.order);
-                    html += '<div class="space-y-3">';
-                    if (result.data.length === 0) { html += `<div class="text-center py-6 text-gray-500 border border-dashed border-dark-border rounded-xl">Tidak ada detail item.</div>`; }
-                    else {
-                        result.data.forEach(item => {
-                            let opts = ''; if (item.options && item.options.length > 0) { opts = '<ul class="mt-2 text-xs text-gray-400 space-y-1 border-l-2 border-dark-border pl-3">'; item.options.forEach(o => { opts += `<li>• ${escapeHtml(o.option_name)}: <span class="text-gray-300">${escapeHtml(o.value_name)}</span> (+Rp ${parseInt(o.additional_price).toLocaleString('id-ID')})</li>`; }); opts += '</ul>'; }
-                            html += `<div class="bg-dark-base border border-dark-border p-4 rounded-xl flex justify-between items-start hover:border-gold-500/30 transition duration-300"><div><h4 class="font-bold text-gray-100 text-lg">${escapeHtml(item.product_name)}</h4><div class="text-sm text-gray-500 mt-0.5">Harga Dasar: Rp ${parseInt(item.price_at_time).toLocaleString('id-ID')} x ${item.quantity} pcs</div>${opts}</div><div class="text-right"><div class="text-xs text-gray-500 mb-1">Subtotal</div><div class="font-bold text-gold-500 text-lg">Rp ${parseInt(item.subtotal).toLocaleString('id-ID')}</div></div></div>`;
-                        });
-                    }
-                    html += '</div>';
-                    document.getElementById('order-detail-content').innerHTML = html + '</div>';
-                } else document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">${escapeHtml(result.message)}</div>`;
-            } catch (e) { document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">Error. Pastikan rute '/api/orders/details' sudah terdaftar di Router.</div>`; }
+                const res = await fetch(`${BASE_URL}/api/orders/details?id=${orderId}`);
+                const result = await res.json();
+                if (result.status !== 'success') {
+                    container.innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">${escapeHtml(result.message)}</div>`;
+                    return;
+                }
+
+                const items = result.data || [];
+                const grandTotal = items.reduce((sum, it) => sum + (parseInt(it.subtotal) || 0), 0);
+                const itemsHtml = items.length === 0
+                    ? `<div class="text-center py-6 text-gray-500 border border-dashed border-dark-border rounded-xl">Tidak ada detail item.</div>`
+                    : items.map(renderOrderItem).join('');
+
+                const totalHtml = items.length > 0
+                    ? `<div class="bg-dark-base border border-gold-500/30 rounded-xl p-4 flex justify-between items-center">
+                           <span class="text-gray-300 font-semibold">Total Pembayaran</span>
+                           <span class="text-gold-500 font-bold text-xl">${formatRupiah(grandTotal)}</span>
+                       </div>`
+                    : '';
+
+                container.innerHTML = `
+                    <div class="space-y-4">
+                        ${renderCustomerContactSection(result.order)}
+                        <div class="space-y-3">${itemsHtml}</div>
+                        ${totalHtml}
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">Error. Pastikan rute '/api/orders/details' sudah terdaftar di Router.</div>`;
+            }
         }
 
         // ==========================================
