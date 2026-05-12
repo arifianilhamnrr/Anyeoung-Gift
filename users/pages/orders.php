@@ -29,65 +29,48 @@ $stmtStore = $pdo->query("SELECT whatsapp_admin FROM store_settings LIMIT 1");
 $storeSetting = $stmtStore->fetch();
 $waAdminNumber = $storeSetting['whatsapp_admin'] ?? '';
 
-function getOrderStatusBadge($status)
+// Status pesanan ditampilkan sebagai satu badge yang menggabungkan order status
+// dan payment status agar mudah dibaca pelanggan.
+function getCombinedOrderStatus($order)
 {
-    switch ($status) {
-        case 'waiting_payment':
-            return 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
-        case 'paid':
-            return 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
-        case 'ready_pickup':
-            return 'bg-purple-500/20 text-purple-300 border border-purple-500/30';
-        case 'completed':
-            return 'bg-green-500/20 text-green-300 border border-green-500/30';
+    $orderStatus = $order['status'] ?? '';
+    $paymentStatus = $order['payment_status'] ?? null;
+    $paymentMethodType = $order['payment_method_type'] ?? null;
+
+    switch ($orderStatus) {
         case 'cancelled':
-            return 'bg-red-500/20 text-red-300 border border-red-500/30';
-        default:
-            return 'bg-gray-500/20 text-gray-300 border border-gray-500/30';
-    }
-}
-
-function getOrderStatusLabel($status)
-{
-    switch ($status) {
-        case 'waiting_payment':
-            return 'Menunggu Pembayaran';
-        case 'paid':
-            return 'Sudah Dibayar';
-        case 'ready_pickup':
-            return 'Siap Diambil';
+            return [
+                'label' => 'Dibatalkan',
+                'class' => 'bg-red-500/20 text-red-300 border border-red-500/30',
+            ];
         case 'completed':
-            return 'Selesai';
-        case 'cancelled':
-            return 'Dibatalkan';
+            return [
+                'label' => 'Selesai',
+                'class' => 'bg-green-500/20 text-green-300 border border-green-500/30',
+            ];
+        case 'ready_pickup':
+            return [
+                'label' => 'Pesanan Siap',
+                'class' => 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
+            ];
+        case 'paid':
+            // Pesanan sudah dibayar tapi admin masih perlu konfirmasi pembayaran.
+            if ($paymentStatus === 'pending') {
+                return [
+                    'label' => 'Konfirmasi',
+                    'class' => 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+                ];
+            }
+            return [
+                'label' => 'Diproses',
+                'class' => 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+            ];
+        case 'waiting_payment':
         default:
-            return ucfirst($status);
-    }
-}
-
-function getPaymentStatusBadge($status)
-{
-    switch ($status) {
-        case 'confirmed':
-            return 'bg-green-500/20 text-green-300 border border-green-500/30';
-        case 'rejected':
-            return 'bg-red-500/20 text-red-300 border border-red-500/30';
-        case 'pending':
-        default:
-            return 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30';
-    }
-}
-
-function getPaymentStatusLabel($status)
-{
-    switch ($status) {
-        case 'confirmed':
-            return 'Terkonfirmasi';
-        case 'rejected':
-            return 'Ditolak';
-        case 'pending':
-        default:
-            return 'Menunggu Konfirmasi';
+            return [
+                'label' => 'Belum Bayar',
+                'class' => 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30',
+            ];
     }
 }
 ?>
@@ -163,17 +146,11 @@ function getPaymentStatusLabel($status)
                             </div>
 
                             <div class="flex flex-wrap lg:flex-nowrap items-center gap-2 lg:gap-3">
+                                <?php $statusBadge = getCombinedOrderStatus($order); ?>
                                 <span
-                                    class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide <?= getOrderStatusBadge($order['status']); ?>">
-                                    <?= getOrderStatusLabel($order['status']); ?>
+                                    class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide <?= $statusBadge['class']; ?>">
+                                    <?= htmlspecialchars($statusBadge['label']); ?>
                                 </span>
-
-                                <?php if (!empty($order['payment_status'])): ?>
-                                    <span
-                                        class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide <?= getPaymentStatusBadge($order['payment_status']); ?>">
-                                        <?= getPaymentStatusLabel($order['payment_status']); ?>
-                                    </span>
-                                <?php endif; ?>
 
                                 <div
                                     class="ml-2 w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-gold group-open:rotate-180 transition-transform duration-300">
@@ -301,6 +278,20 @@ function getPaymentStatusLabel($status)
                                                 class="text-sm text-center bg-purple-500/10 text-purple-300 p-3 rounded-lg border border-purple-500/20">
                                                 🎉 Pesanan siap diambil!
                                             </div>
+
+                                            <form action="actions/complete-order.php" method="POST"
+                                                onsubmit="return confirm('Tandai pesanan ini sebagai selesai?');">
+                                                <input type="hidden" name="order_id" value="<?= (int) $order['id']; ?>">
+                                                <button type="submit"
+                                                    class="w-full inline-flex items-center justify-center gap-2 bg-green-500 text-black py-3 rounded-xl font-bold hover:bg-green-400 transition-colors shadow-[0_4px_14px_0_rgba(34,197,94,0.39)]">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor"
+                                                        viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                                            stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                    Selesaikan Pesanan
+                                                </button>
+                                            </form>
                                         <?php endif; ?>
 
                                         <?php if ($order['status'] !== 'cancelled' && !empty($waAdminNumber)): ?>

@@ -29,7 +29,27 @@ $storeSetting = $stmt->fetch();
     </p>
 </section>
 
-<section class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8 px-2 md:px-0">
+<section class="mb-8 px-2 md:px-0">
+    <div class="relative max-w-xl mx-auto">
+        <span class="absolute inset-y-0 left-4 flex items-center text-gold/70 pointer-events-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"></path>
+            </svg>
+        </span>
+        <input id="productSearch" type="search" autocomplete="off" placeholder="Cari produk..."
+            class="w-full bg-black/40 backdrop-blur-md border border-gold/20 focus:border-gold/60 text-gray-100 placeholder-gray-500 rounded-full py-3 pl-12 pr-12 text-sm md:text-base outline-none focus:ring-2 focus:ring-gold/30 transition">
+        <button id="productSearchClear" type="button"
+            class="hidden absolute inset-y-0 right-4 items-center text-gray-400 hover:text-gold focus:outline-none">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
+                </path>
+            </svg>
+        </button>
+    </div>
+</section>
+
+<section id="productsGrid" class="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-8 px-2 md:px-0">
 
     <?php foreach ($products as $product): ?>
         <?php
@@ -50,7 +70,8 @@ $storeSetting = $stmt->fetch();
         ?>
 
         <div
-            class="group flex flex-col h-full bg-black/40 backdrop-blur-md border border-gold/20 rounded-xl overflow-hidden hover:border-gold/60 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-1 transition-all duration-300">
+            class="productCard group flex flex-col h-full bg-black/40 backdrop-blur-md border border-gold/20 rounded-xl overflow-hidden hover:border-gold/60 hover:shadow-[0_0_20px_rgba(212,175,55,0.2)] hover:-translate-y-1 transition-all duration-300"
+            data-product-name="<?= htmlspecialchars(strtolower($product['name'])); ?>">
 
             <div class="h-40 md:h-60 bg-white/5 overflow-hidden relative">
                 <div
@@ -100,3 +121,47 @@ $storeSetting = $stmt->fetch();
     <?php endforeach; ?>
 
 </section>
+
+<div id="productSearchEmpty"
+    class="hidden mt-8 mx-2 md:mx-0 bg-white/5 border border-gold/20 backdrop-blur-md rounded-2xl p-8 text-center text-gray-300">
+    <div class="w-14 h-14 bg-white/5 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"></path>
+        </svg>
+    </div>
+    <p class="text-base">Produk yang kamu cari tidak ditemukan.</p>
+</div>
+
+<script>
+    (function () {
+        const input = document.getElementById('productSearch');
+        const clearBtn = document.getElementById('productSearchClear');
+        const cards = document.querySelectorAll('.productCard');
+        const emptyState = document.getElementById('productSearchEmpty');
+        const grid = document.getElementById('productsGrid');
+        if (!input || !cards.length) return;
+
+        function applyFilter() {
+            const q = input.value.toLowerCase().trim();
+            let visible = 0;
+            cards.forEach(card => {
+                const name = card.dataset.productName || '';
+                const match = q === '' || name.includes(q);
+                card.classList.toggle('hidden', !match);
+                if (match) visible++;
+            });
+            emptyState.classList.toggle('hidden', visible !== 0);
+            grid.classList.toggle('hidden', visible === 0 && cards.length > 0);
+            clearBtn.classList.toggle('hidden', q === '');
+            clearBtn.classList.toggle('flex', q !== '');
+        }
+
+        input.addEventListener('input', applyFilter);
+        clearBtn.addEventListener('click', function () {
+            input.value = '';
+            input.focus();
+            applyFilter();
+        });
+    })();
+</script>
