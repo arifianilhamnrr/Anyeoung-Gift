@@ -38,11 +38,36 @@
             background: #F59E0B;
         }
 
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            margin: 0 0.5rem;
+            border-radius: 0.75rem;
+            color: #9CA3AF;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .nav-item:hover {
+            background: rgba(245, 158, 11, 0.08);
+            color: #F59E0B;
+        }
+
+        .nav-item .nav-icon {
+            width: 1.1rem;
+            height: 1.1rem;
+            flex-shrink: 0;
+        }
+
         .nav-active {
-            background-color: #2C2C2C;
-            border-left-width: 4px;
-            border-left-color: #F59E0B;
+            background: linear-gradient(90deg, rgba(245, 158, 11, 0.18), rgba(245, 158, 11, 0.04));
             color: #F59E0B !important;
+            box-shadow: inset 3px 0 0 #F59E0B;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -57,6 +82,50 @@
             background: #444;
             border-radius: 10px;
         }
+
+        /* Kebab dropdown menu (positioned via JS using fixed coords so it
+           escapes overflow-hidden table containers). */
+        .row-menu {
+            position: fixed;
+            min-width: 11rem;
+            background: #1E1E1E;
+            border: 1px solid #333333;
+            border-radius: 0.75rem;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .row-menu button {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            padding: 0.55rem 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #D1D5DB;
+            background: transparent;
+            border: 0;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .row-menu button:hover {
+            background: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+
+        .row-menu button.is-danger:hover {
+            background: rgba(239, 68, 68, 0.12);
+            color: #F87171;
+        }
+
+        .row-menu button .ic {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
     </style>
 </head>
 
@@ -64,49 +133,87 @@
     class="bg-dark-base text-gray-200 flex h-screen overflow-hidden antialiased selection:bg-gold-500 selection:text-gray-900">
 
     <div id="sidebar-overlay"
-        class="fixed inset-0 bg-black/40 backdrop-blur-md z-40 hidden transition-all duration-300 md:hidden"
+        class="fixed inset-0 bg-black/50 backdrop-blur-md z-40 hidden transition-all duration-300 md:hidden"
         onclick="toggleSidebar()"></div>
 
     <aside id="sidebar"
-        class="w-64 bg-dark-surface/80 border-r border-dark-border flex flex-col py-5 fixed inset-y-0 left-0 z-50 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out">
-        <div class="text-2xl font-bold text-gold-500 text-center mb-8 tracking-wide">ANYEONG GIFT</div>
-        <nav class="flex flex-col gap-1">
-            <a href="#"
-                class="nav-item nav-active px-6 py-3 cursor-pointer text-gray-300 hover:bg-dark-hover hover:border-l-4 hover:border-gold-500 hover:text-gold-500 transition-all block no-underline"
-                data-target="dashboard">📊 Dashboard</a>
-            <a href="#"
-                class="nav-item px-6 py-3 cursor-pointer text-gray-300 hover:bg-dark-hover hover:border-l-4 hover:border-gold-500 hover:text-gold-500 transition-all block no-underline"
-                data-target="orders">📦 Orders</a>
-            <a href="#"
-                class="nav-item px-6 py-3 cursor-pointer text-gray-300 hover:bg-dark-hover hover:border-l-4 hover:border-gold-500 hover:text-gold-500 transition-all block no-underline"
-                data-target="products">🛍️ Products</a>
-            <a href="#"
-                class="nav-item px-6 py-3 cursor-pointer text-gray-300 hover:bg-dark-hover hover:border-l-4 hover:border-gold-500 hover:text-gold-500 transition-all block no-underline"
-                data-target="payments">💳 Payments</a>
-            <a href="#"
-                class="nav-item px-6 py-3 cursor-pointer text-gray-300 hover:bg-dark-hover hover:border-l-4 hover:border-gold-500 hover:text-gold-500 transition-all block no-underline"
-                data-target="settings">⚙️ Settings</a>
+        class="w-64 bg-dark-surface/95 backdrop-blur border-r border-dark-border flex flex-col py-5 fixed inset-y-0 left-0 z-50 transform -translate-x-full md:relative md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="px-5 mb-7">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/30 text-gold-500 flex items-center justify-center font-bold text-lg">A</div>
+                <div class="leading-tight">
+                    <div class="text-sm font-bold text-gray-100 tracking-wide">Anyeong Gift</div>
+                    <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Admin Panel</div>
+                </div>
+            </div>
+        </div>
+        <nav class="flex flex-col gap-0.5">
+            <a href="#" data-target="dashboard" class="nav-item nav-active">
+                <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l9-9 9 9M5 10v10h4v-6h6v6h4V10" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="#" data-target="orders" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                Pesanan
+            </a>
+            <a href="#" data-target="products" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Produk
+            </a>
+            <a href="#" data-target="payments" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M5 6h14a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" />
+                </svg>
+                Pembayaran
+            </a>
+            <a href="#" data-target="settings" class="nav-item">
+                <svg class="nav-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317a1.724 1.724 0 013.35 0 1.724 1.724 0 002.573 1.066 1.724 1.724 0 012.37 2.37 1.724 1.724 0 001.066 2.572 1.724 1.724 0 010 3.35 1.724 1.724 0 00-1.066 2.573 1.724 1.724 0 01-2.37 2.37 1.724 1.724 0 00-2.572 1.066 1.724 1.724 0 01-3.35 0 1.724 1.724 0 00-2.573-1.066 1.724 1.724 0 01-2.37-2.37 1.724 1.724 0 00-1.066-2.572 1.724 1.724 0 010-3.35 1.724 1.724 0 001.066-2.573 1.724 1.724 0 012.37-2.37 1.724 1.724 0 002.573-1.066z" />
+                    <circle cx="12" cy="12" r="3" />
+                </svg>
+                Pengaturan
+            </a>
         </nav>
-        <div class="mt-auto p-4 border-t border-dark-border">
+        <div class="mt-auto px-3">
             <button onclick="handleLogout()"
-                class="w-full bg-red-500/10 text-red-500 border border-red-500/30 hover:bg-red-500 hover:text-white py-2.5 rounded-xl font-bold transition duration-300 flex justify-center items-center gap-2">🚪
-                Keluar</button>
+                class="w-full flex items-center justify-center gap-2 bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500 hover:text-white hover:border-red-500 py-2.5 rounded-xl text-sm font-semibold transition duration-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Keluar
+            </button>
         </div>
     </aside>
 
-    <main class="flex-1 flex flex-col overflow-y-auto w-full relative">
+    <main class="flex-1 flex flex-col w-full relative overflow-hidden">
         <header
-            class="h-[70px] bg-dark-surface border-b border-dark-border flex items-center justify-between px-4 md:px-8 shrink-0">
-            <div class="flex items-center gap-4">
+            class="sticky top-0 z-30 bg-dark-surface/90 backdrop-blur-xl border-b border-dark-border flex items-center justify-between px-4 md:px-8 h-[64px] shrink-0">
+            <div class="flex items-center gap-3">
                 <button onclick="toggleSidebar()"
-                    class="md:hidden text-gray-300 hover:text-gold-500 text-2xl focus:outline-none">☰</button>
-                <h2 id="page-title" class="text-xl md:text-2xl font-semibold">Dashboard</h2>
+                    class="md:hidden text-gray-300 hover:text-gold-500 transition w-9 h-9 rounded-lg flex items-center justify-center hover:bg-gold-500/10 focus:outline-none"
+                    aria-label="Toggle sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <h2 id="page-title" class="text-lg md:text-xl font-semibold text-gray-100 tracking-tight">Dashboard</h2>
             </div>
-            <div class="user-profile hidden md:block text-sm text-gray-400">
-                <span>👋 Halo, <?= $_SESSION['admin_name'] ?? 'Admin' ?></span>
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-2.5 bg-dark-base/60 border border-dark-border rounded-full pl-1 pr-3 py-1">
+                    <span class="w-7 h-7 rounded-full bg-gold-500/15 text-gold-500 flex items-center justify-center text-xs font-bold border border-gold-500/30"><?= strtoupper(substr($_SESSION['admin_name'] ?? 'A', 0, 1)) ?></span>
+                    <span class="text-xs text-gray-300 font-medium"><?= $_SESSION['admin_name'] ?? 'Admin' ?></span>
+                </div>
             </div>
         </header>
-        <div class="p-4 md:p-8 flex-1" id="app-content"></div>
+        <div class="flex-1 overflow-y-auto custom-scrollbar">
+            <div class="p-4 md:p-8" id="app-content"></div>
+        </div>
     </main>
 
     <div id="productModal"
@@ -375,10 +482,75 @@
             }
         }
 
+        // SVG icon library used by row dropdown items.
+        const rowMenuIcons = {
+            eye: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.04 12.32a1.01 1.01 0 010-.64C3.42 7.51 7.36 4.5 12 4.5c4.64 0 8.58 3.01 9.96 7.18.07.2.07.43 0 .64C20.58 16.49 16.64 19.5 12 19.5c-4.64 0-8.58-3.01-9.96-7.18z"/><circle cx="12" cy="12" r="3"/>',
+            edit: '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75a2.121 2.121 0 113 3L7 19.25l-4 1 1-4L16.5 3.75z"/>',
+            pause: '<path stroke-linecap="round" stroke-linejoin="round" d="M10 9v6M14 9v6M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
+            play: '<path stroke-linecap="round" stroke-linejoin="round" d="M14.752 11.168l-5.197-3a1 1 0 00-1.555.832v6a1 1 0 001.555.832l5.197-3a1 1 0 000-1.664z"/><circle cx="12" cy="12" r="9"/>',
+            trash: '<path stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 002 2h8a2 2 0 002-2l1-12M9 7V5a2 2 0 012-2h2a2 2 0 012 2v2"/>',
+            wallet: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 7h14a2 2 0 012 2v9a2 2 0 01-2 2H3V7zm0 0V5a2 2 0 012-2h11a2 2 0 012 2v2M17 13h2"/>',
+            kebab: '<circle cx="12" cy="5" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="12" cy="19" r="1.6"/>'
+        };
+
+        // Render a kebab (three-dot) trigger that, when clicked, opens a dropdown
+        // with the supplied menu items. Each item: { label, onclick, icon, danger?, accent? }
+        function renderRowMenu(rowId, items) {
+            const payload = encodeURIComponent(JSON.stringify(items));
+            return `
+                <div class="relative inline-block text-left">
+                    <button type="button" data-row-menu-toggle data-row-id="${rowId}" data-items="${payload}"
+                        onclick="openRowMenu(event, '${rowId}')"
+                        class="inline-flex items-center justify-center w-9 h-9 rounded-lg text-gray-400 hover:bg-dark-hover hover:text-gold-500 transition border border-transparent hover:border-dark-border"
+                        aria-label="Aksi">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">${rowMenuIcons.kebab}</svg>
+                    </button>
+                </div>`;
+        }
+
+        function openRowMenu(ev, rowId) {
+            ev.stopPropagation();
+            const trigger = ev.currentTarget;
+            const already = document.querySelector(`.row-menu[data-row-id="${rowId}"]`);
+            document.querySelectorAll('.row-menu').forEach(m => m.remove());
+            if (already) return;
+            const items = JSON.parse(decodeURIComponent(trigger.getAttribute('data-items')));
+            const menu = document.createElement('div');
+            menu.className = 'row-menu';
+            menu.setAttribute('data-row-id', rowId);
+            menu.innerHTML = items.map(it => {
+                const iconSvg = it.icon && rowMenuIcons[it.icon]
+                    ? `<svg class="ic" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">${rowMenuIcons[it.icon]}</svg>`
+                    : '';
+                const danger = it.danger ? ' is-danger' : '';
+                const accent = it.accent ? ' style="color:#F59E0B"' : '';
+                return `<button type="button" class="${danger}"${accent} onclick="document.querySelectorAll('.row-menu').forEach(m=>m.remove()); ${it.onclick}">${iconSvg}<span>${it.label}</span></button>`;
+            }).join('');
+            document.body.appendChild(menu);
+            const rect = trigger.getBoundingClientRect();
+            const menuRect = menu.getBoundingClientRect();
+            let left = rect.right - menuRect.width;
+            if (left < 8) left = 8;
+            let top = rect.bottom + 4;
+            if (top + menuRect.height > window.innerHeight - 8) {
+                top = rect.top - menuRect.height - 4;
+            }
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+        }
+
         async function handleLogout() {
             if (!confirm('Apakah Anda yakin ingin keluar?')) return;
             try { const res = await fetch(`${BASE_URL}/api/logout`, { method: 'POST' }); const data = await res.json(); if (data.status === 'success') window.location.href = `${BASE_URL}/login`; } catch (e) { showToast('Kesalahan jaringan', 'error'); }
         }
+
+        const pageTitleMap = {
+            dashboard: 'Dashboard',
+            orders: 'Pesanan',
+            products: 'Produk',
+            payments: 'Pembayaran',
+            settings: 'Pengaturan'
+        };
 
         document.addEventListener('DOMContentLoaded', () => {
             loadView('dashboard');
@@ -387,10 +559,16 @@
                     e.preventDefault();
                     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('nav-active'));
                     e.currentTarget.classList.add('nav-active');
-                    document.getElementById('page-title').innerText = e.currentTarget.getAttribute('data-target').toUpperCase();
-                    loadView(e.currentTarget.getAttribute('data-target'));
+                    const key = e.currentTarget.getAttribute('data-target');
+                    document.getElementById('page-title').innerText = pageTitleMap[key] || key;
+                    loadView(key);
                     if (window.innerWidth < 768) toggleSidebar();
                 });
+            });
+            // Close any open row dropdowns when clicking outside.
+            document.addEventListener('click', (e) => {
+                if (e.target.closest('.row-menu') || e.target.closest('[data-row-menu-toggle]')) return;
+                document.querySelectorAll('.row-menu').forEach(m => m.remove());
             });
         });
 
@@ -601,20 +779,19 @@
                     else {
                         result.data.forEach(p => {
                             let isActive = p.is_active == 1;
-
-                            // MENGEMBALIKAN TOMBOL DETAIL DAN EDIT YANG HILANG
-                            let actionBtns = `
-                                <button onclick="openProductDetailModal(${p.id})" class="bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">🔍 Detail</button>
-                                <button onclick="openEditProductModal(${p.id})" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 hover:bg-yellow-500 hover:text-gray-900 px-3 py-1.5 rounded-md text-xs font-bold transition">✏️ Edit</button>
-                                <button onclick="toggleProductStatus(${p.id}, ${isActive ? 0 : 1})" class="border px-3 py-1.5 rounded-md text-xs font-bold transition ${isActive ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500 hover:text-white'}">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>
-                                <button onclick="deleteProduct(${p.id})" class="border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">Hapus</button>
-                            `;
+                            const menuItems = [
+                                { label: 'Lihat detail', onclick: `openProductDetailModal(${p.id})`, icon: 'eye' },
+                                { label: 'Edit produk', onclick: `openEditProductModal(${p.id})`, icon: 'edit' },
+                                { label: isActive ? 'Nonaktifkan' : 'Aktifkan', onclick: `toggleProductStatus(${p.id}, ${isActive ? 0 : 1})`, icon: isActive ? 'pause' : 'play' },
+                                { label: 'Hapus', onclick: `deleteProduct(${p.id})`, icon: 'trash', danger: true }
+                            ];
+                            const actionBtns = renderRowMenu(`prod-${p.id}`, menuItems);
 
                             html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
                                 <td class="p-4"><div class="font-bold text-gray-200">${p.name}</div><div class="text-xs text-gray-500 mt-1">${p.total_options || 0} Opsi</div></td>
                                 <td class="p-4 capitalize text-gray-300">${p.category}</td><td class="p-4 font-bold">${p.base_price ? 'Rp ' + parseInt(p.base_price).toLocaleString('id-ID') : 'Dinamis'}</td>
                                 <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
-                                <td class="p-4 flex items-center justify-center gap-2">${actionBtns}</td>
+                                <td class="p-4 text-center">${actionBtns}</td>
                             </tr>`;
                         });
                     }
@@ -711,9 +888,14 @@
                                 case 'cancelled': badgeHTML = `<span class="${bStyle} border-red-500/30 bg-red-500/15 text-red-500">❌ Dibatalkan</span>`; break;
                             }
                             let cName = o.customer_name ? o.customer_name.replace(/'/g, "\\'") : 'Anonim';
-                            let actions = `<button onclick="openOrderDetailModal(${o.id}, '${cName}')" class="bg-blue-500/10 text-blue-400 border border-blue-500/30 hover:bg-blue-500 hover:text-white px-3 py-2 rounded-md text-xs font-bold transition">🔍 Detail</button>`;
-                            if (o.status === 'pending' || o.status === 'waiting_payment') { actions += `<button onclick="openPaymentModal(${o.id}, '${cName}', ${o.total_price})" class="bg-gold-500/10 text-gold-500 border border-gold-500/30 hover:bg-gold-500 hover:text-gray-900 px-3 py-2 rounded-md text-xs font-bold transition">💳 Konfirmasi</button>`; }
-                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover"><td class="p-4 font-bold text-gold-500">AG-${String(o.id).padStart(4, '0')}</td><td class="p-4 font-bold text-gray-200">${cName}</td><td class="p-4 font-bold">Rp ${parseInt(o.total_price).toLocaleString('id-ID')}</td><td class="p-4 text-gray-400 text-sm">${new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td><td class="p-4">${badgeHTML}</td><td class="p-4"><div class="flex items-center gap-2">${actions}</div></td></tr>`;
+                            const orderMenu = [
+                                { label: 'Lihat detail', onclick: `openOrderDetailModal(${o.id}, '${cName}')`, icon: 'eye' }
+                            ];
+                            if (o.status === 'pending' || o.status === 'waiting_payment') {
+                                orderMenu.push({ label: 'Konfirmasi pembayaran', onclick: `openPaymentModal(${o.id}, '${cName}', ${o.total_price})`, icon: 'wallet', accent: true });
+                            }
+                            const actions = renderRowMenu(`ord-${o.id}`, orderMenu);
+                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover cursor-pointer" onclick="openOrderDetailModal(${o.id}, '${cName}')"><td class="p-4 font-bold text-gold-500">AG-${String(o.id).padStart(4, '0')}</td><td class="p-4 font-bold text-gray-200">${cName}</td><td class="p-4 font-bold">Rp ${parseInt(o.total_price).toLocaleString('id-ID')}</td><td class="p-4 text-gray-400 text-sm">${new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td><td class="p-4">${badgeHTML}</td><td class="p-4 text-center" onclick="event.stopPropagation()">${actions}</td></tr>`;
                         });
                     }
                     if (document.getElementById('orders-table-body')) document.getElementById('orders-table-body').innerHTML = html;
@@ -802,6 +984,66 @@
             return 'Rp ' + (isNaN(n) ? '0' : n.toLocaleString('id-ID'));
         }
 
+        // Render the payment section inside the order detail modal.
+        // Hidden completely for COD (`onsite`) since there is no proof to show.
+        function renderPaymentSection(payment) {
+            if (!payment) return '';
+            const type = (payment.method_type || '').toLowerCase();
+            if (type === 'onsite') return '';
+            const methodName = escapeHtml(payment.method_name || 'Pembayaran online');
+            const proof = payment.proof_image || null;
+            const paymentStatus = (payment.status || 'pending').toLowerCase();
+            const statusMap = {
+                pending: { label: 'Menunggu Verifikasi', cls: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30' },
+                confirmed: { label: 'Terverifikasi', cls: 'bg-green-500/15 text-green-400 border-green-500/30' },
+                rejected: { label: 'Ditolak', cls: 'bg-red-500/15 text-red-400 border-red-500/30' }
+            };
+            const statusInfo = statusMap[paymentStatus] || statusMap.pending;
+            const paidAt = payment.paid_at
+                ? new Date(payment.paid_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : null;
+            const proofUrl = proof ? `${BASE_URL}/uploads/payments/${encodeURIComponent(proof)}` : null;
+            const proofBlock = proofUrl
+                ? `<div class="mt-3">
+                       <div class="text-xs text-gray-500 uppercase tracking-wider mb-2">Bukti Pembayaran</div>
+                       <button type="button" onclick="openProofViewer('${proofUrl}')" class="block w-full rounded-xl overflow-hidden border border-dark-border bg-dark-base hover:border-gold-500/50 transition text-left">
+                           <img src="${proofUrl}" alt="Bukti pembayaran" loading="lazy" class="w-full max-h-72 object-contain bg-black/40" />
+                           <div class="px-3 py-2 text-xs text-gray-400 flex items-center justify-between">
+                               <span>Klik untuk lihat penuh</span>
+                               <span class="text-gold-500 font-semibold">Buka</span>
+                           </div>
+                       </button>
+                   </div>`
+                : `<div class="mt-3 rounded-xl border border-dashed border-dark-border bg-dark-base/40 p-4 text-center text-sm text-gray-500">
+                       Pembeli belum mengunggah bukti pembayaran.
+                   </div>`;
+            return `
+                <div class="bg-dark-base/50 border border-dark-border rounded-xl p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-3">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider mb-1">Pembayaran</div>
+                            <div class="font-semibold text-gray-100">${methodName}</div>
+                            ${paidAt ? `<div class="text-xs text-gray-500 mt-1">Diunggah: ${paidAt}</div>` : ''}
+                        </div>
+                        <span class="shrink-0 px-3 py-1 rounded-full text-[11px] font-bold border ${statusInfo.cls}">${statusInfo.label}</span>
+                    </div>
+                    ${proofBlock}
+                </div>`;
+        }
+
+        function openProofViewer(url) {
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 z-[2000] bg-black/90 flex items-center justify-center p-4';
+            overlay.innerHTML = `
+                <button type="button" class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white text-2xl flex items-center justify-center" aria-label="Tutup">&times;</button>
+                <img src="${url}" alt="Bukti pembayaran" class="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+            `;
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay || e.target.tagName === 'BUTTON') overlay.remove();
+            });
+            document.body.appendChild(overlay);
+        }
+
         function renderItemOption(opt) {
             // custom_value menyimpan input teks bebas (mis. tulisan pita) — tampilkan
             // sebagai nilai utama dan abaikan placeholder '-' di option_value_snapshot.
@@ -866,6 +1108,7 @@
                 container.innerHTML = `
                     <div class="space-y-4">
                         ${renderCustomerContactSection(result.order)}
+                        ${renderPaymentSection(result.payment)}
                         <div class="space-y-3">${itemsHtml}</div>
                         ${totalHtml}
                     </div>
@@ -896,20 +1139,17 @@
                     } else {
                         result.data.forEach(m => {
                             let isActive = m.is_active == 1;
-
-                            // TOMBOL AKSI BARU (Edit, Aktifkan/Nonaktifkan, Hapus)
-                            let actionBtns = `
-                                <button onclick="openEditPaymentMethodModal(${m.id})" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 hover:bg-yellow-500 hover:text-gray-900 px-3 py-1.5 rounded-md text-xs font-bold transition">✏️ Edit</button>
-                                <button class="border px-3 py-1.5 rounded-md text-xs font-bold transition ${isActive ? 'bg-red-500/10 text-red-500 border-red-500/30 hover:bg-red-500 hover:text-white' : 'bg-green-500/10 text-green-500 border-green-500/30 hover:bg-green-500 hover:text-white'}">${isActive ? 'Nonaktifkan' : 'Aktifkan'}</button>
-                                <button class="border border-red-500/30 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white px-3 py-1.5 rounded-md text-xs font-bold transition">Hapus</button>
-                            `;
+                            const menuItems = [
+                                { label: 'Edit metode', onclick: `openEditPaymentMethodModal(${m.id})`, icon: 'edit' }
+                            ];
+                            const actionBtns = renderRowMenu(`pm-${m.id}`, menuItems);
 
                             html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
                                 <td class="p-4 font-bold text-gray-200">${m.name}</td>
                                 <td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${m.type}</td>
                                 <td class="p-4 text-gold-500 font-mono text-sm">${m.account_info || '-'}</td>
                                 <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
-                                <td class="p-4 flex items-center justify-center gap-2">${actionBtns}</td>
+                                <td class="p-4 text-center">${actionBtns}</td>
                             </tr>`;
                         });
                     }

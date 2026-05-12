@@ -164,4 +164,24 @@ class OrderModel extends Model
 
         return $order;
     }
+
+    // Mengambil data pembayaran terbaru untuk satu pesanan (untuk halaman detail
+    // pesanan admin). Termasuk metode pembayaran yang dipakai pembeli dan link
+    // ke file bukti transfer / QRIS kalau ada.
+    public function getOrderPayment($orderId) {
+        $this->query("
+            SELECT p.id, p.order_id, p.amount, p.status, p.proof_image, p.paid_at, p.created_at,
+                   pm.id AS method_id,
+                   pm.name AS method_name,
+                   pm.type AS method_type,
+                   pm.account_info AS method_account
+            FROM payments p
+            LEFT JOIN payment_methods pm ON p.payment_method_id = pm.id
+            WHERE p.order_id = :order_id
+            ORDER BY p.id DESC
+            LIMIT 1
+        ");
+        $this->bind(':order_id', $orderId);
+        return $this->single();
+    }
 }
