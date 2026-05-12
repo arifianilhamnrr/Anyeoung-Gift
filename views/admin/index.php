@@ -497,20 +497,92 @@
             `,
 
             settings: `
-                <div class="animate-fade-in-up max-w-2xl mx-auto">
+                <div class="animate-fade-in-up max-w-3xl mx-auto">
                     <div class="mb-6">
                         <h2 class="text-2xl font-bold text-gray-100 mb-1">Pengaturan Toko</h2>
-                        <p class="text-gray-400 text-sm">Sesuaikan nama toko dan informasi kontak WhatsApp.</p>
+                        <p class="text-gray-400 text-sm">Sesuaikan info toko, WhatsApp, dan email notifikasi pembeli.</p>
                     </div>
                     <div class="bg-dark-surface p-6 md:p-8 rounded-2xl border border-dark-border shadow-xl relative overflow-hidden">
                         <div class="absolute top-0 right-0 w-32 h-32 bg-gold-500/5 rounded-full blur-3xl pointer-events-none"></div>
                         <form id="settingsForm" onsubmit="submitSettingsForm(event)">
-                            <div class="space-y-5 relative z-10">
-                                <div><label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Toko</label><input type="text" id="set_store_name" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required></div>
-                                <div><label class="block text-sm text-gray-400 font-medium mb-1.5">WhatsApp Admin</label><input type="number" id="set_wa_admin" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required></div>
-                                <div><label class="block text-sm text-gray-400 font-medium mb-1.5">Pesan Default Pembeli</label><textarea id="set_wa_template" rows="4" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition custom-scrollbar"></textarea></div>
+                            <div class="space-y-6 relative z-10">
+                                <div>
+                                    <label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Toko</label>
+                                    <input type="text" id="set_store_name" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-400 font-medium mb-1.5">WhatsApp Admin</label>
+                                    <input type="number" id="set_wa_admin" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-400 font-medium mb-1.5">Pesan Default Pembeli</label>
+                                    <textarea id="set_wa_template" rows="4" class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition custom-scrollbar"></textarea>
+                                </div>
+                                <div class="pt-4 border-t border-dark-border/70">
+                                    <h3 class="text-lg font-semibold text-gray-100">Notifikasi Email</h3>
+                                    <p class="text-xs text-gray-500 mt-1">Gunakan App Password Gmail (smtp.gmail.com) agar pengiriman email berjalan lancar.</p>
+                                </div>
+                                <label class="flex items-center justify-between bg-dark-base border border-dark-border rounded-xl px-4 py-3 text-sm">
+                                    <span class="text-gray-300 font-medium">Aktifkan email notifikasi</span>
+                                    <input type="checkbox" id="set_email_enabled" class="w-4 h-4 accent-gold-500">
+                                </label>
+                                <div class="grid gap-4 sm:grid-cols-2">
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Host</label>
+                                        <input type="text" id="set_email_host" placeholder="smtp.gmail.com" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Port</label>
+                                        <input type="number" id="set_email_port" placeholder="587" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Username</label>
+                                        <input type="email" id="set_email_user" placeholder="email@gmail.com" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Password</label>
+                                        <input type="password" id="set_email_pass" placeholder="App Password" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Pengirim</label>
+                                        <input type="text" id="set_email_from_name" placeholder="Anyeong Gift" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Email Pengirim</label>
+                                        <input type="email" id="set_email_from_address" placeholder="email@gmail.com" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Enkripsi</label>
+                                        <select id="set_email_encryption" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                            <option value="tls">TLS (Recommended)</option>
+                                            <option value="ssl">SSL</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500">Kosongkan password jika tidak ingin mengubah kredensial email.</p>
                                 <button type="submit" id="btnSaveSettings" class="w-full mt-4 bg-gold-500 text-gray-900 font-bold py-3.5 rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">💾 Simpan Pengaturan</button>
                             </div>
+                        </form>
+                    </div>
+                    <div class="mt-8 bg-dark-surface p-6 md:p-8 rounded-2xl border border-dark-border shadow-xl">
+                        <div class="mb-4">
+                            <h3 class="text-lg font-semibold text-gray-100">Ubah Password Admin</h3>
+                            <p class="text-xs text-gray-500">Gunakan password baru minimal 6 karakter.</p>
+                        </div>
+                        <form id="adminPasswordForm" onsubmit="submitAdminPasswordForm(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">Password Lama</label>
+                                <input type="password" id="admin_current_password" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">Password Baru</label>
+                                <input type="password" id="admin_new_password" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" minlength="6" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">Konfirmasi Password Baru</label>
+                                <input type="password" id="admin_confirm_password" class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition" minlength="6" required>
+                            </div>
+                            <button type="submit" id="btnAdminPassword" class="w-full mt-2 bg-gold-500 text-gray-900 font-bold py-3.5 rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">🔒 Simpan Password</button>
                         </form>
                     </div>
                 </div>
@@ -1764,6 +1836,13 @@
                     document.getElementById('set_store_name').value = result.data.store_name || '';
                     document.getElementById('set_wa_admin').value = result.data.whatsapp_admin || '';
                     document.getElementById('set_wa_template').value = result.data.whatsapp_message_template || '';
+                    document.getElementById('set_email_enabled').checked = Number(result.data.email_enabled || 0) === 1;
+                    document.getElementById('set_email_host').value = result.data.email_smtp_host || '';
+                    document.getElementById('set_email_port').value = result.data.email_smtp_port || '';
+                    document.getElementById('set_email_user').value = result.data.email_smtp_username || '';
+                    document.getElementById('set_email_from_name').value = result.data.email_from_name || '';
+                    document.getElementById('set_email_from_address').value = result.data.email_from_address || '';
+                    document.getElementById('set_email_encryption').value = result.data.email_smtp_encryption || 'tls';
                 }
             } catch (e) { console.error('Gagal mengambil pengaturan', e); }
         }
@@ -1775,15 +1854,52 @@
             const payload = {
                 store_name: document.getElementById('set_store_name').value,
                 whatsapp_admin: document.getElementById('set_wa_admin').value,
-                whatsapp_message_template: document.getElementById('set_wa_template').value
+                whatsapp_message_template: document.getElementById('set_wa_template').value,
+                email_enabled: document.getElementById('set_email_enabled').checked,
+                email_smtp_host: document.getElementById('set_email_host').value,
+                email_smtp_port: document.getElementById('set_email_port').value,
+                email_smtp_username: document.getElementById('set_email_user').value,
+                email_smtp_password: document.getElementById('set_email_pass').value,
+                email_from_name: document.getElementById('set_email_from_name').value,
+                email_from_address: document.getElementById('set_email_from_address').value,
+                email_smtp_encryption: document.getElementById('set_email_encryption').value
             };
             try {
                 const res = await fetch(`${BASE_URL}/api/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
-                if (data.status === 'success') showToast('Pengaturan berhasil disimpan!', 'success');
+                if (data.status === 'success') {
+                    showToast('Pengaturan berhasil disimpan!', 'success');
+                    document.getElementById('set_email_pass').value = '';
+                }
                 else showToast(data.message, 'error');
             } catch (error) { showToast('Kesalahan jaringan', 'error'); }
             finally { btn.innerText = '💾 Simpan Pengaturan'; btn.disabled = false; }
+        }
+
+        async function submitAdminPasswordForm(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnAdminPassword');
+            btn.innerText = 'Menyimpan...'; btn.disabled = true;
+            const payload = {
+                current_password: document.getElementById('admin_current_password').value,
+                new_password: document.getElementById('admin_new_password').value,
+                confirm_password: document.getElementById('admin_confirm_password').value
+            };
+            try {
+                const res = await fetch(`${BASE_URL}/api/admin/password`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast(data.message || 'Password berhasil diperbarui!', 'success');
+                    document.getElementById('adminPasswordForm').reset();
+                } else {
+                    showToast(data.message || 'Gagal memperbarui password.', 'error');
+                }
+            } catch (error) {
+                showToast('Kesalahan jaringan', 'error');
+            } finally {
+                btn.innerText = '🔒 Simpan Password';
+                btn.disabled = false;
+            }
         }
     </script>
 </body>

@@ -26,6 +26,8 @@ $allowed_pages = [
     'checkout',
     'login',
     'register',
+    'forgot_password',
+    'reset_password',
     'profile',
     'orders',
     'addresses',
@@ -43,7 +45,7 @@ if ($page !== 'checkout' && isset($_SESSION['buy_now'])) {
 }
 
 // halaman yang TIDAK perlu login
-$public_pages = ['home', 'products', 'product', 'login', 'register'];
+$public_pages = ['home', 'products', 'product', 'login', 'register', 'forgot_password', 'reset_password'];
 
 // halaman yang WAJIB login
 $protected_pages = [
@@ -65,7 +67,7 @@ if (in_array($page, $protected_pages) && !isset($_SESSION['user_id'])) {
 }
 
 // halaman auth (tanpa layout)
-$auth_pages = ['login', 'register'];
+$auth_pages = ['login', 'register', 'forgot_password', 'reset_password'];
 
 $use_sidebar = in_array($page, ['profile', 'orders', 'addresses']);
 ?>

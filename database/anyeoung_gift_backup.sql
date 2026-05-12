@@ -367,6 +367,14 @@ CREATE TABLE `store_settings` (
   `store_name` varchar(100) NOT NULL,
   `whatsapp_admin` varchar(20) NOT NULL,
   `whatsapp_message_template` text,
+  `email_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `email_smtp_host` varchar(191) DEFAULT NULL,
+  `email_smtp_port` int DEFAULT NULL,
+  `email_smtp_username` varchar(191) DEFAULT NULL,
+  `email_smtp_password` varchar(191) DEFAULT NULL,
+  `email_smtp_encryption` varchar(10) DEFAULT NULL,
+  `email_from_name` varchar(100) DEFAULT NULL,
+  `email_from_address` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
@@ -379,9 +387,28 @@ CREATE TABLE `store_settings` (
 
 LOCK TABLES `store_settings` WRITE;
 /*!40000 ALTER TABLE `store_settings` DISABLE KEYS */;
-INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.','2026-03-29 06:07:06','2026-03-31 04:35:53');
+INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.',0,NULL,NULL,NULL,NULL,'tls',NULL,NULL,'2026-03-29 06:07:06','2026-03-31 04:35:53');
 /*!40000 ALTER TABLE `store_settings` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `password_resets`
+--
+
+DROP TABLE IF EXISTS `password_resets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `password_resets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_password_resets_user_id` (`user_id`),
+  KEY `idx_password_resets_token_hash` (`token_hash`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `users`

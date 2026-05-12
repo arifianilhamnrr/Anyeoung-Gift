@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../config/database.php';
+require_once __DIR__ . '/email-helper.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php?page=login');
@@ -192,6 +193,41 @@ try {
     ]);
 
     $pdo->commit();
+
+    try {
+        $stmt = $pdo->prepare("SELECT name, email FROM users WHERE id = ? LIMIT 1");
+        $stmt->execute([$userId]);
+        $user = $stmt->fetch();
+
+        if ($user && !empty($user['email'])) {
+            $orderNumber = 'AG-' . str_pad((string) $orderId, 4, '0', STR_PAD_LEFT);
+            $storeSettings = fetchStoreSettings($pdo);
+            $storeName = $storeSettings['store_name'] ?? 'Anyeong Gift';
+            $statusLabel = formatOrderStatusLabel('waiting_payment');
+            $totalFormatted = formatRupiah((int) $grandTotal);
+            $methodName = $paymentMethod['name'] ?? 'Metode pembayaran';
+            $methodType = strtolower($paymentMethod['type'] ?? '');
+
+            $nextStep = $methodType === 'onsite'
+                ? 'Silakan lakukan pembayaran saat pengambilan di toko.'
+                : 'Silakan selesaikan pembayaran dan unggah bukti transfer agar pesanan segera diproses.';
+
+            $subject = "Pesanan {$orderNumber} Berhasil Dibuat - {$storeName}";
+            $body = "
+                <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #111;\">
+                    <h2 style=\"margin: 0 0 8px;\">Pesanan Berhasil Dibuat</h2>
+                    <p>Halo <strong>" . htmlspecialchars($user['name']) . "</strong>, terima kasih sudah berbelanja di {$storeName}.</p>
+                    <p>Pesanan kamu <strong>{$orderNumber}</strong> sudah tercatat dengan status <strong>{$statusLabel}</strong>.</p>
+                    <p>Total transaksi: <strong>Rp {$totalFormatted}</strong> via {$methodName}.</p>
+                    <p>{$nextStep}</p>
+                </div>
+            ";
+            $textBody = "Halo {$user['name']}, pesanan {$orderNumber} tercatat dengan status {$statusLabel}. Total Rp {$totalFormatted} via {$methodName}. {$nextStep}";
+
+            sendConfiguredEmail($pdo, $user['email'], $user['name'], $subject, $body, $textBody);
+        }
+    } catch (Exception $e) {
+    }
 
     // Bersihkan hanya bucket yang dipakai. Buy now tidak menyentuh keranjang
     // utama, jadi isi keranjang tetap utuh setelah pesanan buy now selesai.

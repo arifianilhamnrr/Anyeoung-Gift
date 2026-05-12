@@ -16,6 +16,7 @@ Aplikasi web toko hadiah / bouquet / hampers dengan dua sisi: **storefront pelan
 - [Cara Pemakaian](#cara-pemakaian)
 - [Setup untuk Hosting (Production)](#setup-untuk-hosting-production)
 - [Konfigurasi Penting](#konfigurasi-penting)
+- [Email Notifikasi](#email-notifikasi)
 - [FAQ / Troubleshooting](#faq--troubleshooting)
 
 ---
@@ -30,6 +31,7 @@ Aplikasi web toko hadiah / bouquet / hampers dengan dua sisi: **storefront pelan
 - **Keranjang & Bayar Sekarang**: tombol "Bayar Sekarang" di product detail melakukan checkout cuma untuk produk tersebut tanpa mengganggu isi keranjang utama.
 - **Sticky checkout bar** di mobile untuk halaman keranjang, checkout, dan product detail.
 - **Login & Register** dengan password bcrypt (`password_hash` / `password_verify`).
+- **Lupa password** via email reset link.
 - **Manajemen alamat** pengiriman (multiple address).
 - **Checkout** dengan pemilihan alamat + metode pembayaran (transfer, QRIS, e-wallet, atau bayar di toko / COD).
 - **Auto-redirect** ke halaman upload pembayaran setelah checkout (untuk metode non-COD).
@@ -57,6 +59,7 @@ Aplikasi web toko hadiah / bouquet / hampers dengan dua sisi: **storefront pelan
 - **Cetak invoice** pesanan langsung dari modal detail (auto-print, siap di-print sebagai PDF juga).
 - **Manajemen metode pembayaran**: tambah/edit metode (transfer, QRIS, e-wallet, onsite) + **upload gambar QRIS** dengan preview. Gambar lama dipertahankan saat update tanpa upload baru.
 - **Pengaturan toko**: nama toko, nomor WhatsApp admin, template pesan chat untuk produk `chat_only`.
+- **Pengaturan email notifikasi** (Gmail SMTP) + **ubah password admin** langsung dari dashboard.
 - **Sticky modal headers** + kebab dropdown action di tabel agar UI lebih rapi.
 
 ### Template WhatsApp Otomatis
@@ -98,11 +101,12 @@ Anyeoung-Gift/
 │   └── images/                # Logo, dsb.
 ├── config.php                 # Kredensial DB + BASE_URL (sisi admin)
 ├── config/database.php        # Kredensial DB (sisi user, pakai PDO)
+├── composer.json              # Dependency email (PHPMailer)
 ├── database/
 │   └── anyeoung_gift_backup.sql   # Dump schema + data contoh
 ├── public/                    # Entry point ADMIN (http://localhost/anyeong-gift/public)
 │   ├── index.php              # Front controller admin (router)
-│   ├── assets/                # CSS/JS hasil compile
+│   ├── assets/                # JS admin
 │   └── uploads/
 │       ├── products/          # Foto produk
 │       ├── payments/          # Bukti pembayaran user
@@ -115,6 +119,7 @@ Anyeoung-Gift/
 ├── views/
 │   ├── admin/                 # Layout + partial dashboard admin
 │   └── auth/                  # Halaman login admin
+├── vendor/                    # Dependency Composer (email)
 ├── node_modules/              # Dependencies Tailwind (jangan di-commit)
 └── package.json
 ```
@@ -159,7 +164,15 @@ Alternatif via CLI:
 mysql -u root anyeoung_gift < database/anyeoung_gift_backup.sql
 ```
 
-### 4. (Opsional) Install & Build Tailwind
+### 4. (Opsional) Install Dependency Email
+
+Fitur email notifikasi pakai PHPMailer. Install dependency ini jika belum ada folder `vendor/`:
+
+```bash
+composer install
+```
+
+### 5. (Opsional) Install & Build Tailwind
 
 CSS hasil build sudah ikut di-commit di `assets/css/main.css`, jadi tidak perlu Node.js untuk sekadar menjalankan aplikasi.
 
@@ -176,7 +189,7 @@ Untuk mode watch saat development:
 npx tailwindcss -i ./assets/css/input.css -o ./assets/css/main.css --watch
 ```
 
-### 5. Jalankan
+### 6. Jalankan
 
 - Start Apache + MySQL via panel XAMPP/Laragon.
 - Buka admin: <http://localhost/anyeong-gift/public>
@@ -191,7 +204,8 @@ Setelah import dump database, tersedia akun:
 | Role | Email | Password |
 |---|---|---|
 | Admin | `super@anyeong.com` | `admin123` *(lihat catatan di bawah)* |
-| User | `arifianilhamnurriandana@gmail.com` | *(unknown, bcrypt hash)* |
+
+> Untuk akun user/customer, silakan daftar lewat halaman register di `/users`.
 
 > Password admin di dump masih SHA-256 lama. Sistem akan otomatis meng-upgrade ke bcrypt setelah login pertama berhasil. Jika kamu lupa, set ulang dengan SQL:
 >
@@ -331,6 +345,25 @@ Pastikan writeable oleh web server:
 - `public/uploads/products/` — foto produk
 - `public/uploads/payments/` — bukti transfer user
 - `public/uploads/payment_methods/` — gambar QRIS admin
+
+---
+
+## Email Notifikasi
+
+Fitur email notifikasi dipakai untuk:
+
+- Reset password user (link dikirim via email).
+- Notifikasi transaksi baru dan status pesanan yang diupdate admin.
+
+Konfigurasinya dilakukan lewat menu **Pengaturan** di admin dashboard:
+
+1. Aktifkan toggle **Email Notifikasi**.
+2. Isi SMTP Gmail:
+   - Host: `smtp.gmail.com`
+   - Port: `587`
+   - Enkripsi: `TLS`
+3. Gunakan **App Password** Gmail (wajib aktifkan 2FA).
+4. Isi email pengirim (biasanya sama dengan username).
 
 ---
 
