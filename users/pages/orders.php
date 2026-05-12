@@ -7,6 +7,20 @@ $checkoutSuccessOrderId = $_SESSION['checkout_success_order_id'] ?? null;
 
 unset($_SESSION['order_success'], $_SESSION['order_error'], $_SESSION['checkout_success_order_id']);
 
+// Pagination: 5 pesanan per halaman. Untuk efisiensi kami query COUNT(*) total
+// terpisah lalu LIMIT/OFFSET untuk fetch halaman aktif saja.
+$perPage = 5;
+$currentPage = max(1, (int) ($_GET['p'] ?? 1));
+
+$stmtCount = $pdo->prepare("SELECT COUNT(*) FROM orders WHERE user_id = ?");
+$stmtCount->execute([$userId]);
+$totalOrders = (int) $stmtCount->fetchColumn();
+$totalPages = max(1, (int) ceil($totalOrders / $perPage));
+if ($currentPage > $totalPages) {
+    $currentPage = $totalPages;
+}
+$offset = ($currentPage - 1) * $perPage;
+
 $stmt = $pdo->prepare("
     SELECT 
         o.*,
@@ -20,6 +34,7 @@ $stmt = $pdo->prepare("
     LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id
     WHERE o.user_id = ?
     ORDER BY o.id DESC
+    LIMIT $perPage OFFSET $offset
 ");
 $stmt->execute([$userId]);
 $orders = $stmt->fetchAll();
@@ -333,6 +348,34 @@ function getCombinedOrderStatus($order)
                 </details>
             <?php endforeach; ?>
         </div>
+
+        <?php if ($totalPages > 1): ?>
+            <nav aria-label="Pagination" class="mt-8 flex items-center justify-center gap-2 flex-wrap">
+                <?php
+                $pagerBase = function ($targetPage, $label, $disabled = false, $active = false) {
+                    $cls = 'min-w-[2.5rem] h-10 px-3 rounded-full text-sm font-bold inline-flex items-center justify-center transition border';
+                    if ($disabled) {
+                        $cls .= ' border-white/10 text-gray-600 bg-white/5 cursor-not-allowed';
+                        return '<span class="' . $cls . '">' . $label . '</span>';
+                    }
+                    if ($active) {
+                        $cls .= ' border-gold bg-gold text-black';
+                        return '<span class="' . $cls . '">' . $label . '</span>';
+                    }
+                    $cls .= ' border-white/10 text-gray-200 bg-white/5 hover:border-gold hover:text-gold';
+                    return '<a href="index.php?page=orders&p=' . (int) $targetPage . '" class="' . $cls . '">' . $label . '</a>';
+                };
+                ?>
+                <?= $pagerBase($currentPage - 1, '&larr; Prev', $currentPage <= 1); ?>
+                <?php for ($pIdx = 1; $pIdx <= $totalPages; $pIdx++): ?>
+                    <?= $pagerBase($pIdx, (string) $pIdx, false, $pIdx === $currentPage); ?>
+                <?php endfor; ?>
+                <?= $pagerBase($currentPage + 1, 'Next &rarr;', $currentPage >= $totalPages); ?>
+            </nav>
+            <div class="text-center text-xs text-gray-500 mt-2">
+                Halaman <?= $currentPage; ?> dari <?= $totalPages; ?> &middot; Total <?= $totalOrders; ?> pesanan
+            </div>
+        <?php endif; ?>
 
     <?php endif; ?>
 </div>

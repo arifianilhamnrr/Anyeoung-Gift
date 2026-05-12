@@ -47,7 +47,6 @@ $router->post('/api/products', 'ProductController@store');
 $router->post('/api/products/toggle-status', 'ProductController@toggleStatus');
 $router->get('/api/orders', 'OrderController@index');
 $router->post('/api/orders/update-status', 'OrderController@updateStatus');
-$router->get('/api/dev/generate-order', 'OrderController@generateDummy');
 $router->post('/api/products/delete', 'ProductController@delete');
 $router->get('/api/payment-methods', 'PaymentMethodController@index');
 $router->post('/api/payment-methods', 'PaymentMethodController@store');

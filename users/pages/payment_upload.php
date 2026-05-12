@@ -38,16 +38,31 @@ if ($order['payment_method_type'] === 'onsite') {
     exit;
 }
 
-// Proses Data Rekening
+// Proses Data Rekening. Payload `account_info` saat ini berisi {info, image?}
+// dengan struktur lama (langsung berupa key=>value) sebagai fallback. Kami
+// pisahkan teks info vs file gambar QRIS agar bisa ditampilkan dengan benar.
 $accountDetails = [];
+$qrisImage = null;
 if (!empty($order['payment_account_info'])) {
     $decoded = json_decode($order['payment_account_info'], true);
     if (is_array($decoded)) {
-        $accountDetails = $decoded;
+        if (isset($decoded['info']) || isset($decoded['image'])) {
+            // Format baru
+            if (!empty($decoded['info'])) {
+                $accountDetails['No. Rekening'] = $decoded['info'];
+            }
+            if (!empty($decoded['image'])) {
+                $qrisImage = $decoded['image'];
+            }
+        } else {
+            // Format lama: associative array generik label => value
+            $accountDetails = $decoded;
+        }
     } else {
         $accountDetails['No. Rekening'] = trim($order['payment_account_info'], '"');
     }
 }
+$isQrisMethod = strtolower($order['payment_method_type'] ?? '') === 'qris';
 
 // Ambil nomor WA admin
 $stmtStore = $pdo->query("SELECT whatsapp_admin FROM store_settings LIMIT 1");
@@ -110,6 +125,18 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
                                         class="text-gold font-mono font-bold select-all"><?= htmlspecialchars($value); ?></span>
                                 </div>
                             <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
+                    <?php if ($isQrisMethod && !empty($qrisImage)): ?>
+                        <div class="mt-4 bg-white/95 rounded-xl p-3 flex flex-col items-center gap-2">
+                            <img src="../public/uploads/payment_methods/<?= htmlspecialchars($qrisImage); ?>"
+                                alt="QRIS Anyeong Gift"
+                                class="w-full max-w-xs aspect-square object-contain">
+                            <p class="text-[10px] uppercase tracking-wider text-gray-600 font-bold">Scan QRIS di atas</p>
+                        </div>
+                    <?php elseif ($isQrisMethod): ?>
+                        <div class="mt-4 text-xs text-yellow-300 bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 text-center">
+                            Gambar QRIS belum diunggah oleh admin. Mohon hubungi admin untuk panduan pembayaran.
                         </div>
                     <?php endif; ?>
                 </div>

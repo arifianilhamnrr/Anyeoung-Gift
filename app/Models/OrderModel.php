@@ -12,11 +12,18 @@ class OrderModel extends Model
 
     public function getAllOrders()
     {
-        // Hapus u.phone as customer_phone
-        $sql = "SELECT o.id, o.total_price, o.status, o.created_at, 
-                    u.name as customer_name 
-                FROM orders o 
-                LEFT JOIN users u ON o.user_id = u.id 
+        // Sertakan tipe metode pembayaran (terutama untuk membedakan onsite/COD
+        // dari online) agar UI admin bisa menampilkan aksi yang sesuai per
+        // pesanan (mis. "Konfirmasi Pesanan" untuk COD, "Konfirmasi Pembayaran"
+        // untuk online).
+        $sql = "SELECT o.id, o.total_price, o.status, o.created_at,
+                    u.name AS customer_name,
+                    pm.type AS payment_method_type,
+                    pm.name AS payment_method_name
+                FROM orders o
+                LEFT JOIN users u ON o.user_id = u.id
+                LEFT JOIN payments p ON p.order_id = o.id
+                LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id
                 ORDER BY o.created_at DESC";
         $this->query($sql);
         return $this->resultSet();

@@ -407,7 +407,7 @@
                             required></div>
                     <div>
                         <label class="block text-sm text-gray-400 font-medium mb-1.5">Tipe Pembayaran</label>
-                        <select id="pm_type"
+                        <select id="pm_type" onchange="togglePaymentQrisField()"
                             class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
                             required>
                             <option value="transfer">Transfer Bank</option>
@@ -420,6 +420,20 @@
                             type="text" id="pm_info"
                             class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
                             placeholder="Cth: 1234567890 a/n Budi"></div>
+                    <div id="pm_qris_wrapper" class="hidden space-y-2">
+                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Gambar QRIS</label>
+                        <label for="pm_image"
+                            class="flex items-center justify-center gap-2 p-3 bg-dark-base border border-dashed border-dark-border text-gray-300 rounded-xl text-sm cursor-pointer hover:border-gold-500 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            <span id="pm_image_label">Pilih gambar QRIS (JPG/PNG)</span>
+                        </label>
+                        <input type="file" id="pm_image" accept="image/*" class="hidden"
+                            onchange="onQrisImageSelected(this)">
+                        <div id="pm_image_preview_wrapper" class="hidden">
+                            <img id="pm_image_preview" alt="Pratinjau QRIS"
+                                class="w-full max-h-48 object-contain rounded-lg border border-dark-border bg-dark-base p-2">
+                        </div>
+                    </div>
                 </div>
                 <button type="submit" id="btnSavePaymentMethod"
                     class="w-full mt-8 bg-gold-500 text-gray-900 font-bold py-3.5 rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">💾
@@ -445,14 +459,23 @@
             echo str_replace('`', '\\`', ob_get_clean()); ?>`,
 
             products: `
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 animate-fade-in-up">
-                    <div>
-                        <h2 class="text-2xl font-bold text-gray-100 mb-1">Manajemen Produk</h2>
-                        <p class="text-gray-400 text-sm">Kelola daftar produk, harga, dan opsi kustomisasi toko Anda.</p>
+                <div class="flex flex-col gap-4 mb-6 animate-fade-in-up">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-100 mb-1">Manajemen Produk</h2>
+                            <p class="text-gray-400 text-sm">Kelola daftar produk, harga, dan opsi kustomisasi toko Anda.</p>
+                        </div>
+                        <button onclick="openProductModal()" class="bg-gold-500 text-gray-900 px-5 py-2.5 rounded-lg font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition flex items-center gap-2 whitespace-nowrap">
+                            <span class="text-xl leading-none">+</span> Tambah Produk
+                        </button>
                     </div>
-                    <button onclick="openProductModal()" class="bg-gold-500 text-gray-900 px-5 py-2.5 rounded-lg font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition flex items-center gap-2 whitespace-nowrap">
-                        <span class="text-xl leading-none">+</span> Tambah Produk
-                    </button>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+                        <label class="text-xs uppercase tracking-wider text-gray-500 sm:w-32 shrink-0">Filter Kategori</label>
+                        <select id="productCategoryFilter" onchange="renderProductsTable()"
+                            class="w-full sm:max-w-xs p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            <option value="all">Semua Kategori</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="bg-dark-surface rounded-xl border border-dark-border overflow-x-auto shadow-md animate-fade-in-up">
                     <table class="w-full text-left border-collapse min-w-[700px] whitespace-nowrap">
@@ -470,6 +493,7 @@
                         </tbody>
                     </table>
                 </div>
+                <div id="products-pagination" class="mt-4"></div>
             `,
 
             settings: `
@@ -570,6 +594,54 @@
             }
             menu.style.left = left + 'px';
             menu.style.top = top + 'px';
+        }
+
+        // Render kontrol pagination sederhana (Prev / nomor halaman / Next).
+        // onPageChange dipanggil dengan nomor halaman baru (1-based).
+        window.__paginationHandlers = window.__paginationHandlers || {};
+        function renderPagination(containerId, currentPage, totalPages, totalItems, onPageChange) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            window.__paginationHandlers[containerId] = onPageChange;
+            if (totalItems <= 0 || totalPages <= 1) {
+                container.innerHTML = totalItems > 0
+                    ? `<div class="text-xs text-gray-500 text-right">Menampilkan ${totalItems} item</div>`
+                    : '';
+                return;
+            }
+            const btn = (page, label, disabled, active) => {
+                const base = 'min-w-[2.25rem] h-9 px-3 rounded-lg text-xs font-bold transition border';
+                const cls = disabled
+                    ? `${base} bg-dark-base border-dark-border text-gray-600 cursor-not-allowed`
+                    : active
+                        ? `${base} bg-gold-500 border-gold-500 text-gray-900`
+                        : `${base} bg-dark-base border-dark-border text-gray-300 hover:border-gold-500 hover:text-gold-500`;
+                if (disabled || active) {
+                    return `<button type="button" class="${cls}" ${disabled ? 'disabled' : ''}>${label}</button>`;
+                }
+                return `<button type="button" class="${cls}" onclick="window.__paginationHandlers['${containerId}'](${page})">${label}</button>`;
+            };
+            const pages = [];
+            const range = 2;
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || Math.abs(i - currentPage) <= range) {
+                    pages.push(i);
+                } else if (pages[pages.length - 1] !== '…') {
+                    pages.push('…');
+                }
+            }
+            const buttons = pages.map(p => p === '…'
+                ? `<span class="text-gray-600 px-1">…</span>`
+                : btn(p, String(p), false, p === currentPage)).join('');
+            container.innerHTML = `
+                <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                    <div class="text-xs text-gray-500">Total ${totalItems} item · Halaman ${currentPage} dari ${totalPages}</div>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        ${btn(currentPage - 1, '← Prev', currentPage <= 1, false)}
+                        ${buttons}
+                        ${btn(currentPage + 1, 'Next →', currentPage >= totalPages, false)}
+                    </div>
+                </div>`;
         }
 
         async function handleLogout() {
@@ -803,34 +875,72 @@
             }
         }
 
-        async function loadProductsData() {
-            if (document.getElementById('products-table-body')) document.getElementById('products-table-body').innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="5" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
-            try {
-                const res = await fetch(`${BASE_URL}/api/products`); const result = await res.json(); let html = '';
-                if (result.status === 'success') {
-                    if (result.data.length === 0) html = `<tr><td colspan="5" class="text-center p-10 text-gray-500">Belum ada produk.</td></tr>`;
-                    else {
-                        result.data.forEach(p => {
-                            let isActive = p.is_active == 1;
-                            const menuItems = [
-                                { label: 'Lihat detail', onclick: `openProductDetailModal(${p.id})`, icon: 'eye' },
-                                { label: 'Edit produk', onclick: `openEditProductModal(${p.id})`, icon: 'edit' },
-                                { label: isActive ? 'Nonaktifkan' : 'Aktifkan', onclick: `toggleProductStatus(${p.id}, ${isActive ? 0 : 1})`, icon: isActive ? 'pause' : 'play' },
-                                { label: 'Hapus', onclick: `deleteProduct(${p.id})`, icon: 'trash', danger: true }
-                            ];
-                            const actionBtns = renderRowMenu(`prod-${p.id}`, menuItems);
+        // State penyimpanan list produk + state pagination/filter untuk tabel admin.
+        let productsCache = [];
+        let productsCurrentPage = 1;
+        const PRODUCTS_PAGE_SIZE = 10;
 
-                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
-                                <td class="p-4"><div class="font-bold text-gray-200">${p.name}</div><div class="text-xs text-gray-500 mt-1">${p.total_options || 0} Opsi</div></td>
-                                <td class="p-4 capitalize text-gray-300">${p.category}</td><td class="p-4 font-bold">${p.base_price ? 'Rp ' + parseInt(p.base_price).toLocaleString('id-ID') : 'Dinamis'}</td>
-                                <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
-                                <td class="p-4 text-center">${actionBtns}</td>
-                            </tr>`;
-                        });
-                    }
-                    if (document.getElementById('products-table-body')) document.getElementById('products-table-body').innerHTML = html;
+        async function loadProductsData() {
+            const tbody = document.getElementById('products-table-body');
+            if (tbody) tbody.innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="5" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
+            try {
+                const res = await fetch(`${BASE_URL}/api/products`);
+                const result = await res.json();
+                if (result.status === 'success') {
+                    productsCache = result.data || [];
+                    productsCurrentPage = 1;
+                    populateProductCategoryFilter();
+                    renderProductsTable();
                 }
             } catch (e) { console.error(e); }
+        }
+
+        function populateProductCategoryFilter() {
+            const select = document.getElementById('productCategoryFilter');
+            if (!select) return;
+            const prev = select.value || 'all';
+            const categories = Array.from(new Set(productsCache.map(p => (p.category || '').trim()).filter(Boolean))).sort((a, b) => a.localeCompare(b));
+            select.innerHTML = `<option value="all">Semua Kategori</option>` + categories.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
+            select.value = categories.includes(prev) ? prev : 'all';
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('products-table-body');
+            if (!tbody) return;
+            const select = document.getElementById('productCategoryFilter');
+            const filter = select ? select.value : 'all';
+            const filtered = filter === 'all' ? productsCache : productsCache.filter(p => (p.category || '') === filter);
+            const pageSize = PRODUCTS_PAGE_SIZE;
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            if (productsCurrentPage > totalPages) productsCurrentPage = totalPages;
+            const start = (productsCurrentPage - 1) * pageSize;
+            const pageRows = filtered.slice(start, start + pageSize);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center p-10 text-gray-500">Belum ada produk yang cocok.</td></tr>`;
+            } else {
+                tbody.innerHTML = pageRows.map(p => {
+                    const isActive = p.is_active == 1;
+                    const menuItems = [
+                        { label: 'Lihat detail', onclick: `openProductDetailModal(${p.id})`, icon: 'eye' },
+                        { label: 'Edit produk', onclick: `openEditProductModal(${p.id})`, icon: 'edit' },
+                        { label: isActive ? 'Nonaktifkan' : 'Aktifkan', onclick: `toggleProductStatus(${p.id}, ${isActive ? 0 : 1})`, icon: isActive ? 'pause' : 'play' },
+                        { label: 'Hapus', onclick: `deleteProduct(${p.id})`, icon: 'trash', danger: true }
+                    ];
+                    const actionBtns = renderRowMenu(`prod-${p.id}`, menuItems);
+                    return `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
+                        <td class="p-4"><div class="font-bold text-gray-200">${escapeHtml(p.name)}</div><div class="text-xs text-gray-500 mt-1">${p.total_options || 0} Opsi</div></td>
+                        <td class="p-4 capitalize text-gray-300">${escapeHtml(p.category || '-')}</td>
+                        <td class="p-4 font-bold">${p.base_price ? 'Rp ' + parseInt(p.base_price).toLocaleString('id-ID') : 'Dinamis'}</td>
+                        <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
+                        <td class="p-4 text-center">${actionBtns}</td>
+                    </tr>`;
+                }).join('');
+            }
+            renderPagination('products-pagination', productsCurrentPage, totalPages, filtered.length, (page) => {
+                productsCurrentPage = page;
+                renderProductsTable();
+            });
         }
 
         async function toggleProductStatus(id, status) { if (!confirm(`Yakin ubah status?`)) return; try { const res = await fetch(`${BASE_URL}/api/products/toggle-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) }); const data = await res.json(); if (data.status === 'success') { showToast('Status diubah', 'success'); loadProductsData(); } } catch (e) { } }
@@ -904,36 +1014,124 @@
             }
         }
         // --- ORDERS ---
+        // Status pesanan ditampilkan sebagai badge yang konsisten dengan halaman user.
+        const ORDER_STATUS_BADGE = {
+            pending: { label: '⏳ Belum Dibayar', cls: 'border-yellow-500/30 bg-yellow-500/15 text-yellow-500' },
+            waiting_payment: { label: '⏳ Belum Dibayar', cls: 'border-yellow-500/30 bg-yellow-500/15 text-yellow-500' },
+            paid: { label: '💳 Sudah Dibayar', cls: 'border-blue-500/30 bg-blue-500/15 text-blue-500' },
+            ready_pickup: { label: '🛍️ Siap Diambil', cls: 'border-purple-500/30 bg-purple-500/15 text-purple-400' },
+            completed: { label: '✅ Selesai', cls: 'border-green-500/30 bg-green-500/15 text-green-500' },
+            cancelled: { label: '❌ Dibatalkan', cls: 'border-red-500/30 bg-red-500/15 text-red-500' }
+        };
+
+        let ordersCache = [];
+        let ordersCurrentPage = 1;
+        const ORDERS_PAGE_SIZE = 10;
+
         async function loadOrdersData() {
-            if (document.getElementById('orders-table-body')) document.getElementById('orders-table-body').innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="6" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
+            const tbody = document.getElementById('orders-table-body');
+            if (tbody) tbody.innerHTML = `<tr class="animate-pulse border-b border-dark-border"><td colspan="6" class="p-4"><div class="h-6 bg-dark-hover rounded w-full"></div></td></tr>`;
             try {
-                const res = await fetch(`${BASE_URL}/api/orders`); const result = await res.json(); let html = '';
+                const res = await fetch(`${BASE_URL}/api/orders`);
+                const result = await res.json();
                 if (result.status === 'success') {
-                    if (result.data.length === 0) html = `<tr><td colspan="6" class="text-center p-10 text-gray-500">Belum ada pesanan.</td></tr>`;
-                    else {
-                        result.data.forEach(o => {
-                            let badgeHTML = ''; const bStyle = "px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-block border ";
-                            switch (o.status) {
-                                case 'pending': case 'waiting_payment': badgeHTML = `<span class="${bStyle} border-yellow-500/30 bg-yellow-500/15 text-yellow-500">⏳ Belum Dibayar</span>`; break;
-                                case 'paid': badgeHTML = `<span class="${bStyle} border-blue-500/30 bg-blue-500/15 text-blue-500">💳 Sudah Dibayar</span>`; break;
-                                case 'ready_pickup': badgeHTML = `<span class="${bStyle} border-purple-500/30 bg-purple-500/15 text-purple-400">🛍️ Siap Diambil</span>`; break;
-                                case 'completed': badgeHTML = `<span class="${bStyle} border-green-500/30 bg-green-500/15 text-green-500">✅ Selesai</span>`; break;
-                                case 'cancelled': badgeHTML = `<span class="${bStyle} border-red-500/30 bg-red-500/15 text-red-500">❌ Dibatalkan</span>`; break;
-                            }
-                            let cName = o.customer_name ? o.customer_name.replace(/'/g, "\\'") : 'Anonim';
-                            const orderMenu = [
-                                { label: 'Lihat detail', onclick: `openOrderDetailModal(${o.id}, '${cName}')`, icon: 'eye' }
-                            ];
-                            if (o.status === 'pending' || o.status === 'waiting_payment') {
-                                orderMenu.push({ label: 'Konfirmasi pembayaran', onclick: `openPaymentModal(${o.id}, '${cName}', ${o.total_price})`, icon: 'wallet', accent: true });
-                            }
-                            const actions = renderRowMenu(`ord-${o.id}`, orderMenu);
-                            html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover cursor-pointer" onclick="openOrderDetailModal(${o.id}, '${cName}')"><td class="p-4 font-bold text-gold-500">AG-${String(o.id).padStart(4, '0')}</td><td class="p-4 font-bold text-gray-200">${cName}</td><td class="p-4 font-bold">Rp ${parseInt(o.total_price).toLocaleString('id-ID')}</td><td class="p-4 text-gray-400 text-sm">${new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td><td class="p-4">${badgeHTML}</td><td class="p-4 text-center" onclick="event.stopPropagation()">${actions}</td></tr>`;
-                        });
-                    }
-                    if (document.getElementById('orders-table-body')) document.getElementById('orders-table-body').innerHTML = html;
+                    ordersCache = result.data || [];
+                    ordersCurrentPage = 1;
+                    renderOrdersTable();
                 }
             } catch (e) { console.error(e); }
+        }
+
+        function renderOrdersTable() {
+            const tbody = document.getElementById('orders-table-body');
+            if (!tbody) return;
+            const filterEl = document.getElementById('orderStatusFilter');
+            const filter = filterEl ? filterEl.value : 'all';
+            const filtered = filter === 'all' ? ordersCache : ordersCache.filter(o => {
+                if (filter === 'waiting_payment') return o.status === 'pending' || o.status === 'waiting_payment';
+                return o.status === filter;
+            });
+            const pageSize = ORDERS_PAGE_SIZE;
+            const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+            if (ordersCurrentPage > totalPages) ordersCurrentPage = totalPages;
+            const start = (ordersCurrentPage - 1) * pageSize;
+            const pageRows = filtered.slice(start, start + pageSize);
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center p-10 text-gray-500">Belum ada pesanan yang cocok.</td></tr>`;
+            } else {
+                tbody.innerHTML = pageRows.map(o => {
+                    const badge = ORDER_STATUS_BADGE[o.status] || { label: o.status, cls: 'border-gray-500/30 bg-gray-500/15 text-gray-400' };
+                    const badgeHTML = `<span class="px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap inline-block border ${badge.cls}">${badge.label}</span>`;
+                    const cName = o.customer_name ? o.customer_name.replace(/'/g, "\\'") : 'Anonim';
+                    const isOnsite = (o.payment_method_type || '').toLowerCase() === 'onsite';
+                    const orderMenu = [
+                        { label: 'Lihat detail', onclick: `openOrderDetailModal(${o.id}, '${cName}')`, icon: 'eye' }
+                    ];
+                    if (o.status === 'pending' || o.status === 'waiting_payment') {
+                        if (isOnsite) {
+                            orderMenu.push({ label: 'Konfirmasi pesanan', onclick: `confirmOnsiteOrder(${o.id})`, icon: 'wallet', accent: true });
+                        } else {
+                            orderMenu.push({ label: 'Konfirmasi pembayaran', onclick: `openPaymentModal(${o.id}, '${cName}', ${o.total_price})`, icon: 'wallet', accent: true });
+                        }
+                    }
+                    if (o.status === 'paid') {
+                        orderMenu.push({ label: 'Tandai pesanan siap', onclick: `setOrderStatus(${o.id}, 'ready_pickup')`, icon: 'play', accent: true });
+                    }
+                    if (o.status === 'ready_pickup') {
+                        orderMenu.push({ label: 'Tandai selesai', onclick: `setOrderStatus(${o.id}, 'completed')`, icon: 'play', accent: true });
+                    }
+                    if (o.status !== 'completed' && o.status !== 'cancelled') {
+                        orderMenu.push({ label: 'Batalkan pesanan', onclick: `setOrderStatus(${o.id}, 'cancelled')`, icon: 'trash', danger: true });
+                    }
+                    const actions = renderRowMenu(`ord-${o.id}`, orderMenu);
+                    return `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover cursor-pointer" onclick="openOrderDetailModal(${o.id}, '${cName}')">
+                        <td class="p-4 font-bold text-gold-500">AG-${String(o.id).padStart(4, '0')}</td>
+                        <td class="p-4 font-bold text-gray-200">${escapeHtml(cName)}</td>
+                        <td class="p-4 font-bold">Rp ${parseInt(o.total_price).toLocaleString('id-ID')}</td>
+                        <td class="p-4 text-gray-400 text-sm">${new Date(o.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</td>
+                        <td class="p-4">${badgeHTML}</td>
+                        <td class="p-4 text-center" onclick="event.stopPropagation()">${actions}</td>
+                    </tr>`;
+                }).join('');
+            }
+            renderPagination('orders-pagination', ordersCurrentPage, totalPages, filtered.length, (page) => {
+                ordersCurrentPage = page;
+                renderOrdersTable();
+            });
+        }
+
+        // Untuk pesanan COD: langsung set status ke `paid` tanpa modal upload bukti.
+        async function confirmOnsiteOrder(orderId) {
+            if (!confirm('Konfirmasi pesanan COD ini sebagai sudah dibayar?')) return;
+            await setOrderStatus(orderId, 'paid');
+        }
+
+        async function setOrderStatus(orderId, status) {
+            const labels = {
+                paid: 'mengkonfirmasi pesanan',
+                ready_pickup: 'menandai pesanan siap diambil',
+                completed: 'menandai pesanan selesai',
+                cancelled: 'membatalkan pesanan'
+            };
+            const verb = labels[status] || 'mengubah status pesanan';
+            if (status === 'cancelled' && !confirm('Yakin membatalkan pesanan ini?')) return;
+            try {
+                const res = await fetch(`${BASE_URL}/api/orders/update-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, status })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast('Berhasil ' + verb, 'success');
+                    loadOrdersData();
+                } else {
+                    showToast(data.message || 'Gagal memperbarui status', 'error');
+                }
+            } catch (e) {
+                showToast('Kesalahan jaringan', 'error');
+            }
         }
 
         let currentPaymentOrderId = null;
@@ -963,6 +1161,22 @@
             return `https://wa.me/${normalized}${text}`;
         }
 
+        // Template pesan WhatsApp per status pesanan. Placeholder {nama} dan
+        // {kode} akan diganti otomatis.
+        const WA_TEMPLATES = {
+            waiting_payment: 'Halo {nama}, terima kasih telah memesan di Anyeong Gift. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran melalui halaman pesanan agar kami dapat memproses pesanan Anda. Terima kasih!',
+            pending: 'Halo {nama}, terima kasih telah memesan di Anyeong Gift. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran melalui halaman pesanan agar kami dapat memproses pesanan Anda. Terima kasih!',
+            paid: 'Halo {nama}, pembayaran untuk pesanan {kode} telah kami terima. Pesanan Anda akan segera kami siapkan. Mohon tunggu konfirmasi berikutnya. Terima kasih!',
+            ready_pickup: 'Halo {nama}, kabar baik! Pesanan {kode} sudah siap untuk diambil di toko kami. Silakan datang sesuai jam operasional. Sampai jumpa di Anyeong Gift!',
+            completed: 'Halo {nama}, terima kasih telah berbelanja di Anyeong Gift untuk pesanan {kode}. Kami berharap Anda puas dengan layanan kami. Sampai jumpa di pesanan berikutnya!',
+            cancelled: 'Halo {nama}, dengan berat hati kami sampaikan bahwa pesanan {kode} telah dibatalkan. Jika ada pertanyaan, jangan ragu untuk menghubungi kami kembali. Terima kasih.'
+        };
+
+        function buildWhatsappMessageForStatus(status, recipientName, orderCode) {
+            const tpl = WA_TEMPLATES[status] || `Halo ${recipientName}, kami dari Anyeong Gift ingin menginformasikan terkait pesanan Anda ${orderCode}.`;
+            return tpl.replace(/{nama}/g, recipientName).replace(/{kode}/g, orderCode);
+        }
+
         function renderCustomerContactSection(order) {
             if (!order) return '';
             const address = order.address || {};
@@ -970,7 +1184,7 @@
             const phone = address.whatsapp_number || '';
             const orderCode = '#AG-' + String(order.id).padStart(4, '0');
 
-            const waMessage = `Halo ${recipientName}, kami dari Anyeong Gift ingin menginformasikan terkait pesanan Anda ${orderCode}.`;
+            const waMessage = buildWhatsappMessageForStatus(order.status, recipientName, orderCode);
             const waLink = formatWhatsappLink(phone, waMessage);
 
             const phoneRow = phone
@@ -1119,6 +1333,78 @@
         // "Cetak Invoice" button can render an invoice without refetching.
         let currentInvoiceData = null;
 
+        // Aksi cepat di modal detail pesanan. Aksi yang tampil bergantung
+        // pada status pesanan + tipe pembayaran (COD vs. online).
+        function renderOrderActionBar(order, payment) {
+            if (!order) return '';
+            const status = order.status;
+            const paymentType = (payment && payment.method_type ? payment.method_type : '').toLowerCase();
+            const isOnsite = paymentType === 'onsite';
+            const buttons = [];
+
+            const btnPrimary = (label, onclick) =>
+                `<button type="button" onclick="${onclick}" class="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm transition">${label}</button>`;
+            const btnGhost = (label, onclick) =>
+                `<button type="button" onclick="${onclick}" class="inline-flex items-center gap-2 bg-dark-base border border-dark-border text-gray-200 hover:border-gold-500 hover:text-gold-500 px-4 py-2 rounded-lg text-sm font-bold transition">${label}</button>`;
+            const btnDanger = (label, onclick) =>
+                `<button type="button" onclick="${onclick}" class="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition">${label}</button>`;
+
+            if (status === 'pending' || status === 'waiting_payment') {
+                if (isOnsite) {
+                    buttons.push(btnPrimary('✅ Konfirmasi Pesanan', `confirmOrderFromModal(${order.id}, 'paid')`));
+                } else {
+                    buttons.push(btnPrimary('💳 Konfirmasi Pembayaran', `openPaymentModalFromDetail(${order.id})`));
+                }
+            }
+            if (status === 'paid') {
+                buttons.push(btnPrimary('🛍️ Tandai Pesanan Siap', `confirmOrderFromModal(${order.id}, 'ready_pickup')`));
+            }
+            if (status === 'ready_pickup') {
+                buttons.push(btnPrimary('✅ Tandai Selesai', `confirmOrderFromModal(${order.id}, 'completed')`));
+            }
+            if (status !== 'completed' && status !== 'cancelled') {
+                buttons.push(btnDanger('❌ Batalkan Pesanan', `confirmOrderFromModal(${order.id}, 'cancelled')`));
+            }
+
+            if (buttons.length === 0) return '';
+            return `<div class="bg-dark-base border border-dark-border rounded-xl p-4 flex flex-wrap gap-2">${buttons.join('')}</div>`;
+        }
+
+        async function confirmOrderFromModal(orderId, status) {
+            const confirms = {
+                paid: 'Konfirmasi pesanan ini sebagai sudah dibayar?',
+                ready_pickup: 'Tandai pesanan ini siap untuk diambil?',
+                completed: 'Tandai pesanan ini selesai?',
+                cancelled: 'Yakin membatalkan pesanan ini?'
+            };
+            if (confirms[status] && !confirm(confirms[status])) return;
+            try {
+                const res = await fetch(`${BASE_URL}/api/orders/update-status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order_id: orderId, status })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    showToast('Status pesanan diperbarui', 'success');
+                    fetchOrderDetails(orderId);
+                    if (typeof loadOrdersData === 'function') loadOrdersData();
+                } else {
+                    showToast(data.message || 'Gagal memperbarui status', 'error');
+                }
+            } catch (e) {
+                showToast('Kesalahan jaringan', 'error');
+            }
+        }
+
+        // Buka modal upload bukti pembayaran lewat tombol di detail pesanan.
+        function openPaymentModalFromDetail(orderId) {
+            const order = (currentInvoiceData && currentInvoiceData.order) || null;
+            const name = order ? (order.customer_name || 'Pelanggan') : 'Pelanggan';
+            const total = currentInvoiceData ? currentInvoiceData.grandTotal : 0;
+            openPaymentModal(orderId, name, total);
+        }
+
         async function fetchOrderDetails(orderId) {
             const container = document.getElementById('order-detail-content');
             currentInvoiceData = null;
@@ -1152,6 +1438,7 @@
 
                 container.innerHTML = `
                     <div class="space-y-4">
+                        ${renderOrderActionBar(result.order, result.payment)}
                         ${renderCustomerContactSection(result.order)}
                         ${renderPaymentSection(result.payment)}
                         <div class="space-y-3">${itemsHtml}</div>
@@ -1325,11 +1612,18 @@
                                 { label: 'Edit metode', onclick: `openEditPaymentMethodModal(${m.id})`, icon: 'edit' }
                             ];
                             const actionBtns = renderRowMenu(`pm-${m.id}`, menuItems);
+                            const infoCell = m.type === 'qris' && m.image
+                                ? `<div class="flex items-center gap-3">
+                                       <img src="${BASE_URL}/uploads/payment_methods/${escapeHtml(m.image)}" alt="QRIS"
+                                            class="w-12 h-12 rounded-md object-cover border border-dark-border">
+                                       <span class="text-gray-400 text-xs">${escapeHtml(m.account_info || 'QRIS')}</span>
+                                   </div>`
+                                : `<span class="text-gold-500 font-mono text-sm">${escapeHtml(m.account_info || '-')}</span>`;
 
                             html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover">
-                                <td class="p-4 font-bold text-gray-200">${m.name}</td>
-                                <td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${m.type}</td>
-                                <td class="p-4 text-gold-500 font-mono text-sm">${m.account_info || '-'}</td>
+                                <td class="p-4 font-bold text-gray-200">${escapeHtml(m.name)}</td>
+                                <td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${escapeHtml(m.type)}</td>
+                                <td class="p-4">${infoCell}</td>
                                 <td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td>
                                 <td class="p-4 text-center">${actionBtns}</td>
                             </tr>`;
@@ -1340,6 +1634,51 @@
             } catch (e) { console.error(e); }
         }
 
+        // Tampilkan/sembunyikan field gambar QRIS bergantung tipe yang dipilih.
+        function togglePaymentQrisField() {
+            const type = document.getElementById('pm_type').value;
+            const wrapper = document.getElementById('pm_qris_wrapper');
+            if (!wrapper) return;
+            if (type === 'qris') {
+                wrapper.classList.remove('hidden');
+            } else {
+                wrapper.classList.add('hidden');
+            }
+        }
+
+        function onQrisImageSelected(input) {
+            const wrapper = document.getElementById('pm_image_preview_wrapper');
+            const img = document.getElementById('pm_image_preview');
+            const label = document.getElementById('pm_image_label');
+            if (!input.files || input.files.length === 0) {
+                wrapper.classList.add('hidden');
+                label.textContent = 'Pilih gambar QRIS (JPG/PNG)';
+                return;
+            }
+            const file = input.files[0];
+            label.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = (e) => { img.src = e.target.result; wrapper.classList.remove('hidden'); };
+            reader.readAsDataURL(file);
+        }
+
+        // Reset preview gambar QRIS ke kondisi awal / file dari server.
+        function resetQrisImagePreview(existingFilename) {
+            const wrapper = document.getElementById('pm_image_preview_wrapper');
+            const img = document.getElementById('pm_image_preview');
+            const label = document.getElementById('pm_image_label');
+            const input = document.getElementById('pm_image');
+            if (input) input.value = '';
+            if (existingFilename) {
+                img.src = `${BASE_URL}/uploads/payment_methods/${existingFilename}`;
+                wrapper.classList.remove('hidden');
+                label.textContent = 'Ganti gambar QRIS (opsional)';
+            } else {
+                wrapper.classList.add('hidden');
+                label.textContent = 'Pilih gambar QRIS (JPG/PNG)';
+            }
+        }
+
         // Mode Tambah Baru
         function openPaymentMethodModal() {
             editPaymentId = null;
@@ -1347,6 +1686,8 @@
             document.getElementById('btnSavePaymentMethod').innerHTML = '💾 Simpan Metode';
 
             document.getElementById('paymentMethodForm').reset();
+            resetQrisImagePreview(null);
+            togglePaymentQrisField();
             toggleModal('paymentMethodModal', true);
         }
 
@@ -1364,6 +1705,8 @@
             document.getElementById('pm_name').value = method.name;
             document.getElementById('pm_type').value = method.type;
             document.getElementById('pm_info').value = method.account_info || '';
+            resetQrisImagePreview(method.image || null);
+            togglePaymentQrisField();
 
             toggleModal('paymentMethodModal', true);
         }
@@ -1374,17 +1717,18 @@
         async function submitPaymentMethod(e) {
             e.preventDefault();
             const btn = document.getElementById('btnSavePaymentMethod');
+            const originalLabel = btn.innerHTML;
             btn.innerText = 'Menyimpan...'; btn.disabled = true;
 
-            const payload = {
-                name: document.getElementById('pm_name').value,
-                type: document.getElementById('pm_type').value,
-                account_info: document.getElementById('pm_info').value
-            };
-
-            // Jika mode Edit, tambahkan ID ke payload
-            if (editPaymentId) {
-                payload.id = editPaymentId;
+            // Kirim sebagai FormData supaya file QRIS bisa dilampirkan saat tipe = qris.
+            const formData = new FormData();
+            formData.append('name', document.getElementById('pm_name').value);
+            formData.append('type', document.getElementById('pm_type').value);
+            formData.append('account_info', document.getElementById('pm_info').value || '');
+            if (editPaymentId) formData.append('id', editPaymentId);
+            const imageInput = document.getElementById('pm_image');
+            if (imageInput && imageInput.files && imageInput.files.length > 0) {
+                formData.append('image', imageInput.files[0]);
             }
 
             const apiUrl = editPaymentId ? `${BASE_URL}/api/payment-methods/update` : `${BASE_URL}/api/payment-methods`;
@@ -1392,8 +1736,7 @@
             try {
                 const res = await fetch(apiUrl, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: formData
                 });
                 const data = await res.json();
 
@@ -1441,18 +1784,6 @@
                 else showToast(data.message, 'error');
             } catch (error) { showToast('Kesalahan jaringan', 'error'); }
             finally { btn.innerText = '💾 Simpan Pengaturan'; btn.disabled = false; }
-        }
-
-        // --- DEV TOOLS (Simulasi Pesanan) ---
-        async function simulateNewOrder() {
-            try {
-                const btn = event.target; const originalText = btn.innerText; btn.innerText = 'Menyuntikkan...';
-                const response = await fetch(`${BASE_URL}/api/dev/generate-order`);
-                const result = await response.json();
-                if (result.status === 'success') { showToast(result.message, 'success'); loadOrdersData(); }
-                else { showToast('Gagal: ' + result.message, 'error'); }
-                btn.innerText = originalText;
-            } catch (error) { showToast('Kesalahan jaringan.', 'error'); }
         }
     </script>
 </body>
