@@ -109,11 +109,13 @@ class OrderController extends Controller {
         try {
             // Panggil fungsi di Model untuk mengambil isi keranjang
             $orderModel = new \App\Models\OrderModel();
-            $data = $orderModel->getOrderDetails($orderId);
+            $items = $orderModel->getOrderDetails($orderId);
+            $order = $orderModel->getOrderHeader($orderId);
 
             return $this->jsonResponse([
                 'status' => 'success',
-                'data' => $data
+                'data' => $items,
+                'order' => $order
             ]);
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);

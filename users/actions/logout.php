@@ -2,5 +2,5 @@
 session_start();
 session_destroy();
 
-header("Location: ../index.php?page=home");
+header("Location: ../index.php?page=login");
 exit;

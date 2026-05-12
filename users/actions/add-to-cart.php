@@ -41,5 +41,9 @@ if (!isset($_SESSION['cart'])) {
 
 $_SESSION['cart'][] = $item;
 
-header("Location: ../index.php?page=cart");
+// Mode "Bayar Sekarang": langsung lanjut ke checkout, lewati halaman keranjang.
+$buyNow = isset($_POST['buy_now']) && $_POST['buy_now'] === '1';
+$redirectTo = $buyNow ? '../index.php?page=checkout' : '../index.php?page=cart';
+
+header("Location: $redirectTo");
 exit;

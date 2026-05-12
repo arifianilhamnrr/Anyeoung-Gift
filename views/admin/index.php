@@ -731,20 +731,89 @@
 
         function openOrderDetailModal(orderId, customerName) { document.getElementById('detail-order-id').innerText = '#AG-' + String(orderId).padStart(4, '0'); document.getElementById('detail-customer-info').innerText = 'Pemesan: ' + customerName; document.getElementById('order-detail-content').innerHTML = `<div class="animate-pulse h-20 bg-dark-hover rounded-xl w-full"></div>`; toggleModal('orderDetailModal', true); fetchOrderDetails(orderId); }
         function closeOrderDetailModal() { toggleModal('orderDetailModal', false); }
+        function escapeHtml(text) {
+            if (text === null || text === undefined) return '';
+            return String(text)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function formatWhatsappLink(phone, message) {
+            if (!phone) return null;
+            const digits = String(phone).replace(/\D/g, '');
+            if (!digits) return null;
+            // Nomor lokal yang diawali 0 dikonversi ke format internasional Indonesia (62)
+            const normalized = digits.startsWith('0') ? '62' + digits.slice(1) : digits;
+            const text = message ? '?text=' + encodeURIComponent(message) : '';
+            return `https://wa.me/${normalized}${text}`;
+        }
+
+        function renderCustomerContactSection(order) {
+            if (!order) return '';
+            const address = order.address || {};
+            const recipientName = address.recipient_name || order.customer_name || 'Pelanggan';
+            const phone = address.whatsapp_number || '';
+            const orderCode = '#AG-' + String(order.id).padStart(4, '0');
+
+            const waMessage = `Halo ${recipientName}, kami dari Anyeong Gift ingin menginformasikan terkait pesanan Anda ${orderCode}.`;
+            const waLink = formatWhatsappLink(phone, waMessage);
+
+            const phoneRow = phone
+                ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2"><span class="text-gray-400">WhatsApp</span><span class="font-mono text-gray-100">${escapeHtml(phone)}</span></div>`
+                : `<div class="bg-dark-base/60 border border-dashed border-dark-border rounded-lg px-3 py-2 text-gray-500 text-center">Nomor WhatsApp tidak tersedia</div>`;
+
+            const emailRow = order.customer_email
+                ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2"><span class="text-gray-400">Email</span><span class="text-gray-100 truncate" title="${escapeHtml(order.customer_email)}">${escapeHtml(order.customer_email)}</span></div>`
+                : '';
+
+            const addressRow = address.address_text
+                ? `<div class="bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2"><div class="text-xs text-gray-500 mb-1">Alamat</div><div class="text-gray-200 whitespace-pre-line">${escapeHtml(address.address_text)}</div></div>`
+                : '';
+
+            const notesRow = address.notes
+                ? `<div class="bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2"><div class="text-xs text-gray-500 mb-1">Catatan</div><div class="text-gray-200 italic">${escapeHtml(address.notes)}</div></div>`
+                : '';
+
+            const waButton = waLink
+                ? `<a href="${waLink}" target="_blank" rel="noopener" class="inline-flex items-center justify-center gap-2 bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/40 hover:bg-[#25D366] hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition shrink-0"><svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>Chat WhatsApp</a>`
+                : `<button type="button" disabled class="inline-flex items-center justify-center gap-2 bg-dark-base text-gray-500 border border-dark-border px-4 py-2 rounded-lg text-sm font-bold cursor-not-allowed shrink-0">WhatsApp tidak tersedia</button>`;
+
+            return `
+                <div class="bg-dark-base border border-dark-border rounded-xl p-4 space-y-3">
+                    <div class="flex items-start justify-between gap-3 flex-wrap">
+                        <div>
+                            <div class="text-xs text-gray-500 uppercase tracking-wider">Kontak Pelanggan</div>
+                            <div class="font-bold text-gray-100 text-lg mt-0.5">${escapeHtml(recipientName)}</div>
+                        </div>
+                        ${waButton}
+                    </div>
+                    <div class="grid sm:grid-cols-2 gap-2 text-sm">
+                        ${phoneRow}
+                        ${emailRow}
+                    </div>
+                    ${addressRow}
+                    ${notesRow}
+                </div>
+            `;
+        }
+
         async function fetchOrderDetails(orderId) {
             try {
                 const res = await fetch(`${BASE_URL}/api/orders/details?id=${orderId}`); const result = await res.json();
                 if (result.status === 'success') {
-                    let html = '<div class="space-y-3">';
+                    let html = '<div class="space-y-4">';
+                    html += renderCustomerContactSection(result.order);
+                    html += '<div class="space-y-3">';
                     if (result.data.length === 0) { html += `<div class="text-center py-6 text-gray-500 border border-dashed border-dark-border rounded-xl">Tidak ada detail item.</div>`; }
                     else {
                         result.data.forEach(item => {
-                            let opts = ''; if (item.options && item.options.length > 0) { opts = '<ul class="mt-2 text-xs text-gray-400 space-y-1 border-l-2 border-dark-border pl-3">'; item.options.forEach(o => { opts += `<li>• ${o.option_name}: <span class="text-gray-300">${o.value_name}</span> (+Rp ${parseInt(o.additional_price).toLocaleString('id-ID')})</li>`; }); opts += '</ul>'; }
-                            html += `<div class="bg-dark-base border border-dark-border p-4 rounded-xl flex justify-between items-start hover:border-gold-500/30 transition duration-300"><div><h4 class="font-bold text-gray-100 text-lg">${item.product_name}</h4><div class="text-sm text-gray-500 mt-0.5">Harga Dasar: Rp ${parseInt(item.price_at_time).toLocaleString('id-ID')} x ${item.quantity} pcs</div>${opts}</div><div class="text-right"><div class="text-xs text-gray-500 mb-1">Subtotal</div><div class="font-bold text-gold-500 text-lg">Rp ${parseInt(item.subtotal).toLocaleString('id-ID')}</div></div></div>`;
+                            let opts = ''; if (item.options && item.options.length > 0) { opts = '<ul class="mt-2 text-xs text-gray-400 space-y-1 border-l-2 border-dark-border pl-3">'; item.options.forEach(o => { opts += `<li>• ${escapeHtml(o.option_name)}: <span class="text-gray-300">${escapeHtml(o.value_name)}</span> (+Rp ${parseInt(o.additional_price).toLocaleString('id-ID')})</li>`; }); opts += '</ul>'; }
+                            html += `<div class="bg-dark-base border border-dark-border p-4 rounded-xl flex justify-between items-start hover:border-gold-500/30 transition duration-300"><div><h4 class="font-bold text-gray-100 text-lg">${escapeHtml(item.product_name)}</h4><div class="text-sm text-gray-500 mt-0.5">Harga Dasar: Rp ${parseInt(item.price_at_time).toLocaleString('id-ID')} x ${item.quantity} pcs</div>${opts}</div><div class="text-right"><div class="text-xs text-gray-500 mb-1">Subtotal</div><div class="font-bold text-gold-500 text-lg">Rp ${parseInt(item.subtotal).toLocaleString('id-ID')}</div></div></div>`;
                         });
                     }
+                    html += '</div>';
                     document.getElementById('order-detail-content').innerHTML = html + '</div>';
-                } else document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">${result.message}</div>`;
+                } else document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">${escapeHtml(result.message)}</div>`;
             } catch (e) { document.getElementById('order-detail-content').innerHTML = `<div class="text-red-500 text-center py-5 bg-red-500/10 rounded-xl border border-red-500/20">Error. Pastikan rute '/api/orders/details' sudah terdaftar di Router.</div>`; }
         }
 
