@@ -3,10 +3,10 @@
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     ? 'https'
     : ($_SERVER['REQUEST_SCHEME'] ?? 'http');
-$host = $_SERVER['SERVER_NAME'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost');
+$host = $_SERVER['SERVER_NAME'] ?? 'localhost';
 $host = preg_replace('/[^a-z0-9\\.\\-:]/i', '', $host);
 $port = $_SERVER['SERVER_PORT'] ?? null;
-if ($port && !in_array($port, ['80', '443'], true) && strpos($host, ':') === false) {
+if ($port && !in_array($port, ['80', '443'], true) && !str_contains($host, ':')) {
     $host .= ':' . $port;
 }
 if ($host === '') {

@@ -29,7 +29,7 @@ class Router
         // 2. BERSIHKAN BASE PATH (otomatis dari BASE_URL)
         $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?? '', '/');
         if ($basePath !== '' && $basePath !== '/') {
-            if (str_starts_with($uri, $basePath)) {
+            if (strpos($uri, $basePath) === 0) {
                 $uri = substr($uri, strlen($basePath));
             }
         }
