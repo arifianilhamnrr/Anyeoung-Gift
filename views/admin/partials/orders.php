@@ -1,12 +1,23 @@
-<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-    <div>
-        <h2 class="text-2xl font-bold text-gray-100 mb-1">Manajemen Pesanan</h2>
-        <p class="text-gray-400 text-sm">Pantau pesanan masuk dan perbarui status pengiriman.</p>
+<div class="flex flex-col gap-4 mb-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-100 mb-1">Manajemen Pesanan</h2>
+            <p class="text-gray-400 text-sm">Pantau pesanan masuk dan perbarui status pengiriman.</p>
+        </div>
     </div>
-    <button onclick="simulateNewOrder()"
-        class="bg-transparent text-gold-500 border border-dashed border-gold-500 px-4 py-2.5 rounded-lg font-bold text-sm hover:bg-gold-500/10 transition duration-300 whitespace-nowrap">
-        🧪 Simulasi Pesanan Masuk
-    </button>
+
+    <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+        <label class="text-xs uppercase tracking-wider text-gray-500 sm:w-32 shrink-0">Filter Status</label>
+        <select id="orderStatusFilter" onchange="renderOrdersTable()"
+            class="w-full sm:max-w-xs p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+            <option value="all">Semua Status</option>
+            <option value="waiting_payment">Belum Dibayar</option>
+            <option value="paid">Sudah Dibayar</option>
+            <option value="ready_pickup">Siap Diambil</option>
+            <option value="completed">Selesai</option>
+            <option value="cancelled">Dibatalkan</option>
+        </select>
+    </div>
 </div>
 
 <div class="bg-dark-surface rounded-xl border border-dark-border overflow-x-auto shadow-md">
@@ -28,3 +39,5 @@
         </tbody>
     </table>
 </div>
+
+<div id="orders-pagination" class="mt-4"></div>

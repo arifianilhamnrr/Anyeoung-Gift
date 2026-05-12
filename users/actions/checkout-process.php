@@ -202,7 +202,16 @@ try {
     }
     $_SESSION['checkout_success_order_id'] = $orderId;
 
-    header('Location: ../index.php?page=orders');
+    // Untuk pembayaran non-onsite (transfer/QRIS/e-wallet) pembeli perlu
+    // mengunggah bukti pembayaran. Arahkan langsung ke halaman pembayaran
+    // pesanan baru. Pembayaran COD (onsite) tetap diarahkan ke daftar
+    // pesanan agar pembeli melihat status pending.
+    $methodType = strtolower($paymentMethod['type'] ?? '');
+    if ($methodType !== 'onsite') {
+        header('Location: ../index.php?page=payment_upload&order_id=' . (int) $orderId);
+    } else {
+        header('Location: ../index.php?page=orders');
+    }
     exit;
 
 } catch (Exception $e) {
