@@ -41,30 +41,63 @@ class AuthController extends Controller
         $userModel = new UserModel();
         $admin = $userModel->getAdminByEmail($email);
 
-        // --- LOGIKA ENKRIPSI SHA-256 ---
-        // Kita hash input password user dengan sha256
-        $inputHash = hash('sha256', $password);
-
-        // Bandingkan hash input dengan password (hash) yang ada di database
-        if ($admin && $admin['password'] === $inputHash) {
-
-            // Set Session sebagai "Tiket Masuk"
-            $_SESSION['admin_logged_in'] = true;
-            $_SESSION['admin_id'] = $admin['id'];
-            $_SESSION['admin_name'] = $admin['name'];
-            $_SESSION['admin_email'] = $admin['email'];
-
+        if (!$admin) {
             return $this->jsonResponse([
-                'status' => 'success',
-                'message' => 'Login berhasil, mengalihkan...'
-            ]);
+                'status' => 'error',
+                'message' => 'Email atau Password salah!'
+            ], 401);
         }
 
-        // Jika gagal
+        $storedHash = $admin['password'];
+        $isValid = false;
+        $needsRehash = false;
+
+        if ($this->isBcryptHash($storedHash)) {
+            $isValid = password_verify($password, $storedHash);
+            if ($isValid && password_needs_rehash($storedHash, PASSWORD_DEFAULT)) {
+                $needsRehash = true;
+            }
+        } elseif ($this->isLegacySha256Hash($storedHash)) {
+            // Akun admin lama masih memakai hash SHA-256. Jika cocok, kita
+            // izinkan login lalu lakukan migrasi otomatis ke password_hash().
+            $isValid = hash_equals($storedHash, hash('sha256', $password));
+            if ($isValid) {
+                $needsRehash = true;
+            }
+        }
+
+        if (!$isValid) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Email atau Password salah!'
+            ], 401);
+        }
+
+        if ($needsRehash) {
+            $newHash = password_hash($password, PASSWORD_DEFAULT);
+            $userModel->updatePassword($admin['id'], $newHash);
+        }
+
+        // Set Session sebagai "Tiket Masuk"
+        $_SESSION['admin_logged_in'] = true;
+        $_SESSION['admin_id'] = $admin['id'];
+        $_SESSION['admin_name'] = $admin['name'];
+        $_SESSION['admin_email'] = $admin['email'];
+
         return $this->jsonResponse([
-            'status' => 'error',
-            'message' => 'Email atau Password salah!'
-        ], 401);
+            'status' => 'success',
+            'message' => 'Login berhasil, mengalihkan...'
+        ]);
+    }
+
+    private function isBcryptHash($hash)
+    {
+        return is_string($hash) && preg_match('/^\$2[aby]\$/', $hash) === 1;
+    }
+
+    private function isLegacySha256Hash($hash)
+    {
+        return is_string($hash) && preg_match('/^[a-f0-9]{64}$/i', $hash) === 1;
     }
 
     /**
