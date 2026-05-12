@@ -56,5 +56,6 @@ $router->get('/api/orders/details', 'OrderController@details');
 $router->get('/api/products/details', 'ProductController@details');
 $router->post('/api/products/update', 'ProductController@update');
 $router->post('/api/payment-methods/update', 'PaymentMethodController@update');
+$router->post('/api/admin/password', 'AuthController@updatePassword');
 
 $router->run();

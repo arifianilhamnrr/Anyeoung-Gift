@@ -12,32 +12,19 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Anyeong Gift - Masuk</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="../assets/css/main.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap"
         rel="stylesheet">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        gold: '#A68A56',
-                        goldDark: '#8c7345',
-                        darkbg: '#000000'
-                    },
-                    fontFamily: {
-                        title: ['"Playfair Display"', 'serif'],
-                        sans: ['"Inter"', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
     <style>
         body {
             overflow-x: hidden;
             touch-action: manipulation;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .font-title {
+            font-family: 'Playfair Display', serif;
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -251,7 +238,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                         <input type="password" name="password" placeholder="Masukkan kata sandi" class="custom-input"
                             required>
                         <div class="text-right mt-3">
-                            <a href="#" class="text-gold/70 text-xs font-medium hover:text-gold transition-colors">Lupa
+                            <a href="index.php?page=forgot_password" class="text-gold/70 text-xs font-medium hover:text-gold transition-colors">Lupa
                                 Kata Sandi?</a>
                         </div>
                     </div>

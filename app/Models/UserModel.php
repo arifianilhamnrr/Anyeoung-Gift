@@ -11,6 +11,12 @@ class UserModel extends Model {
         return $this->single();
     }
 
+    public function getAdminById($userId) {
+        $this->query("SELECT * FROM users WHERE id = :id AND role = 'admin' LIMIT 1");
+        $this->bind(':id', $userId);
+        return $this->single();
+    }
+
     // Memperbarui hash password user (digunakan untuk migrasi otomatis dari
     // hash legacy ke password_hash()).
     public function updatePassword($userId, $newHash) {
