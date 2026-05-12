@@ -8,6 +8,12 @@
   --color-gold-500: #F59E0B;
   --color-gold-600: #D97706;
 
+  /* Alias untuk template user-facing yang memakai class polos
+     `text-gold`, `bg-gold`, `border-gold`, `bg-goldDark`, `bg-darkbg`. */
+  --color-gold: #A68A56;
+  --color-goldDark: #8c7345;
+  --color-darkbg: #000000;
+
   /* --- Colors: Dark --- */
   --color-dark-base: #121212;
   --color-dark-surface: #1E1E1E;

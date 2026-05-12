@@ -42,7 +42,7 @@ $currentPage = $_GET['page'] ?? 'home';
     <div id="menuOverlay" class="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"></div>
 
     <div id="menuContent"
-        class="absolute right-0 top-0 h-full w-64 bg-black/60 backdrop-blur-2xl border-l border-white/10 shadow-2xl rounded-l-3xl transform translate-x-full transition-transform duration-300 flex flex-col">
+        class="absolute left-0 top-0 h-full w-64 bg-black/60 backdrop-blur-2xl border-r border-white/10 shadow-2xl rounded-r-3xl transform -translate-x-full transition-transform duration-300 flex flex-col">
 
         <div class="p-6 flex-1 flex flex-col">
             <div class="flex justify-between items-center mb-8 border-b border-gold/20 pb-4">
@@ -93,13 +93,13 @@ $currentPage = $_GET['page'] ?? 'home';
     menuBtn.onclick = function () {
         mobileMenuWrapper.classList.remove('hidden');
         setTimeout(() => {
-            menuContent.classList.remove('translate-x-full');
+            menuContent.classList.remove('-translate-x-full');
         }, 10);
     }
 
     // Fungsi Tutup Menu
     function closeTheMenu() {
-        menuContent.classList.add('translate-x-full');
+        menuContent.classList.add('-translate-x-full');
         setTimeout(() => {
             mobileMenuWrapper.classList.add('hidden');
         }, 300);

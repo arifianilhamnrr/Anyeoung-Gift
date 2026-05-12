@@ -158,10 +158,29 @@ if ($product['product_type'] === 'chat_only') {
                     </p>
                 </div>
 
-                <button type="submit"
-                    class="w-full bg-gold text-black py-4 rounded-lg font-bold text-lg hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 uppercase tracking-wider">
-                    Tambah ke Keranjang
-                </button>
+                <input type="hidden" name="buy_now" id="buyNowFlag" value="0">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <button type="submit" onclick="document.getElementById('buyNowFlag').value='0'"
+                        class="w-full inline-flex items-center justify-center gap-2 border border-gold text-gold bg-transparent py-4 rounded-lg font-bold text-base hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all duration-300 uppercase tracking-wider">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
+                            </path>
+                        </svg>
+                        Tambah ke Keranjang
+                    </button>
+
+                    <button type="submit" onclick="document.getElementById('buyNowFlag').value='1'"
+                        class="w-full inline-flex items-center justify-center gap-2 bg-gold text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 uppercase tracking-wider">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z">
+                            </path>
+                        </svg>
+                        Bayar Sekarang
+                    </button>
+                </div>
 
             </form>
 

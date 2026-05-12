@@ -125,4 +125,37 @@ class OrderModel extends Model
 
         return $items;
     }
+
+    // Mengambil header pesanan beserta info kontak pelanggan dari address_snapshot.
+    // Digunakan oleh halaman detail pesanan admin untuk menampilkan kontak pembeli
+    // dan tombol chat WhatsApp.
+    public function getOrderHeader($orderId) {
+        $this->query("
+            SELECT o.id, o.user_id, o.total_price, o.status, o.created_at,
+                   o.address_snapshot,
+                   u.name AS customer_name,
+                   u.email AS customer_email
+            FROM orders o
+            LEFT JOIN users u ON o.user_id = u.id
+            WHERE o.id = :order_id
+            LIMIT 1
+        ");
+        $this->bind(':order_id', $orderId);
+        $order = $this->single();
+
+        if (!$order) {
+            return null;
+        }
+
+        $address = null;
+        if (!empty($order['address_snapshot'])) {
+            $decoded = json_decode($order['address_snapshot'], true);
+            if (is_array($decoded)) {
+                $address = $decoded;
+            }
+        }
+        $order['address'] = $address;
+
+        return $order;
+    }
 }
