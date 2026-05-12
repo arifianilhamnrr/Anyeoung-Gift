@@ -1,5 +1,6 @@
 <?php
 $id = $_GET['id'] ?? null;
+$justAdded = isset($_GET['added']) && $_GET['added'] === '1';
 
 if (!$id) {
     echo "<p>Produk tidak ditemukan.</p>";
@@ -191,6 +192,62 @@ if ($product['product_type'] === 'chat_only') {
         <?php endif; ?>
     </div>
 </div>
+
+<?php if ($justAdded): ?>
+    <div id="cartToast" role="status" aria-live="polite"
+        class="fixed left-1/2 -translate-x-1/2 top-24 z-[120] flex items-center gap-3 bg-green-500/95 text-black px-5 py-3 rounded-full shadow-[0_10px_30px_rgba(34,197,94,0.45)] font-semibold cartToastEnter">
+        <span class="cartToastIcon w-8 h-8 bg-black/15 rounded-full flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+            </svg>
+        </span>
+        <span>Berhasil ditambahkan ke keranjang!</span>
+    </div>
+
+    <style>
+        @keyframes cartToastIn {
+            0%   { opacity: 0; transform: translate(-50%, -16px) scale(0.92); }
+            60%  { opacity: 1; transform: translate(-50%, 4px)   scale(1.04); }
+            100% { opacity: 1; transform: translate(-50%, 0)     scale(1); }
+        }
+        @keyframes cartToastOut {
+            0%   { opacity: 1; transform: translate(-50%, 0)     scale(1); }
+            100% { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+        }
+        @keyframes cartIconPop {
+            0%   { transform: scale(0.6) rotate(-15deg); }
+            60%  { transform: scale(1.2) rotate(8deg); }
+            100% { transform: scale(1)   rotate(0); }
+        }
+        .cartToastEnter      { animation: cartToastIn 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+        .cartToastLeave      { animation: cartToastOut 280ms ease forwards; }
+        .cartToastIcon svg   { animation: cartIconPop 500ms ease 80ms both; }
+        @media (prefers-reduced-motion: reduce) {
+            .cartToastEnter, .cartToastLeave, .cartToastIcon svg { animation: none; }
+        }
+    </style>
+
+    <script>
+        (function () {
+            const toast = document.getElementById('cartToast');
+            if (!toast) return;
+            setTimeout(function () {
+                toast.classList.remove('cartToastEnter');
+                toast.classList.add('cartToastLeave');
+                toast.addEventListener('animationend', function () {
+                    toast.remove();
+                });
+            }, 2400);
+
+            // Bersihkan query string `?added=1` agar refresh halaman tidak memunculkan toast lagi.
+            if (window.history && history.replaceState) {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('added');
+                history.replaceState({}, '', url.toString());
+            }
+        })();
+    </script>
+<?php endif; ?>
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {

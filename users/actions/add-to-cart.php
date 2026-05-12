@@ -35,15 +35,22 @@ $item = [
     'custom_input' => $custom_input !== '' ? $custom_input : null,
 ];
 
+$buyNow = isset($_POST['buy_now']) && $_POST['buy_now'] === '1';
+
+if ($buyNow) {
+    // Mode "Bayar Sekarang": pakai bucket session terpisah agar checkout hanya
+    // memproses produk ini saja dan tidak menggabung dengan isi keranjang.
+    $_SESSION['buy_now'] = [$item];
+    header("Location: ../index.php?page=checkout");
+    exit;
+}
+
+// Mode "Tambah ke Keranjang": tetap di halaman produk dan tampilkan toast.
 if (!isset($_SESSION['cart'])) {
     $_SESSION['cart'] = [];
 }
 
 $_SESSION['cart'][] = $item;
 
-// Mode "Bayar Sekarang": langsung lanjut ke checkout, lewati halaman keranjang.
-$buyNow = isset($_POST['buy_now']) && $_POST['buy_now'] === '1';
-$redirectTo = $buyNow ? '../index.php?page=checkout' : '../index.php?page=cart';
-
-header("Location: $redirectTo");
+header("Location: ../index.php?page=product&id=" . (int) $product_id . "&added=1");
 exit;
