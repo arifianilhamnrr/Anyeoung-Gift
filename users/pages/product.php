@@ -46,7 +46,7 @@ if ($product['product_type'] === 'chat_only') {
 }
 ?>
 
-<div class="grid md:grid-cols-2 gap-10">
+<div class="grid md:grid-cols-2 gap-10 pb-28 sm:pb-0">
 
     <div>
         <?php
@@ -161,22 +161,20 @@ if ($product['product_type'] === 'chat_only') {
 
                 <input type="hidden" name="buy_now" id="buyNowFlag" value="0">
 
-                <div class="flex sm:grid sm:grid-cols-2 gap-3 items-stretch">
+                <div class="hidden sm:grid sm:grid-cols-2 gap-3 items-stretch">
                     <button type="submit" onclick="document.getElementById('buyNowFlag').value='0'"
-                        aria-label="Tambah ke Keranjang"
-                        title="Tambah ke Keranjang"
-                        class="shrink-0 inline-flex items-center justify-center gap-2 border border-gold text-gold bg-transparent rounded-lg font-bold text-base hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all duration-300 uppercase tracking-wider w-14 sm:w-full py-4 sm:px-6">
+                        class="inline-flex items-center justify-center gap-2 border border-gold text-gold bg-transparent rounded-lg font-bold text-base hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all duration-300 uppercase tracking-wider w-full py-4 px-6">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
                             </path>
                         </svg>
-                        <span class="hidden sm:inline">Tambah ke Keranjang</span>
+                        <span>Tambah ke Keranjang</span>
                     </button>
 
                     <button type="submit" onclick="document.getElementById('buyNowFlag').value='1'"
-                        class="flex-1 sm:flex-none inline-flex items-center justify-center gap-2 bg-gold text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 uppercase tracking-wider">
+                        class="inline-flex items-center justify-center gap-2 bg-gold text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 uppercase tracking-wider">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -188,6 +186,35 @@ if ($product['product_type'] === 'chat_only') {
                 </div>
 
             </form>
+
+            <div
+                class="fixed inset-x-0 bottom-0 z-[80] sm:hidden bg-black/80 backdrop-blur-xl border-t border-gold/30 shadow-[0_-8px_24px_rgba(0,0,0,0.5)] px-4 py-3"
+                style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+                <div class="max-w-7xl mx-auto flex items-stretch gap-3">
+                    <button type="submit" form="productForm"
+                        onclick="document.getElementById('buyNowFlag').value='0'"
+                        aria-label="Tambah ke Keranjang"
+                        title="Tambah ke Keranjang"
+                        class="shrink-0 inline-flex items-center justify-center w-14 border border-gold text-gold bg-transparent rounded-xl hover:bg-gold/10 transition-all duration-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
+                            </path>
+                        </svg>
+                    </button>
+                    <button type="submit" form="productForm"
+                        onclick="document.getElementById('buyNowFlag').value='1'"
+                        class="flex-1 inline-flex items-center justify-center gap-2 bg-gold text-black px-4 py-3 rounded-xl font-bold uppercase tracking-wider text-sm shadow-[0_4px_14px_0_rgba(212,175,55,0.39)] hover:bg-yellow-400 transition-all duration-300">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                            aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z">
+                            </path>
+                        </svg>
+                        Bayar Sekarang
+                    </button>
+                </div>
+            </div>
 
         <?php endif; ?>
     </div>
