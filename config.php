@@ -3,10 +3,10 @@
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     ? 'https'
     : ($_SERVER['REQUEST_SCHEME'] ?? 'http');
-$host = $_SERVER['SERVER_NAME'] ?? 'localhost';
-$host = preg_replace('/[^a-z0-9\\.\\-:]/i', '', $host);
+$host = $_SERVER['SERVER_NAME'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost');
+$host = preg_replace('/[^a-z0-9\\.\\-]/i', '', $host);
 $port = $_SERVER['SERVER_PORT'] ?? null;
-if ($port && !in_array($port, ['80', '443'], true) && !str_contains($host, ':')) {
+if ($port && !in_array($port, ['80', '443'], true)) {
     $host .= ':' . $port;
 }
 if ($host === '') {
@@ -16,6 +16,11 @@ $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $basePath = $scriptName !== '' ? rtrim(str_replace('\\', '/', dirname($scriptName)), '/') : '';
 if ($basePath === '.') {
     $basePath = '';
+}
+$basePath = preg_replace('#[^/a-zA-Z0-9_\\-\\.]#', '', $basePath);
+$basePath = str_replace('..', '', $basePath);
+if ($basePath !== '' && $basePath[0] !== '/') {
+    $basePath = '/' . $basePath;
 }
 $baseUrl = $scheme . '://' . $host . $basePath;
 define('BASE_URL', $baseUrl);
