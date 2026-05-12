@@ -84,7 +84,3 @@ $storeAddress = $stmt->fetch();
         © <?= date('Y'); ?> <?= htmlspecialchars($store['store_name'] ?? 'Anyeong-Gift'); ?>. All rights reserved.
     </div>
 </footer>
-
-</body>
-
-</html>

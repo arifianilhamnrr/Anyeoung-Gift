@@ -4,7 +4,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$cart = $_SESSION['cart'] ?? [];
+// Mode "Bayar Sekarang" dari halaman produk pakai bucket session terpisah
+// supaya checkout cuma memproses produk yang sedang dilihat, tidak mencampur
+// dengan isi keranjang yang sudah ada.
+$isBuyNow = !empty($_SESSION['buy_now']);
+$cart = $isBuyNow ? $_SESSION['buy_now'] : ($_SESSION['cart'] ?? []);
 
 if (empty($cart)) {
     header('Location: index.php?page=cart');

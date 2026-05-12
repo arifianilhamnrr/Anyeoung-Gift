@@ -36,6 +36,12 @@ if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
 
+// Bucket "Bayar Sekarang" hanya hidup di halaman checkout. Begitu user pindah
+// ke halaman lain (kembali ke produk, cart, dll), batalkan intent buy now.
+if ($page !== 'checkout' && isset($_SESSION['buy_now'])) {
+    unset($_SESSION['buy_now']);
+}
+
 // halaman yang TIDAK perlu login
 $public_pages = ['home', 'products', 'product', 'login', 'register'];
 
@@ -90,6 +96,12 @@ $use_sidebar = in_array($page, ['profile', 'orders', 'addresses']);
         </div>
     </div>
 
-    <?php include 'components/footer.php'; ?>
+    <?php if ($page === 'home'): ?>
+        <?php include 'components/footer.php'; ?>
+    <?php endif; ?>
+
+</body>
+
+</html>
 
 <?php endif; ?>

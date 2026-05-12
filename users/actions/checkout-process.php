@@ -7,7 +7,11 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-$cart = $_SESSION['cart'] ?? [];
+// Pilih sumber data checkout: bucket buy_now (instant checkout dari tombol
+// "Bayar Sekarang" di halaman produk) atau cart biasa. Keranjang utama tidak
+// pernah dipakai untuk buy_now agar tidak ikut tercheckout.
+$isBuyNow = !empty($_SESSION['buy_now']);
+$cart = $isBuyNow ? $_SESSION['buy_now'] : ($_SESSION['cart'] ?? []);
 $userId = $_SESSION['user_id'];
 
 if (empty($cart)) {
@@ -189,7 +193,13 @@ try {
 
     $pdo->commit();
 
-    unset($_SESSION['cart']);
+    // Bersihkan hanya bucket yang dipakai. Buy now tidak menyentuh keranjang
+    // utama, jadi isi keranjang tetap utuh setelah pesanan buy now selesai.
+    if ($isBuyNow) {
+        unset($_SESSION['buy_now']);
+    } else {
+        unset($_SESSION['cart']);
+    }
     $_SESSION['checkout_success_order_id'] = $orderId;
 
     header('Location: ../index.php?page=orders');
