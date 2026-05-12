@@ -104,6 +104,19 @@ class ProductModel extends Model
         
         if (!$product) return null;
 
+        // Pastikan field `image` selalu ada untuk konsumen API. Gambar utama
+        // produk disimpan di tabel product_images (is_primary = 1); kalau
+        // belum ada, fallback ke entri pertama untuk produk tersebut.
+        if (empty($product['image'])) {
+            $this->query("SELECT image_path FROM product_images
+                          WHERE product_id = :id
+                          ORDER BY is_primary DESC, sort_order ASC, id ASC
+                          LIMIT 1");
+            $this->bind(':id', $id);
+            $img = $this->single();
+            $product['image'] = $img ? basename($img['image_path']) : null;
+        }
+
         // Ambil nama grup opsinya
         $this->query("SELECT * FROM product_options WHERE product_id = :id");
         $this->bind(':id', $id);
