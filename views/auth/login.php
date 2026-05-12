@@ -65,6 +65,8 @@
     </div>
 
     <script>
+        const baseUrl = <?= json_encode(rtrim(BASE_URL, '/')) ?>;
+
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
@@ -76,7 +78,7 @@
 
             try {
                 // Tembak API Login
-                const response = await fetch('/anyeong-gift/public/api/login', {
+                const response = await fetch(`${baseUrl}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -89,7 +91,7 @@
 
                 if (result.status === 'success') {
                     // Jika sukses, lempar ke dashboard admin
-                    window.location.href = '/anyeong-gift/public/admin';
+                    window.location.href = `${baseUrl}/admin`;
                 } else {
                     errorMsg.innerText = result.message;
                     errorMsg.style.display = 'block';

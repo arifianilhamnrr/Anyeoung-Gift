@@ -14,7 +14,7 @@ class AuthController extends Controller
     {
         // Jika session sudah ada, langsung arahkan ke Dashboard Admin
         if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-            header('Location: /anyeong-gift/public/admin');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/admin');
             exit;
         }
 

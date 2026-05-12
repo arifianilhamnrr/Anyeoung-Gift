@@ -150,7 +150,7 @@ git clone https://github.com/arifianilhamnrr/Anyeoung-Gift.git anyeong-gift
 cd anyeong-gift
 ```
 
-> **Penting:** nama folder harus persis `anyeong-gift` karena routing admin & beberapa URL JS-nya di-hardcode ke path itu (`/anyeong-gift/public`). Kalau ingin pakai nama lain, lihat bagian [Konfigurasi Penting](#konfigurasi-penting).
+> **Catatan:** nama folder bebas. Base URL admin akan mengikuti domain + folder otomatis saat diakses.
 
 ### 3. Import Database
 
@@ -259,17 +259,15 @@ Setelah import dump database, tersedia akun:
 1. **Upload semua file** ke `public_html` (atau subfolder, mis. `public_html/anyeong-gift`).
 2. **Buat database MySQL** dari menu *MySQL Databases* di cPanel.
 3. **Import** `database/anyeoung_gift_backup.sql` lewat phpMyAdmin.
-4. **Edit `config.php`**:
+4. **Edit `config.php`** (BASE_URL otomatis, cukup ubah DB):
    ```php
-   define('BASE_URL', 'https://domainkamu.com/anyeong-gift/public');
    define('DB_HOST', 'localhost');
    define('DB_USER', 'cpaneluser_dbuser');
    define('DB_PASS', 'PASSWORD_DARI_CPANEL');
    define('DB_NAME', 'cpaneluser_anyeoung_gift');
    ```
 5. **Edit `config/database.php`** dengan kredensial yang sama (perhatikan: ada **dua** file koneksi DB karena dua sisi sistem).
-6. **Sesuaikan hardcoded path `/anyeong-gift`** kalau folder di hosting berbeda. Lihat [Konfigurasi Penting](#konfigurasi-penting).
-7. **Permission folder upload** harus writeable oleh web server:
+6. **Permission folder upload** harus writeable oleh web server:
    ```bash
    chmod -R 775 public/uploads
    chown -R www-data:www-data public/uploads     # Linux
@@ -298,7 +296,7 @@ sudo mysql -e "CREATE USER 'anyeong'@'localhost' IDENTIFIED BY 'PASSWORD_KUAT';"
 sudo mysql -e "GRANT ALL ON anyeoung_gift.* TO 'anyeong'@'localhost'; FLUSH PRIVILEGES;"
 sudo mysql anyeoung_gift < /var/www/html/anyeong-gift/database/anyeoung_gift_backup.sql
 
-# 4. Update config.php & config/database.php (sesuaikan kredensial + BASE_URL)
+# 4. Update config.php & config/database.php (sesuaikan kredensial DB)
 sudo nano /var/www/html/anyeong-gift/config.php
 
 # 5. Permission upload folder
@@ -320,19 +318,9 @@ sudo certbot --apache -d domainkamu.com
 
 ## Konfigurasi Penting
 
-### Hardcoded Path `/anyeong-gift`
+### BASE_URL Otomatis
 
-Ada beberapa tempat yang hardcode path folder. Kalau kamu deploy di folder dengan nama lain (mis. `gift-shop`), ganti semua:
-
-| File | Yang Perlu Diubah |
-|---|---|
-| `config.php` | `BASE_URL` |
-| `app/Core/Router.php` | `str_replace('/anyeong-gift/public', ...)` & `str_replace('/anyeong-gift', ...)` |
-| `app/Controllers/AuthController.php` | `header('Location: /anyeong-gift/public/admin')` |
-| `app/Controllers/DashboardController.php` | `header('Location: /anyeong-gift/public/login')` |
-| `views/auth/login.php` | `fetch('/anyeong-gift/public/api/login', ...)` & redirect |
-
-Untuk deploy di root domain (`https://domainkamu.com` langsung ke admin), strip semua path itu jadi string kosong.
+Base URL admin sekarang dihitung otomatis dari request (scheme + host + folder `public`). Jadi tidak perlu mengubah path saat folder deploy berbeda.
 
 ### Dua File Konfigurasi DB
 
@@ -381,8 +369,8 @@ Cek `store_settings.whatsapp_admin` di database — harus format internasional t
 **Upload gambar QRIS error "Format gambar QRIS tidak didukung".**
 Hanya menerima `jpg`, `jpeg`, `png`, `webp`. Konversi dulu kalau pakai format lain.
 
-**Redirect ke `/anyeong-gift/public/login` jadi 404 di hosting.**
-Folder deploy beda nama. Lihat [Hardcoded Path `/anyeong-gift`](#hardcoded-path-anyeong-gift) di atas.
+**Redirect ke `/public/login` jadi 404 di hosting.**
+Pastikan kamu mengakses admin lewat folder `public` yang benar dan BASE_URL otomatis terbaca dari domain/folder saat ini.
 
 **Pesanan tidak muncul di tabel admin setelah checkout user.**
 Cek koneksi DB di `config.php` vs `config/database.php` — kalau dua-duanya berbeda nama database, sisi user akan menulis ke DB yang salah.

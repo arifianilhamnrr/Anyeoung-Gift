@@ -14,7 +14,7 @@ class DashboardController extends Controller
     {
         // 🔒 1. GEMBOK KEAMANAN HALAMAN WEB
         if (!isset($_SESSION['admin_logged_in'])) {
-            header('Location: /anyeong-gift/public/login');
+            header('Location: ' . rtrim(BASE_URL, '/') . '/login');
             exit;
         }
 

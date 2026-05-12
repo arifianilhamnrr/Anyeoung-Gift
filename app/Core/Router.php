@@ -26,10 +26,13 @@ class Router
         // 1. Ambil URL murni yang diketik pengunjung
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        // 2. BERSIHKAN NAMA FOLDER (Mantra Anti-404)
-        // Kita paksa buang nama folder 'anyeong-gift' dan 'public' jika terbawa
-        $uri = str_replace('/anyeong-gift/public', '', $uri);
-        $uri = str_replace('/anyeong-gift', '', $uri);
+        // 2. BERSIHKAN BASE PATH (otomatis dari BASE_URL)
+        $basePath = rtrim(parse_url(BASE_URL, PHP_URL_PATH) ?? '', '/');
+        if ($basePath !== '' && $basePath !== '/') {
+            if (strpos($uri, $basePath) === 0) {
+                $uri = substr($uri, strlen($basePath));
+            }
+        }
 
         // 3. Rapikan garis miring di belakang. Jika kosong, jadikan '/'
         $uri = rtrim($uri, '/') ?: '/';
