@@ -19,6 +19,8 @@
                 }
             }
         }
+        // DEKLARASI BASE URL UNTUK JAVASCRIPT
+        const BASE_URL = "<?= BASE_URL ?>";
     </script>
 </head>
 
@@ -75,8 +77,8 @@
             errorMsg.style.display = 'none';
 
             try {
-                // Tembak API Login
-                const response = await fetch('/anyeong-gift/public/api/login', {
+                // Tembak API Login menggunakan BASE_URL dinamis
+                const response = await fetch(`${BASE_URL}/api/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -88,8 +90,8 @@
                 const result = await response.json();
 
                 if (result.status === 'success') {
-                    // Jika sukses, lempar ke dashboard admin
-                    window.location.href = '/anyeong-gift/public/admin';
+                    // Redirect ke dashboard dinamis
+                    window.location.href = `${BASE_URL}/admin`;
                 } else {
                     errorMsg.innerText = result.message;
                     errorMsg.style.display = 'block';

@@ -18,7 +18,6 @@ class Router
     }
 
     // Menjalankan Router
-    // Menjalankan Router
     public function run()
     {
         $method = $_SERVER['REQUEST_METHOD'];
@@ -26,10 +25,14 @@ class Router
         // 1. Ambil URL murni yang diketik pengunjung
         $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        // 2. BERSIHKAN NAMA FOLDER (Mantra Anti-404)
-        // Kita paksa buang nama folder 'anyeong-gift' dan 'public' jika terbawa
-        $uri = str_replace('/anyeong-gift/public', '', $uri);
-        $uri = str_replace('/anyeong-gift', '', $uri);
+        // 2. BERSIHKAN NAMA FOLDER DINAMIS (Anti-404 di Hosting/Local)
+        $scriptName = dirname($_SERVER['SCRIPT_NAME']);
+
+        if ($scriptName !== '/' && $scriptName !== '\\') {
+            if (strpos($uri, $scriptName) === 0) {
+                $uri = substr($uri, strlen($scriptName));
+            }
+        }
 
         // 3. Rapikan garis miring di belakang. Jika kosong, jadikan '/'
         $uri = rtrim($uri, '/') ?: '/';
@@ -45,9 +48,9 @@ class Router
             }
         }
 
-        // Jika rute benar-benar tidak terdaftar di index.php
+        // Jika rute benar-benar tidak terdaftar
         http_response_code(404);
-        echo "404 - Halaman atau Endpoint Tidak Ditemukan (URL yang ditangkap: " . $uri . ")";
+        echo "404 - Halaman atau Endpoint Tidak Ditemukan (URL yang ditangkap: " . htmlspecialchars($uri) . ")";
     }
 
     // Mengeksekusi Controller dan Method

@@ -14,7 +14,7 @@ class AuthController extends Controller
     {
         // Jika session sudah ada, langsung arahkan ke Dashboard Admin
         if (isset($_SESSION['admin_logged_in']) && $_SESSION['admin_logged_in'] === true) {
-            header('Location: /anyeong-gift/public/admin');
+            header('Location: ' . BASE_URL . '/admin');
             exit;
         }
 
@@ -26,7 +26,6 @@ class AuthController extends Controller
      */
     public function processLogin()
     {
-        // Ambil data input JSON (email & password)
         $data = $this->getJsonInput();
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
@@ -58,8 +57,6 @@ class AuthController extends Controller
                 $needsRehash = true;
             }
         } elseif ($this->isLegacySha256Hash($storedHash)) {
-            // Akun admin lama masih memakai hash SHA-256. Jika cocok, kita
-            // izinkan login lalu lakukan migrasi otomatis ke password_hash().
             $isValid = hash_equals($storedHash, hash('sha256', $password));
             if ($isValid) {
                 $needsRehash = true;
@@ -78,7 +75,6 @@ class AuthController extends Controller
             $userModel->updatePassword($admin['id'], $newHash);
         }
 
-        // Set Session sebagai "Tiket Masuk"
         $_SESSION['admin_logged_in'] = true;
         $_SESSION['admin_id'] = $admin['id'];
         $_SESSION['admin_name'] = $admin['name'];
@@ -163,7 +159,6 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        // Hapus semua data session
         $_SESSION = [];
 
         if (ini_get("session.use_cookies")) {
