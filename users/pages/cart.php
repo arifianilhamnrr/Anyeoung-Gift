@@ -3,7 +3,7 @@ $cart = $_SESSION['cart'] ?? [];
 $grandTotal = 0;
 ?>
 
-<div class="space-y-6 relative">
+<div class="space-y-6 relative <?= !empty($cart) ? 'pb-28 lg:pb-0' : '' ?>">
     <div>
         <h1 class="text-3xl md:text-4xl font-title text-gold mb-2">Keranjang</h1>
         <p class="text-gray-400">Cek kembali produk yang akan kamu pesan.</p>
@@ -161,6 +161,27 @@ $grandTotal = 0;
                         </button>
                     </form>
                 </div>
+            </div>
+        </div>
+
+        <div
+            class="fixed inset-x-0 bottom-0 z-[80] lg:hidden bg-black/80 backdrop-blur-xl border-t border-gold/30 shadow-[0_-8px_24px_rgba(0,0,0,0.5)] px-4 py-3"
+            style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
+            <div class="max-w-7xl mx-auto flex items-center gap-3">
+                <div class="flex-1 min-w-0">
+                    <div class="text-[10px] uppercase tracking-wider text-gray-400">Total (<?= count($cart); ?>
+                        item<?= count($cart) > 1 ? 's' : ''; ?>)</div>
+                    <div class="text-gold font-bold text-lg truncate">
+                        Rp <?= number_format($grandTotal, 0, ',', '.'); ?>
+                    </div>
+                </div>
+                <a href="index.php?page=checkout"
+                    class="shrink-0 inline-flex items-center justify-center gap-2 bg-gold text-black px-6 py-3 rounded-xl font-bold shadow-[0_4px_14px_0_rgba(212,175,55,0.39)] hover:bg-yellow-400 transition-all duration-300">
+                    Checkout
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
             </div>
         </div>
 
