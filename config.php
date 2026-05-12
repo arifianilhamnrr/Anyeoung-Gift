@@ -3,7 +3,15 @@
 $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     ? 'https'
     : ($_SERVER['REQUEST_SCHEME'] ?? 'http');
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$host = $_SERVER['SERVER_NAME'] ?? ($_SERVER['HTTP_HOST'] ?? 'localhost');
+$host = preg_replace('/[^a-z0-9\\.\\-:]/i', '', $host);
+$port = $_SERVER['SERVER_PORT'] ?? null;
+if ($port && !in_array($port, ['80', '443'], true) && strpos($host, ':') === false) {
+    $host .= ':' . $port;
+}
+if ($host === '') {
+    $host = 'localhost';
+}
 $scriptName = $_SERVER['SCRIPT_NAME'] ?? '';
 $basePath = $scriptName !== '' ? rtrim(str_replace('\\', '/', dirname($scriptName)), '/') : '';
 if ($basePath === '.') {
