@@ -17,6 +17,14 @@ class StoreSettingController extends Controller {
             if ($data && array_key_exists('email_smtp_password', $data)) {
                 $data['email_smtp_password'] = '';
             }
+            $adminUser = $model->getAdminUser();
+            $storeAddress = $model->getStoreAddress();
+            if (!$data) {
+                $data = [];
+            }
+            $data['admin_name'] = $adminUser['name'] ?? '';
+            $data['admin_email'] = $adminUser['email'] ?? '';
+            $data['store_address_text'] = $storeAddress['address_text'] ?? '';
             return $this->jsonResponse(['status' => 'success', 'data' => $data ?: []]);
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
@@ -61,6 +69,7 @@ class StoreSettingController extends Controller {
                     return $this->jsonResponse(['status' => 'error', 'message' => 'Email pengirim tidak valid.'], 400);
                 }
             }
+
 
             $model->updateSettings([
                 'store_name' => $data['store_name'],

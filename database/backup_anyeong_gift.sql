@@ -135,8 +135,36 @@ CREATE TABLE `orders` (
 
 LOCK TABLES `orders` WRITE;
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (1,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-28 03:36:38'),(2,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',135000,'cancelled','2026-03-29 04:31:36'),(3,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-29 04:37:14'),(4,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',600000,'cancelled','2026-03-29 04:59:33'),(5,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',77000,'cancelled','2026-03-29 05:01:38'),(6,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',72000,'cancelled','2026-03-29 05:27:39'),(7,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',60000,'cancelled','2026-03-31 01:15:12'),(8,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',95000,'cancelled','2026-03-31 01:16:09'),(9,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',70000,'cancelled','2026-03-31 01:19:10'),(10,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',1010000,'waiting_payment','2026-03-31 01:28:49'),(11,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',60000,'cancelled','2026-03-31 01:44:29'),(12,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',135000,'waiting_payment','2026-03-31 02:02:40'),(13,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'waiting_payment','2026-03-31 02:08:40'),(14,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'waiting_payment','2026-03-31 02:28:21'),(15,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',130000,'waiting_payment','2026-03-31 04:13:09'),(16,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',220000,'paid','2026-03-31 04:27:12');
+INSERT INTO `orders` VALUES (1,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-28 03:36:38'),(2,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',135000,'cancelled','2026-03-29 04:31:36'),(3,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',120000,'cancelled','2026-03-29 04:37:14'),(4,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',600000,'cancelled','2026-03-29 04:59:33'),(5,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',77000,'cancelled','2026-03-29 05:01:38'),(6,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',72000,'cancelled','2026-03-29 05:27:39'),(7,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',60000,'cancelled','2026-03-31 01:15:12'),(8,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',95000,'cancelled','2026-03-31 01:16:09'),(9,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',70000,'cancelled','2026-03-31 01:19:10'),(10,1,'{\"id\": 1, \"notes\": null, \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Arifian Ilham Nur Riandana\", \"whatsapp_number\": \"085174472744\"}',1010000,'cancelled','2026-03-31 01:28:49'),(11,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',60000,'cancelled','2026-03-31 01:44:29'),(12,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',135000,'cancelled','2026-03-31 02:02:40'),(13,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'cancelled','2026-03-31 02:08:40'),(14,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',185000,'cancelled','2026-03-31 02:28:21'),(15,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',130000,'cancelled','2026-03-31 04:13:09'),(16,1,'{\"id\": 4, \"notes\": \"Saya ambil nanti sore ya\", \"address_text\": \"Karangpucung, Kertanegara, Purbalingga\", \"recipient_name\": \"Testing\", \"whatsapp_number\": \"0812345678\"}',220000,'paid','2026-03-31 04:27:12');
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `password_resets`
+--
+
+DROP TABLE IF EXISTS `password_resets`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `password_resets` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `token_hash` varchar(64) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_password_resets_user_id` (`user_id`),
+  KEY `idx_password_resets_token_hash` (`token_hash`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `password_resets`
+--
+
+LOCK TABLES `password_resets` WRITE;
+/*!40000 ALTER TABLE `password_resets` DISABLE KEYS */;
+/*!40000 ALTER TABLE `password_resets` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -387,28 +415,9 @@ CREATE TABLE `store_settings` (
 
 LOCK TABLES `store_settings` WRITE;
 /*!40000 ALTER TABLE `store_settings` DISABLE KEYS */;
-INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.',0,NULL,NULL,NULL,NULL,'tls',NULL,NULL,'2026-03-29 06:07:06','2026-03-31 04:35:53');
+INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.',1,'smtp.gmail.com',587,'arifianilhamnurriandana@gmail.com','vasc euaj vsye rbci','tls','Anyeong-Gift','arifianilhamnurriandana@gmail.com','2026-03-29 06:07:06','2026-05-12 13:48:35');
 /*!40000 ALTER TABLE `store_settings` ENABLE KEYS */;
 UNLOCK TABLES;
-
---
--- Table structure for table `password_resets`
---
-
-DROP TABLE IF EXISTS `password_resets`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `password_resets` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int NOT NULL,
-  `token_hash` varchar(64) NOT NULL,
-  `expires_at` datetime NOT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `idx_password_resets_user_id` (`user_id`),
-  KEY `idx_password_resets_token_hash` (`token_hash`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `users`
@@ -427,7 +436,7 @@ CREATE TABLE `users` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -436,7 +445,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'arifian ilham nur r','arifianilhamnurriandana@gmail.com','$2y$10$H4yzIc.VP08QMz3S8s3l6OkBUM2BpHSO.yILOxE6DKSj0qLanZ79W','user','2026-03-28 02:37:19','2026-03-29 06:03:08'),(2,'testing aja','akhsjdkah@gmail.cp','$2y$10$59wjbgXCbprJ0xJYLtzTR.NIgNz8GSvmwYoPOVtzMsAP89zH9LCDm','user','2026-03-28 02:46:43','2026-03-28 02:46:43'),(3,'Super Admin','super@anyeong.com','bee5688aea66a47460b19c76f8f199c6b9585eb726f8322b1429793863609ca2','admin','2026-03-31 00:27:52','2026-03-31 00:27:52'),(4,'Knalpot DK Speed','testing@test.com','$2y$10$CtsNqqn9VM1DLGHLqNwYgef38gG1ryCfaDHxET6cdKoNXo9zIHdGy','user','2026-03-31 03:28:07','2026-03-31 03:28:07');
+INSERT INTO `users` VALUES (1,'arifian ilham nur r','arifianilhamnurriandana@gmail.com','$2y$10$H4yzIc.VP08QMz3S8s3l6OkBUM2BpHSO.yILOxE6DKSj0qLanZ79W','user','2026-03-28 02:37:19','2026-03-29 06:03:08'),(2,'testing aja','akhsjdkah@gmail.cp','$2y$10$59wjbgXCbprJ0xJYLtzTR.NIgNz8GSvmwYoPOVtzMsAP89zH9LCDm','user','2026-03-28 02:46:43','2026-03-28 02:46:43'),(3,'Super Admin','super@anyeong.com','bee5688aea66a47460b19c76f8f199c6b9585eb726f8322b1429793863609ca2','admin','2026-03-31 00:27:52','2026-03-31 00:27:52'),(4,'Knalpot DK Speed','testing@test.com','$2y$10$CtsNqqn9VM1DLGHLqNwYgef38gG1ryCfaDHxET6cdKoNXo9zIHdGy','user','2026-03-31 03:28:07','2026-03-31 03:28:07'),(5,'arifian ilham nur riandana','testing@mail.argtgbgt.tech','$2y$10$EvNfTN5BmHfEdB0lbcG/dOzNixCQPdd/aW4QzkREflFhgIQo4gmMW','user','2026-05-12 13:51:13','2026-05-12 13:52:50');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -449,4 +458,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-31 11:55:39
+-- Dump completed on 2026-05-12 22:32:08

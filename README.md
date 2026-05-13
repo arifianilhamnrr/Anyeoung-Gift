@@ -365,6 +365,12 @@ Konfigurasinya dilakukan lewat menu **Pengaturan** di admin dashboard:
 3. Gunakan **App Password** Gmail (wajib aktifkan 2FA).
 4. Isi email pengirim (biasanya sama dengan username).
 
+Catatan sumber data pengaturan:
+
+- Nama toko, WhatsApp, pesan default, dan SMTP diambil dari `store_settings`.
+- Email toko diambil dari `users` dengan role `admin` (untuk tampilan profil).
+- Alamat toko diambil dari `addresses` dengan `type = 'store'`.
+
 ---
 
 ## FAQ / Troubleshooting

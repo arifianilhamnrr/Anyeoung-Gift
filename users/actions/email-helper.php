@@ -10,6 +10,21 @@ function fetchStoreSettings(PDO $pdo): array
     return $settings ?: [];
 }
 
+function fetchStoreAddress(PDO $pdo): array
+{
+    $stmt = $pdo->query("SELECT * FROM addresses WHERE type = 'store' ORDER BY is_default DESC, id DESC LIMIT 1");
+    $address = $stmt ? $stmt->fetch() : false;
+    return $address ?: [];
+}
+
+function fetchAdminRecipients(PDO $pdo): array
+{
+    $stmt = $pdo->query("SELECT id, name, email FROM users WHERE role = 'admin' AND email <> ''");
+    $rows = $stmt ? $stmt->fetchAll() : false;
+    return $rows ?: [];
+}
+
+
 function formatOrderStatusLabel(string $status): string
 {
     $map = [

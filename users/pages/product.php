@@ -46,39 +46,55 @@ if ($product['product_type'] === 'chat_only') {
 }
 ?>
 
-<div class="grid md:grid-cols-2 gap-10 pb-28 sm:pb-0">
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&display=swap');
 
-    <div>
+    .font-elegant {
+        font-family: 'Playfair Display', serif;
+    }
+</style>
+
+<div class="grid md:grid-cols-2 gap-8 lg:gap-16 pb-40 sm:pb-10 max-w-7xl mx-auto items-start">
+
+    <div class="md:sticky md:top-24">
         <?php
         $imgFile = basename($image['image_path'] ?? 'default.jpg');
         $imageSrc = "../public/uploads/products/" . $imgFile;
         ?>
         <img src="<?= htmlspecialchars($imageSrc); ?>" alt="<?= htmlspecialchars($product['name']); ?>"
-            class="rounded-xl w-full h-80 md:h-96 object-cover border border-gold/20 shadow-lg">
+            class="w-full h-[26rem] md:h-auto md:max-h-[75vh] object-cover rounded-b-[2.5rem] md:rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
     </div>
 
-    <div>
-        <h1 class="text-3xl font-title text-gold mb-4 drop-shadow-sm">
-            <?= htmlspecialchars($product['name']); ?>
-        </h1>
+    <div class="px-5 md:px-0 md:pr-4">
+        <?php
+        $rawName = htmlspecialchars($product['name']);
+        $words = explode(' ', $rawName);
 
-        <?php if ($product['product_type'] === 'simple'): ?>
-            <p
-                class="text-2xl font-bold text-gray-100 mb-6 bg-gold/10 inline-block px-4 py-2 rounded-lg border border-gold/30">
-                Rp <?= number_format($product['base_price'], 0, ',', '.'); ?>
-            </p>
-        <?php endif; ?>
+        if (count($words) > 1) {
+            $firstWord = array_shift($words);
+            $restOfWords = implode(' ', $words);
+            $displayName = $firstWord . '<br>' . $restOfWords;
+        } else {
+            $displayName = $rawName;
+        }
+        ?>
+
+        <h1 class="font-elegant text-gray-200 mb-10 mt-6 text-center md:text-left uppercase tracking-widest"
+            style="font-size: 3.2rem; line-height: 0.68;">
+            <?= $displayName; ?>
+        </h1>
 
         <?php if ($product['product_type'] === 'chat_only'): ?>
 
             <a href="<?= htmlspecialchars($waLink); ?>" target="_blank"
-                class="block text-center bg-gold text-black py-3 rounded-lg font-semibold hover:bg-yellow-500 hover:shadow-[0_0_15px_rgba(212,175,55,0.4)] transition-all duration-300 mt-6">
+                class="block text-center text-white py-3 rounded-lg font-semibold transition-all duration-300 mt-6 hover:opacity-80"
+                style="background-color: #A3804C;">
                 Hubungi Admin
             </a>
 
         <?php else: ?>
 
-            <form action="actions/add-to-cart.php" method="POST" id="productForm" class="space-y-6 mt-4">
+            <form action="actions/add-to-cart.php" method="POST" id="productForm" class="space-y-6 mt-4 md:mt-10">
 
                 <input type="hidden" name="product_id" value="<?= $product['id']; ?>">
                 <input type="hidden" name="total_price" id="finalPrice">
@@ -93,8 +109,8 @@ if ($product['product_type'] === 'chat_only') {
                     $values = $stmt2->fetchAll();
                     ?>
 
-                    <div class="bg-white/5 p-4 rounded-lg border border-white/10">
-                        <label class="block text-gold mb-3 font-medium border-b border-gold/30 pb-2">
+                    <div class="bg-[#181818] p-5 rounded-xl border border-white/5 shadow-sm">
+                        <label class="block mb-4 font-medium border-b border-white/10 pb-3" style="color: #A3804C;">
                             <?= htmlspecialchars($opt['option_name']); ?>
                             <?php if ($opt['is_required']): ?>
                                 <span class="text-red-500 ml-1">*</span>
@@ -102,20 +118,22 @@ if ($product['product_type'] === 'chat_only') {
                         </label>
 
                         <?php if ($opt['option_type'] === 'single'): ?>
-                            <div class="space-y-2 pl-2">
+                            <div class="space-y-3 pl-2">
                                 <?php foreach ($values as $val): ?>
                                     <label
-                                        class="flex items-center gap-3 cursor-pointer text-gray-300 hover:text-white transition-colors">
+                                        class="flex items-start gap-3 cursor-pointer text-gray-300 hover:text-white transition-colors">
                                         <input type="radio" name="options[<?= htmlspecialchars($opt['option_name']); ?>]"
                                             value="<?= htmlspecialchars($val['value_name']); ?>"
                                             data-price="<?= htmlspecialchars($val['additional_price']); ?>"
                                             data-extra='<?= htmlspecialchars($val['extra_data'] ?? '{}'); ?>'
-                                            class="optionInput w-4 h-4 accent-gold" <?= $opt['is_required'] ? 'required' : ''; ?>>
-                                        <span>
+                                            class="optionInput w-4 h-4 mt-0.5 shrink-0" <?= $opt['is_required'] ? 'required' : ''; ?>>
+                                        <span class="text-[15px] leading-snug">
                                             <?= htmlspecialchars($val['value_name']); ?>
                                             <?php if ($val['additional_price'] > 0): ?>
-                                                <span class="text-gold/80 text-sm ml-1">(+Rp
-                                                    <?= number_format($val['additional_price'], 0, ',', '.'); ?>)</span>
+                                                <span class="text-sm ml-1 inline-block whitespace-nowrap"
+                                                    style="color: rgba(163, 128, 76, 0.8);">
+                                                    (+Rp <?= number_format($val['additional_price'], 0, ',', '.'); ?>)
+                                                </span>
                                             <?php endif; ?>
                                         </span>
                                     </label>
@@ -123,20 +141,22 @@ if ($product['product_type'] === 'chat_only') {
                             </div>
 
                         <?php elseif ($opt['option_type'] === 'multiple'): ?>
-                            <div class="space-y-2 pl-2">
+                            <div class="space-y-3 pl-2">
                                 <?php foreach ($values as $val): ?>
                                     <label
-                                        class="flex items-center gap-3 cursor-pointer text-gray-300 hover:text-white transition-colors">
+                                        class="flex items-start gap-3 cursor-pointer text-gray-300 hover:text-white transition-colors">
                                         <input type="checkbox" name="options[<?= htmlspecialchars($opt['option_name']); ?>][]"
                                             value="<?= htmlspecialchars($val['value_name']); ?>"
                                             data-price="<?= htmlspecialchars($val['additional_price']); ?>"
                                             data-extra='<?= htmlspecialchars($val['extra_data'] ?? '{}'); ?>'
-                                            class="optionInput w-4 h-4 accent-gold rounded">
-                                        <span>
+                                            class="optionInput w-4 h-4 mt-0.5 shrink-0 rounded">
+                                        <span class="text-[15px] leading-snug">
                                             <?= htmlspecialchars($val['value_name']); ?>
                                             <?php if ($val['additional_price'] > 0): ?>
-                                                <span class="text-gold/80 text-sm ml-1">(+Rp
-                                                    <?= number_format($val['additional_price'], 0, ',', '.'); ?>)</span>
+                                                <span class="text-sm ml-1 inline-block whitespace-nowrap"
+                                                    style="color: rgba(163, 128, 76, 0.8);">
+                                                    (+Rp <?= number_format($val['additional_price'], 0, ',', '.'); ?>)
+                                                </span>
                                             <?php endif; ?>
                                         </span>
                                     </label>
@@ -145,74 +165,77 @@ if ($product['product_type'] === 'chat_only') {
 
                         <?php elseif ($opt['option_type'] === 'custom_input'): ?>
                             <textarea name="custom_input"
-                                class="w-full p-3 bg-black/50 border border-gold/50 rounded-lg text-white focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-all"
-                                placeholder="Masukkan tulisan di sini..." <?= $opt['is_required'] ? 'required' : ''; ?>></textarea>
+                                class="w-full p-4 bg-black/40 border rounded-lg text-white focus:outline-none transition-all"
+                                style="border-color: rgba(163, 128, 76, 0.5);" placeholder="Masukkan tulisan di sini..."
+                                <?= $opt['is_required'] ? 'required' : ''; ?>></textarea>
                         <?php endif; ?>
                     </div>
 
                 <?php endforeach; ?>
 
-                <div class="border-t border-gold/50 pt-6 mt-8 flex justify-between items-center">
-                    <span class="text-gray-300 font-medium">Total Harga</span>
-                    <p class="text-2xl font-bold text-gold">
+                <div class="hidden sm:flex border-t border-white/10 pt-8 mt-10 justify-between items-center">
+                    <span class="text-gray-300 font-medium text-lg">Total Harga</span>
+                    <p class="text-4xl font-bold" style="color: #A3804C;">
                         Rp <span id="totalPrice"><?= number_format($product['base_price'] ?? 0, 0, ',', '.'); ?></span>
                     </p>
                 </div>
 
                 <input type="hidden" name="buy_now" id="buyNowFlag" value="0">
 
-                <div class="hidden sm:grid sm:grid-cols-2 gap-3 items-stretch">
+                <div class="hidden sm:grid sm:grid-cols-2 gap-4 items-stretch mt-6">
                     <button type="submit" onclick="document.getElementById('buyNowFlag').value='0'"
-                        class="inline-flex items-center justify-center gap-2 border border-gold text-gold bg-transparent rounded-lg font-bold text-base hover:bg-gold/10 hover:shadow-[0_0_15px_rgba(212,175,55,0.25)] transition-all duration-300 uppercase tracking-wider w-full py-4 px-6">
+                        class="inline-flex items-center justify-center gap-2 bg-transparent border rounded-xl font-bold text-base hover:bg-white/5 transition-all duration-300 uppercase tracking-wider w-full py-4 px-6"
+                        style="border-color: #A3804C; color: #A3804C;">
                         <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                             aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
                             </path>
                         </svg>
-                        <span>Tambah ke Keranjang</span>
+                        <span>Keranjang</span>
                     </button>
 
                     <button type="submit" onclick="document.getElementById('buyNowFlag').value='1'"
-                        class="inline-flex items-center justify-center gap-2 bg-gold text-black py-4 rounded-lg font-bold text-base hover:bg-yellow-500 hover:shadow-[0_0_20px_rgba(212,175,55,0.4)] transition-all duration-300 uppercase tracking-wider">
-                        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z">
-                            </path>
-                        </svg>
+                        class="inline-flex items-center justify-center gap-2 text-white py-4 rounded-xl font-bold text-base hover:opacity-80 transition-all duration-300 uppercase tracking-wider shadow-lg"
+                        style="background-color: #A3804C; box-shadow: 0 4px 20px rgba(163, 128, 76, 0.3);">
                         Bayar Sekarang
                     </button>
                 </div>
 
+                <div style="height: 140px;" class="block sm:hidden w-full"></div>
+
             </form>
 
-            <div
-                class="fixed inset-x-0 bottom-0 z-[80] sm:hidden bg-black/80 backdrop-blur-xl border-t border-gold/30 shadow-[0_-8px_24px_rgba(0,0,0,0.5)] px-4 py-3"
-                style="padding-bottom: calc(0.75rem + env(safe-area-inset-bottom));">
-                <div class="max-w-7xl mx-auto flex items-stretch gap-3">
-                    <button type="submit" form="productForm"
-                        onclick="document.getElementById('buyNowFlag').value='0'"
-                        aria-label="Tambah ke Keranjang"
-                        title="Tambah ke Keranjang"
-                        class="shrink-0 inline-flex items-center justify-center w-14 border border-gold text-gold bg-transparent rounded-xl hover:bg-gold/10 transition-all duration-300">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
-                            </path>
-                        </svg>
-                    </button>
-                    <button type="submit" form="productForm"
-                        onclick="document.getElementById('buyNowFlag').value='1'"
-                        class="flex-1 inline-flex items-center justify-center gap-2 bg-gold text-black px-4 py-3 rounded-xl font-bold uppercase tracking-wider text-sm shadow-[0_4px_14px_0_rgba(212,175,55,0.39)] hover:bg-yellow-400 transition-all duration-300">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                            aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M13 10V3L4 14h7v7l9-11h-7z">
-                            </path>
-                        </svg>
-                        Bayar Sekarang
-                    </button>
+            <div class="fixed inset-x-0 bottom-0 z-50 sm:hidden bg-black border-t border-white/10 shadow-2xl px-5 py-4"
+                style="padding-bottom: calc(1rem + env(safe-area-inset-bottom));">
+
+                <div class="max-w-7xl mx-auto flex flex-col gap-4">
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-white font-semibold text-[15px] tracking-wide">Total :</span>
+                        <span class="text-gray-100 font-semibold text-[15px] tracking-wide">
+                            Rp. <span
+                                id="stickyTotalPrice"><?= number_format($product['base_price'] ?? 0, 0, ',', '.'); ?></span>
+                        </span>
+                    </div>
+
+                    <div class="flex items-stretch gap-4">
+                        <button type="submit" form="productForm" onclick="document.getElementById('buyNowFlag').value='0'"
+                            aria-label="Tambah ke Keranjang"
+                            class="shrink-0 flex items-center justify-center text-white px-2 hover:text-gray-300 transition-colors">
+                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.35 2.7A1 1 0 006.5 17h11M9 21a1 1 0 100-2 1 1 0 000 2zm8 0a1 1 0 100-2 1 1 0 000 2z">
+                                </path>
+                            </svg>
+                        </button>
+
+                        <button type="submit" form="productForm" onclick="document.getElementById('buyNowFlag').value='1'"
+                            class="flex-1 text-white py-3 rounded text-sm font-medium hover:opacity-80 transition-colors tracking-wide"
+                            style="background-color: #A3804C;">
+                            Bayar Sekarang
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -233,24 +256,67 @@ if ($product['product_type'] === 'chat_only') {
 
     <style>
         @keyframes cartToastIn {
-            0%   { opacity: 0; transform: translate(-50%, -16px) scale(0.92); }
-            60%  { opacity: 1; transform: translate(-50%, 4px)   scale(1.04); }
-            100% { opacity: 1; transform: translate(-50%, 0)     scale(1); }
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -16px) scale(0.92);
+            }
+
+            60% {
+                opacity: 1;
+                transform: translate(-50%, 4px) scale(1.04);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
         }
+
         @keyframes cartToastOut {
-            0%   { opacity: 1; transform: translate(-50%, 0)     scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -12px) scale(0.96); }
+            0% {
+                opacity: 1;
+                transform: translate(-50%, 0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -12px) scale(0.96);
+            }
         }
+
         @keyframes cartIconPop {
-            0%   { transform: scale(0.6) rotate(-15deg); }
-            60%  { transform: scale(1.2) rotate(8deg); }
-            100% { transform: scale(1)   rotate(0); }
+            0% {
+                transform: scale(0.6) rotate(-15deg);
+            }
+
+            60% {
+                transform: scale(1.2) rotate(8deg);
+            }
+
+            100% {
+                transform: scale(1) rotate(0);
+            }
         }
-        .cartToastEnter      { animation: cartToastIn 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
-        .cartToastLeave      { animation: cartToastOut 280ms ease forwards; }
-        .cartToastIcon svg   { animation: cartIconPop 500ms ease 80ms both; }
+
+        .cartToastEnter {
+            animation: cartToastIn 360ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .cartToastLeave {
+            animation: cartToastOut 280ms ease forwards;
+        }
+
+        .cartToastIcon svg {
+            animation: cartIconPop 500ms ease 80ms both;
+        }
+
         @media (prefers-reduced-motion: reduce) {
-            .cartToastEnter, .cartToastLeave, .cartToastIcon svg { animation: none; }
+
+            .cartToastEnter,
+            .cartToastLeave,
+            .cartToastIcon svg {
+                animation: none;
+            }
         }
     </style>
 
@@ -266,7 +332,6 @@ if ($product['product_type'] === 'chat_only') {
                 });
             }, 2400);
 
-            // Bersihkan query string `?added=1` agar refresh halaman tidak memunculkan toast lagi.
             if (window.history && history.replaceState) {
                 const url = new URL(window.location.href);
                 url.searchParams.delete('added');
@@ -278,10 +343,8 @@ if ($product['product_type'] === 'chat_only') {
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Panggil fungsi hitung saat halaman pertama kali dimuat
         calculateTotal();
 
-        // Panggil fungsi hitung setiap kali ada input yang berubah (radio/checkbox)
         document.addEventListener("change", function (e) {
             if (e.target && e.target.classList.contains('optionInput')) {
                 calculateTotal();
@@ -312,7 +375,6 @@ if ($product['product_type'] === 'chat_only') {
                 }
             });
 
-            // Logic khusus untuk produk custom uang
             if (productType === 'custom_money') {
                 if (nominal > 0 && qty > 0) {
                     total = (nominal * qty) + modelPrice;
@@ -323,15 +385,20 @@ if ($product['product_type'] === 'chat_only') {
                 total = basePrice + modelPrice;
             }
 
-            document.getElementById('totalPrice').innerText = total.toLocaleString('id-ID');
+            let formattedTotal = total.toLocaleString('id-ID');
+            document.getElementById('totalPrice').innerText = formattedTotal;
+
+            let stickyTotalEl = document.getElementById('stickyTotalPrice');
+            if (stickyTotalEl) {
+                stickyTotalEl.innerText = formattedTotal;
+            }
         }
 
-        // Event listener untuk form submit
         const form = document.getElementById('productForm');
         if (form) {
             form.addEventListener("submit", function () {
                 let totalText = document.getElementById('totalPrice').innerText;
-                let totalNumber = totalText.replace(/\./g, ''); // Hapus titik ribuan
+                let totalNumber = totalText.replace(/\./g, '');
                 document.getElementById('finalPrice').value = totalNumber;
             });
         }

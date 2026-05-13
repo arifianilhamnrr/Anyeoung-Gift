@@ -27,20 +27,28 @@ if ($user) {
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $scriptDir = rtrim(str_replace('/actions', '', dirname($_SERVER['SCRIPT_NAME'])), '/');
     $resetLink = $scheme . '://' . $host . $scriptDir . '/index.php?page=reset_password&token=' . urlencode($token);
+    $logoUrl = $scheme . '://' . $host . '/assets/images/anyeong-logo.svg';
 
     $settings = fetchStoreSettings($pdo);
     $storeName = $settings['store_name'] ?? 'Anyeong Gift';
-    $subject = "Reset Password {$storeName}";
+    $subject = "Permintaan Reset Password - {$storeName}";
     $body = "
         <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #111;\">
+            <div style=\"margin-bottom:12px;\"><img src=\"{$logoUrl}\" alt=\"Logo {$storeName}\" style=\"height:48px;\" /></div>
             <h2 style=\"margin: 0 0 8px;\">Permintaan Reset Password</h2>
             <p>Halo <strong>" . htmlspecialchars($user['name']) . "</strong>,</p>
-            <p>Kami menerima permintaan reset password untuk akun kamu di {$storeName}. Klik tombol di bawah ini untuk melanjutkan:</p>
-            <p><a href=\"{$resetLink}\" style=\"display:inline-block;padding:12px 18px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:bold;\">Reset Password</a></p>
+            <p>Kami menerima permintaan reset password untuk akun kamu di {$storeName}.</p>
+            <p>Gunakan tombol berikut untuk membuat password baru:</p>
+            <p><a href=\"{$resetLink}\" style=\"display:inline-block;padding:12px 18px;background:#f59e0b;color:#111;text-decoration:none;border-radius:8px;font-weight:bold;\">Buat Password Baru</a></p>
             <p>Link ini berlaku selama 1 jam. Jika kamu tidak merasa meminta reset password, abaikan email ini.</p>
+            <p style=\"margin-top:16px;\">Salam hangat,<br>{$storeName}</p>
         </div>
     ";
-    $textBody = "Halo {$user['name']}, gunakan link berikut untuk reset password: {$resetLink}. Link berlaku 1 jam.";
+    $textBody = "Halo {$user['name']},\n";
+    $textBody .= "Kami menerima permintaan reset password untuk akun kamu di {$storeName}.\n";
+    $textBody .= "Gunakan link berikut untuk membuat password baru (berlaku 1 jam): {$resetLink}\n";
+    $textBody .= "Jika kamu tidak merasa meminta reset password, abaikan email ini.\n";
+    $textBody .= "Salam, {$storeName}.";
 
     sendConfiguredEmail($pdo, $user['email'], $user['name'], $subject, $body, $textBody);
 }

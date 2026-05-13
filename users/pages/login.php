@@ -117,7 +117,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                         Selamat Datang di <br><span class="text-white drop-shadow-md">Anyeong Gift</span>
                     </h1>
 
-                    <img src="logo.png" alt="Logo Anyeong Gift" class="w-24 h-auto mx-auto mb-6">
+                    <img src="../assets/images/anyeong-logo.svg" alt="Logo Anyeong Gift" class="w-24 h-auto mx-auto mb-6">
 
                     <p class="text-black/80 text-sm mb-8 px-4 leading-relaxed font-medium">
                         Kami bangga melayani ribuan pelanggan dengan menghadirkan hadiah terbaik untuk setiap momen

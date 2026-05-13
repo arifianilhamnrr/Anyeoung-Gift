@@ -200,31 +200,163 @@ try {
         $user = $stmt->fetch();
 
         if ($user && !empty($user['email'])) {
-            $orderNumber = 'AG-' . str_pad((string) $orderId, 4, '0', STR_PAD_LEFT);
+            $orderNumber = 'ORD-' . str_pad((string) $orderId, 5, '0', STR_PAD_LEFT);
             $storeSettings = fetchStoreSettings($pdo);
             $storeName = $storeSettings['store_name'] ?? 'Anyeong Gift';
             $statusLabel = formatOrderStatusLabel('waiting_payment');
             $totalFormatted = formatRupiah((int) $grandTotal);
             $methodName = $paymentMethod['name'] ?? 'Metode pembayaran';
             $methodType = strtolower($paymentMethod['type'] ?? '');
+            $storeAddress = fetchStoreAddress($pdo);
+            $storeAddressText = $storeAddress['address_text'] ?? '';
+            $storeWhatsapp = $storeSettings['whatsapp_admin'] ?? '';
+
+            $orderDate = date('d M Y H:i');
+            $itemRows = '';
+            $itemLines = [];
+
+            foreach ($cart as $item) {
+                $name = htmlspecialchars((string) ($item['product_name'] ?? '-'));
+                $price = (int) ($item['price'] ?? 0);
+                $optionLines = [];
+
+                if (!empty($item['options']) && is_array($item['options'])) {
+                    foreach ($item['options'] as $optionName => $optionValue) {
+                        if (is_array($optionValue)) {
+                            $value = implode(', ', $optionValue);
+                        } else {
+                            $value = (string) $optionValue;
+                        }
+                        $optionLines[] = htmlspecialchars((string) $optionName) . ': ' . htmlspecialchars($value);
+                    }
+                }
+
+                if (!empty($item['custom_input'])) {
+                    $optionLines[] = 'Catatan: ' . htmlspecialchars((string) $item['custom_input']);
+                }
+
+                $optionHtml = '';
+                if (!empty($optionLines)) {
+                    $optionHtml = '<div style="margin-top:4px;color:#555;font-size:12px;">' . implode('<br>', $optionLines) . '</div>';
+                }
+
+                $itemRows .= "<tr><td style=\"padding:8px 10px;border-bottom:1px solid #eee;\"><strong>{$name}</strong>{$optionHtml}</td><td style=\"padding:8px 10px;border-bottom:1px solid #eee;text-align:right;white-space:nowrap;\">Rp " . number_format($price, 0, ',', '.') . "</td></tr>";
+                $itemLines[] = '- ' . ($item['product_name'] ?? '-') . ' : Rp ' . number_format($price, 0, ',', '.');
+            }
+
+            if ($itemRows === '') {
+                $itemRows = '<tr><td style="padding:10px;color:#666;" colspan="2">Tidak ada item.</td></tr>';
+            }
 
             $nextStep = $methodType === 'onsite'
                 ? 'Silakan lakukan pembayaran saat pengambilan di toko.'
                 : 'Silakan selesaikan pembayaran dan unggah bukti transfer agar pesanan segera diproses.';
 
+            $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+            $scriptDir = rtrim(str_replace('/actions', '', dirname($_SERVER['SCRIPT_NAME'])), '/');
+            $paymentLink = $scheme . '://' . $host . $scriptDir . '/index.php?page=payment_upload&order_id=' . (int) $orderId;
+            $logoUrl = $scheme . '://' . $host . '/assets/images/anyeong-logo.svg';
+            $paymentLinkHtml = $methodType !== 'onsite'
+                ? '<p style="margin:8px 0 0;">Link pembayaran: <a href="' . $paymentLink . '">' . $paymentLink . '</a></p>'
+                : '';
+
             $subject = "Pesanan {$orderNumber} Berhasil Dibuat - {$storeName}";
             $body = "
                 <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #111;\">
-                    <h2 style=\"margin: 0 0 8px;\">Pesanan Berhasil Dibuat</h2>
-                    <p>Halo <strong>" . htmlspecialchars($user['name']) . "</strong>, terima kasih sudah berbelanja di {$storeName}.</p>
-                    <p>Pesanan kamu <strong>{$orderNumber}</strong> sudah tercatat dengan status <strong>{$statusLabel}</strong>.</p>
-                    <p>Total transaksi: <strong>Rp {$totalFormatted}</strong> via {$methodName}.</p>
-                    <p>{$nextStep}</p>
+                    <div style=\"margin-bottom:12px;\"><img src=\"{$logoUrl}\" alt=\"Logo {$storeName}\" style=\"height:48px;\" /></div>
+                    <h2 style=\"margin: 0 0 8px;\">Konfirmasi Pesanan</h2>
+                    <p>Halo <strong>" . htmlspecialchars($user['name']) . "</strong>,</p>
+                    <p>Terima kasih telah berbelanja di {$storeName}. Pesanan kamu sudah berhasil dibuat.</p>
+                    <table style=\"width:100%;border-collapse:collapse;margin:12px 0 8px;\">
+                        <tr><td style=\"padding:6px 0;\">Nomor Pesanan</td><td style=\"padding:6px 0;text-align:right;\"><strong>{$orderNumber}</strong></td></tr>
+                        <tr><td style=\"padding:6px 0;\">Tanggal Pesanan</td><td style=\"padding:6px 0;text-align:right;\">{$orderDate}</td></tr>
+                        <tr><td style=\"padding:6px 0;\">Status</td><td style=\"padding:6px 0;text-align:right;\">{$statusLabel}</td></tr>
+                        <tr><td style=\"padding:6px 0;\">Metode Pembayaran</td><td style=\"padding:6px 0;text-align:right;\">" . htmlspecialchars($methodName) . "</td></tr>
+                        <tr><td style=\"padding:6px 0;font-weight:bold;\">Total</td><td style=\"padding:6px 0;text-align:right;font-weight:bold;\">Rp {$totalFormatted}</td></tr>
+                    </table>
+                    <h4 style=\"margin:16px 0 8px;\">Detail Pesanan</h4>
+                    <table style=\"width:100%;border-collapse:collapse;\">
+                        <thead>
+                            <tr>
+                                <th style=\"text-align:left;background:#111;color:#fff;padding:8px 10px;font-size:12px;\">Item</th>
+                                <th style=\"text-align:right;background:#111;color:#fff;padding:8px 10px;font-size:12px;\">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {$itemRows}
+                        </tbody>
+                    </table>
+                    <p style=\"margin:12px 0 0;\">{$nextStep}</p>
+                    {$paymentLinkHtml}
+                    <h4 style=\"margin:16px 0 8px;\">Alamat Toko</h4>
+                    <p style=\"margin:0;white-space:pre-line;\">" . htmlspecialchars($storeAddressText) . "</p>
+                    <p style=\"margin:8px 0 0;\">WhatsApp Toko: " . htmlspecialchars($storeWhatsapp) . "</p>
+                    <p style=\"margin-top:16px;\">Terima kasih telah berbelanja di {$storeName}.</p>
                 </div>
             ";
-            $textBody = "Halo {$user['name']}, pesanan {$orderNumber} tercatat dengan status {$statusLabel}. Total Rp {$totalFormatted} via {$methodName}. {$nextStep}";
+            $textBody = "Halo {$user['name']}, terima kasih telah berbelanja di {$storeName}.\n";
+            $textBody .= "Nomor pesanan: {$orderNumber}\n";
+            $textBody .= "Tanggal pesanan: {$orderDate}\n";
+            $textBody .= "Status: {$statusLabel}\n";
+            $textBody .= "Metode pembayaran: {$methodName}\n";
+            $textBody .= "Total: Rp {$totalFormatted}\n\n";
+            $textBody .= "Detail pesanan:\n" . implode("\n", $itemLines) . "\n\n";
+            $textBody .= $nextStep . "\n";
+            if ($methodType !== 'onsite') {
+                $textBody .= "Link pembayaran: {$paymentLink}\n\n";
+            }
+            if ($storeAddressText !== '') {
+                $textBody .= "Alamat toko:\n{$storeAddressText}\n";
+            }
+            if ($storeWhatsapp !== '') {
+                $textBody .= "WhatsApp toko: {$storeWhatsapp}\n";
+            }
+            $textBody .= "\nTerima kasih telah berbelanja di {$storeName}.";
 
             sendConfiguredEmail($pdo, $user['email'], $user['name'], $subject, $body, $textBody);
+
+            $adminRecipients = fetchAdminRecipients($pdo);
+            if (!empty($adminRecipients)) {
+                $adminSubject = "Pesanan Baru {$orderNumber} - {$storeName}";
+                $adminBody = "
+                    <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #111;\">
+                        <div style=\"margin-bottom:12px;\"><img src=\"{$logoUrl}\" alt=\"Logo {$storeName}\" style=\"height:48px;\" /></div>
+                        <h2 style=\"margin: 0 0 8px;\">Pesanan Baru Masuk</h2>
+                        <p>Pesanan baru telah dibuat.</p>
+                        <table style=\"width:100%;border-collapse:collapse;margin:12px 0 8px;\">
+                            <tr><td style=\"padding:6px 0;\">Nomor Pesanan</td><td style=\"padding:6px 0;text-align:right;\"><strong>{$orderNumber}</strong></td></tr>
+                            <tr><td style=\"padding:6px 0;\">Tanggal Pesanan</td><td style=\"padding:6px 0;text-align:right;\">{$orderDate}</td></tr>
+                            <tr><td style=\"padding:6px 0;\">Metode Pembayaran</td><td style=\"padding:6px 0;text-align:right;\">" . htmlspecialchars($methodName) . "</td></tr>
+                            <tr><td style=\"padding:6px 0;font-weight:bold;\">Total</td><td style=\"padding:6px 0;text-align:right;font-weight:bold;\">Rp {$totalFormatted}</td></tr>
+                        </table>
+                        <h4 style=\"margin:16px 0 8px;\">Detail Pesanan</h4>
+                        <table style=\"width:100%;border-collapse:collapse;\">
+                            <thead>
+                                <tr>
+                                    <th style=\"text-align:left;background:#111;color:#fff;padding:8px 10px;font-size:12px;\">Item</th>
+                                    <th style=\"text-align:right;background:#111;color:#fff;padding:8px 10px;font-size:12px;\">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {$itemRows}
+                            </tbody>
+                        </table>
+                        <p style=\"margin-top:16px;\">Silakan cek dashboard admin untuk proses lebih lanjut.</p>
+                    </div>
+                ";
+                $adminText = "Pesanan baru {$orderNumber} telah dibuat. Total Rp {$totalFormatted}.";
+                $adminText .= "\nDetail pesanan:\n" . implode("\n", $itemLines);
+
+                foreach ($adminRecipients as $admin) {
+                    $adminEmail = $admin['email'] ?? '';
+                    if ($adminEmail === '') {
+                        continue;
+                    }
+                    $adminName = $admin['name'] ?? 'Admin';
+                    sendConfiguredEmail($pdo, $adminEmail, $adminName, $adminSubject, $adminBody, $adminText);
+                }
+            }
         }
     } catch (Exception $e) {
     }

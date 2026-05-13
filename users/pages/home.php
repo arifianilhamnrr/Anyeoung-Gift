@@ -22,7 +22,7 @@ $storeSetting = $stmt->fetch();
 
 <section class="mb-12 text-center px-4 pt-10">
     <div class="flex justify-center mb-6">
-        <img src="../assets/images/logo.png" alt="<?= htmlspecialchars($storeSetting['store_name'] ?? 'Anyeong Gift'); ?>"
+        <img src="../assets/images/anyeong-logo.svg" alt="<?= htmlspecialchars($storeSetting['store_name'] ?? 'Anyeong Gift'); ?>"
             class="h-24 md:h-32 w-auto object-contain drop-shadow-[0_0_20px_rgba(212,175,55,0.35)]"
             onerror="this.style.display='none';">
     </div>

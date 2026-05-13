@@ -54,4 +54,16 @@ class StoreSettingModel extends Model {
         
         return $this->execute();
     }
+
+    public function getAdminUser(): ?array
+    {
+        $this->query("SELECT id, name, email FROM users WHERE role = 'admin' ORDER BY id ASC LIMIT 1");
+        return $this->single();
+    }
+
+    public function getStoreAddress(): ?array
+    {
+        $this->query("SELECT * FROM addresses WHERE type = 'store' ORDER BY is_default DESC, id DESC LIMIT 1");
+        return $this->single();
+    }
 }

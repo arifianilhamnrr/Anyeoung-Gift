@@ -111,6 +111,15 @@ class OrderModel extends Model
         return $this->execute();
     }
 
+    public function updatePaymentStatus($orderId, $newStatus)
+    {
+        $sql = "UPDATE payments SET status = :status WHERE order_id = :order_id";
+        $this->query($sql);
+        $this->bind(':status', $newStatus);
+        $this->bind(':order_id', $orderId);
+        return $this->execute();
+    }
+
     public function getOrderDetails($orderId) {
         // 1. Ambil daftar produk yang dibeli di pesanan ini
         $this->query("SELECT * FROM order_items WHERE order_id = :order_id");
@@ -170,6 +179,12 @@ class OrderModel extends Model
         $order['address'] = $address;
 
         return $order;
+    }
+
+    public function getStoreAddress(): ?array
+    {
+        $this->query("SELECT * FROM addresses WHERE type = 'store' ORDER BY is_default DESC, id DESC LIMIT 1");
+        return $this->single();
     }
 
     // Mengambil data pembayaran terbaru untuk satu pesanan (untuk halaman detail
