@@ -44,18 +44,23 @@ class OrderController extends Controller {
         try {
             $orderModel = new OrderModel();
             $orderModel->updateOrderStatus($data['order_id'], $data['status']);
-            
+
             // Jika pesanan dikonfirmasi (paid), perbarui juga status pembayarannya agar tampil "Diproses" di user
             if ($data['status'] === 'paid') {
                 $orderModel->updatePaymentStatus($data['order_id'], 'confirmed');
             }
 
-            $this->sendOrderStatusEmail($orderModel, (int) $data['order_id']);
-
-            return $this->jsonResponse([
+            // Balas browser dulu sebelum mengirim email, biar AJAX di admin
+            // tidak menunggu SMTP / API email. Tanpa ini, kalau koneksi SMTP
+            // lambat, fetch admin sering timeout dan menampilkan
+            // "Kesalahan jaringan" padahal status pesanan sudah berubah.
+            $this->respondAndContinue([
                 'status' => 'success',
                 'message' => 'Status pesanan berhasil diperbarui.'
             ]);
+
+            $this->sendOrderStatusEmail($orderModel, (int) $data['order_id']);
+            exit;
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
@@ -125,10 +130,11 @@ class OrderController extends Controller {
                 ? date('d M Y H:i', strtotime($order['created_at']))
                 : date('d M Y H:i');
 
-            $paymentMethod = $payment['method_name'] ?? '';
-            if ($paymentMethod === '') {
-                $type = strtolower((string) ($payment['method_type'] ?? ''));
-                $paymentMethod = $type === 'onsite' ? 'Bayar di Tempat' : 'Pembayaran Online';
+            $paymentTypeRaw = strtolower((string) ($payment['method_type'] ?? ''));
+            if ($paymentTypeRaw === 'onsite') {
+                $paymentMethod = 'Cash on Pick Up';
+            } else {
+                $paymentMethod = $payment['method_name'] ?? 'Pembayaran Online';
             }
             $paymentStatus = strtolower((string) ($payment['status'] ?? ''));
             $paymentStatusLabel = $paymentStatus === 'confirmed'

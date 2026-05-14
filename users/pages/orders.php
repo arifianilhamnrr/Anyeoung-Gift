@@ -256,7 +256,7 @@ function getCombinedOrderStatus($order)
                                         </div>
 
                                         <?php if (!empty($order['payment_method_type']) && $order['payment_method_type'] === 'onsite'): ?>
-                                            <p class="text-gray-400 text-sm italic mb-4">Pembayaran di tempat (Onsite).</p>
+                                            <p class="text-gray-400 text-sm italic mb-4">Cash on Pick Up  bayar tunai saat ambil pesanan di toko.</p>
                                         <?php elseif ($order['status'] === 'paid' || $order['payment_status'] === 'verified'): ?>
                                             <p class="text-green-400 text-sm font-medium italic mb-4">✅ Pembayaran terkonfirmasi.
                                             </p>

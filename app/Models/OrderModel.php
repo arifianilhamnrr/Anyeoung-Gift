@@ -29,18 +29,41 @@ class OrderModel extends Model
         return $this->resultSet();
     }
 
-    public function getDashboardSummary()
+    /**
+     * Ringkasan dashboard. Kalau $month / $year diisi (1-12 dan 4 digit),
+     * data dibatasi pada bulan tersebut  berguna untuk rekap bulanan di
+     * dashboard admin. Kalau null, hitung total keseluruhan (perilaku lama).
+     */
+    public function getDashboardSummary(?int $month = null, ?int $year = null)
     {
+        $hasPeriod = $month !== null && $year !== null;
+        $periodClause = $hasPeriod ? " AND MONTH(created_at) = :month AND YEAR(created_at) = :year" : "";
+        $bindPeriod = function () use ($hasPeriod, $month, $year) {
+            if ($hasPeriod) {
+                $this->bind(':month', $month);
+                $this->bind(':year', $year);
+            }
+        };
+
         // Pemasukan dihitung dari pesanan yang sudah dibayar (paid, ready_pickup, completed)
-        $this->query("SELECT SUM(total_price) as total_revenue FROM orders WHERE status IN ('paid', 'ready_pickup', 'completed')");
+        $this->query("SELECT COALESCE(SUM(total_price), 0) AS total_revenue
+                      FROM orders
+                      WHERE status IN ('paid', 'ready_pickup', 'completed')" . $periodClause);
+        $bindPeriod();
         $revenue = $this->single();
 
         // Pesanan aktif adalah yang belum selesai atau dibatalkan
-        $this->query("SELECT COUNT(*) as active_orders FROM orders WHERE status NOT IN ('completed', 'cancelled')");
+        $this->query("SELECT COUNT(*) AS active_orders
+                      FROM orders
+                      WHERE status NOT IN ('completed', 'cancelled')" . $periodClause);
+        $bindPeriod();
         $active = $this->single();
 
         // Pending payment dihitung dari 'pending' atau 'waiting_payment'
-        $this->query("SELECT COUNT(*) as pending_payments FROM orders WHERE status IN ('pending', 'waiting_payment')");
+        $this->query("SELECT COUNT(*) AS pending_payments
+                      FROM orders
+                      WHERE status IN ('pending', 'waiting_payment')" . $periodClause);
+        $bindPeriod();
         $pending = $this->single();
 
         return [
@@ -48,6 +71,32 @@ class OrderModel extends Model
             'active_orders' => $active['active_orders'] ?? 0,
             'pending_payments' => $pending['pending_payments'] ?? 0
         ];
+    }
+
+    /**
+     * Daftar order yang dipakai untuk tabel "Pesanan Terbaru" di dashboard.
+     * Optional difilter ke bulan tertentu untuk rekap bulanan.
+     */
+    public function getRecentOrdersForDashboard(?int $month = null, ?int $year = null, int $limit = 5)
+    {
+        $hasPeriod = $month !== null && $year !== null;
+        $periodClause = $hasPeriod ? " WHERE MONTH(o.created_at) = :month AND YEAR(o.created_at) = :year" : "";
+        $safeLimit = max(1, min(100, (int) $limit));
+        $this->query("SELECT o.id, o.total_price, o.status, o.created_at,
+                             u.name AS customer_name,
+                             pm.type AS payment_method_type,
+                             pm.name AS payment_method_name
+                      FROM orders o
+                      LEFT JOIN users u ON o.user_id = u.id
+                      LEFT JOIN payments p ON p.order_id = o.id
+                      LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id" . $periodClause . "
+                      ORDER BY o.created_at DESC
+                      LIMIT " . $safeLimit);
+        if ($hasPeriod) {
+            $this->bind(':month', $month);
+            $this->bind(':year', $year);
+        }
+        return $this->resultSet();
     }
 
     // ==========================================
