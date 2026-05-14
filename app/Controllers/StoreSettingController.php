@@ -228,10 +228,13 @@ class StoreSettingController extends Controller {
                 ], 400);
             }
 
-            $today = date('Y-m-d');
+            // Gunakan UTC (gmdate) karena server Brevo menggunakan standar waktu UTC
+            $todayUtc = gmdate('Y-m-d');
+            $todayLocal = date('Y-m-d'); // Tetap simpan WIB untuk ditampilkan ke UI
+            
             $account = $this->httpGetBrevo('https://api.brevo.com/v3/account', $apiKey);
             $stats = $this->httpGetBrevo(
-                'https://api.brevo.com/v3/smtp/statistics/aggregatedReport?startDate=' . $today . '&endDate=' . $today,
+                'https://api.brevo.com/v3/smtp/statistics/aggregatedReport?startDate=' . $todayUtc . '&endDate=' . $todayUtc,
                 $apiKey
             );
 
@@ -289,7 +292,7 @@ class StoreSettingController extends Controller {
             return $this->jsonResponse([
                 'status' => 'success',
                 'data' => [
-                    'date' => $today,
+                    'date' => $todayLocal,
                     'plan_name' => $planName,
                     'plan_type' => $planType,
                     'monthly_credits' => $planCredits,
