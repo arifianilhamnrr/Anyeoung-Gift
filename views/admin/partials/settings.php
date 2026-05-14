@@ -112,6 +112,83 @@
         </div>
     </div>
 
+    <!-- Card: Pemakaian Kuota Harian Brevo (muncul hanya saat driver = brevo) -->
+    <div id="brevo_usage_card" class="bg-dark-surface rounded-2xl border border-dark-border shadow-xl overflow-hidden hidden">
+        <div class="flex items-center justify-between px-6 py-4 border-b border-dark-border">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 19V6l-2 2m11 4v7m0 0h-3m3 0h3M5 12l2-2 2 2 2-2 2 2 2-2 2 2" />
+                    </svg>
+                </div>
+                <div>
+                    <div class="font-bold text-gray-100 text-sm">Kuota Email Harian (Brevo)</div>
+                    <div class="text-xs text-gray-500">Pemakaian transactional email hari ini lewat API Brevo</div>
+                </div>
+            </div>
+            <button onclick="loadBrevoUsage(true)"
+                class="flex items-center gap-2 text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500 hover:text-gray-900 px-3 py-2 rounded-lg transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9M20 20v-5h-.581m-15.357-2a8.003 8.003 0 0015.357 2" />
+                </svg>
+                Refresh
+            </button>
+        </div>
+        <div class="p-6 space-y-5">
+            <!-- State: loading -->
+            <div id="brevo_usage_loading" class="text-xs text-gray-500 italic">Memuat data dari Brevo…</div>
+            <!-- State: error -->
+            <div id="brevo_usage_error"
+                class="hidden text-xs px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-300"></div>
+            <!-- State: data -->
+            <div id="brevo_usage_data" class="hidden space-y-5">
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div class="settings-display-card">
+                        <div class="label">Tanggal</div>
+                        <div class="value mono" id="brevo_usage_date">-</div>
+                    </div>
+                    <div class="settings-display-card">
+                        <div class="label">Plan</div>
+                        <div class="value" id="brevo_usage_plan">-</div>
+                    </div>
+                    <div class="settings-display-card">
+                        <div class="label">Akun Brevo</div>
+                        <div class="value mono text-xs" id="brevo_usage_account">-</div>
+                    </div>
+                </div>
+                <div class="grid sm:grid-cols-3 gap-4">
+                    <div class="settings-display-card">
+                        <div class="label">Terkirim Hari Ini</div>
+                        <div class="value text-emerald-400" id="brevo_usage_used">0</div>
+                    </div>
+                    <div class="settings-display-card">
+                        <div class="label">Berhasil Diantar</div>
+                        <div class="value text-blue-300" id="brevo_usage_delivered">0</div>
+                    </div>
+                    <div class="settings-display-card">
+                        <div class="label">Sisa Kuota Hari Ini</div>
+                        <div class="value" id="brevo_usage_remaining">-</div>
+                    </div>
+                </div>
+                <div id="brevo_usage_progress_wrap" class="space-y-1.5">
+                    <div class="flex items-center justify-between text-[11px] uppercase tracking-wider text-gray-500">
+                        <span>Pemakaian Harian</span>
+                        <span><span id="brevo_usage_percent">0</span>% dari <span id="brevo_usage_limit">300</span> email</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-dark-base overflow-hidden border border-dark-border">
+                        <div id="brevo_usage_bar"
+                            class="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 transition-all duration-500"
+                            style="width: 0%"></div>
+                    </div>
+                    <p class="text-[11px] text-gray-500">
+                        Kuota harian Brevo gratis adalah 300 email/hari. Untuk paket berbayar, kuota harian tidak dibatasi
+                        — angka di sini hanya menampilkan jumlah email yang dikirim hari ini.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Card: Keamanan -->
     <div class="bg-dark-surface rounded-2xl border border-dark-border shadow-xl overflow-hidden">
         <div class="flex items-center justify-between px-6 py-4 border-b border-dark-border">
