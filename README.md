@@ -355,19 +355,42 @@ Fitur email notifikasi dipakai untuk:
 - Reset password user (link dikirim via email).
 - Notifikasi transaksi baru dan status pesanan yang diupdate admin.
 
-Konfigurasinya dilakukan lewat menu **Pengaturan** di admin dashboard:
+Konfigurasinya dilakukan lewat menu **Pengaturan** di admin dashboard. Tersedia
+4 pilihan **driver email** — SMTP klasik dan 3 alternatif berbasis API HTTPS
+(berguna kalau port SMTP 587 / 465 diblokir hosting):
 
-1. Aktifkan toggle **Email Notifikasi**.
-2. Isi SMTP Gmail:
-   - Host: `smtp.gmail.com`
-   - Port: `587`
-   - Enkripsi: `TLS`
-3. Gunakan **App Password** Gmail (wajib aktifkan 2FA).
-4. Isi email pengirim (biasanya sama dengan username).
+| Driver        | Endpoint                                  | Yang perlu diisi                                  |
+| ------------- | ----------------------------------------- | ------------------------------------------------- |
+| `smtp`        | host + port + username + password         | Default. Pakai App Password Gmail (host `smtp.gmail.com`, port `587`, TLS). |
+| `brevo`       | `https://api.brevo.com/v3/smtp/email`     | Brevo **API Key** (dari Dashboard → SMTP & API → API Keys). |
+| `mailersend`  | `https://api.mailersend.com/v1/email`     | MailerSend **API Token** (Bearer) + domain yang sudah verified. |
+| `sendpulse`   | `https://api.sendpulse.com/smtp/emails`   | SendPulse **Client ID** + **Client Secret** (OAuth2 di-handle otomatis). |
+
+Field umum yang dipakai semua driver:
+
+- Nama Pengirim
+- Email Pengirim (harus verified di provider yang dipakai)
+
+Kalau driver API gagal saat runtime (HTTP error / timeout), service otomatis
+**fallback ke SMTP** sehingga email tetap terkirim selama SMTP juga sudah
+terkonfigurasi.
+
+### Menjalankan migration
+
+Untuk database yang sudah ada (sebelum patch driver API), jalankan migration
+ini sekali saja:
+
+```bash
+mysql -u <user> -p <database> < database/migrations/2026_05_14_add_email_api_drivers.sql
+```
+
+Untuk install baru, dump `database/backup_anyeong_gift.sql` sudah memuat
+kolom-kolom baru.
 
 Catatan sumber data pengaturan:
 
-- Nama toko, WhatsApp, pesan default, dan SMTP diambil dari `store_settings`.
+- Nama toko, WhatsApp, pesan default, dan kredensial email (SMTP + API)
+  diambil dari `store_settings`.
 - Email toko diambil dari `users` dengan role `admin` (untuk tampilan profil).
 - Alamat toko diambil dari `addresses` dengan `type = 'store'`.
 

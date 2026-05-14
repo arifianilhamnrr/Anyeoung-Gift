@@ -396,11 +396,16 @@ CREATE TABLE `store_settings` (
   `whatsapp_admin` varchar(20) NOT NULL,
   `whatsapp_message_template` text,
   `email_enabled` tinyint(1) NOT NULL DEFAULT '0',
+  `email_driver` varchar(20) NOT NULL DEFAULT 'smtp',
   `email_smtp_host` varchar(191) DEFAULT NULL,
   `email_smtp_port` int DEFAULT NULL,
   `email_smtp_username` varchar(191) DEFAULT NULL,
   `email_smtp_password` varchar(191) DEFAULT NULL,
   `email_smtp_encryption` varchar(10) DEFAULT NULL,
+  `email_brevo_api_key` varchar(255) DEFAULT NULL,
+  `email_mailersend_api_key` varchar(500) DEFAULT NULL,
+  `email_sendpulse_client_id` varchar(255) DEFAULT NULL,
+  `email_sendpulse_client_secret` varchar(255) DEFAULT NULL,
   `email_from_name` varchar(100) DEFAULT NULL,
   `email_from_address` varchar(191) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -415,7 +420,7 @@ CREATE TABLE `store_settings` (
 
 LOCK TABLES `store_settings` WRITE;
 /*!40000 ALTER TABLE `store_settings` DISABLE KEYS */;
-INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.',1,'smtp.gmail.com',587,'arifianilhamnurriandana@gmail.com','vasc euaj vsye rbci','tls','Anyeong-Gift','arifianilhamnurriandana@gmail.com','2026-03-29 06:07:06','2026-05-12 13:48:35');
+INSERT INTO `store_settings` VALUES (1,'Anyeong Gift','6287764023345','Halo Admin Anyoung Gift, saya ingin konsultasi untuk {{product_name}}.',1,'smtp','smtp.gmail.com',587,'arifianilhamnurriandana@gmail.com','vasc euaj vsye rbci','tls',NULL,NULL,NULL,NULL,'Anyeong-Gift','arifianilhamnurriandana@gmail.com','2026-03-29 06:07:06','2026-05-12 13:48:35');
 /*!40000 ALTER TABLE `store_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
