@@ -1,7 +1,7 @@
 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4 animate-fade-in-up">
     <div>
         <h2 class="text-2xl font-bold text-gray-100 mb-1">Metode Pembayaran</h2>
-        <p class="text-gray-400 text-sm">Kelola opsi pembayaran (QRIS, COD, Bank) yang tersedia di toko.</p>
+        <p class="text-gray-400 text-sm">Kelola opsi pembayaran (QRIS, Cash on Pick Up, Bank) yang tersedia di toko.</p>
     </div>
     <button onclick="openPaymentMethodModal()" class="bg-gold-500 text-gray-900 px-5 py-2.5 rounded-lg font-bold hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition flex items-center gap-2 whitespace-nowrap">
         <span class="text-xl leading-none">+</span> Tambah Metode

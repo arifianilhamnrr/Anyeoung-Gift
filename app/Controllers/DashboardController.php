@@ -41,16 +41,36 @@ class DashboardController extends Controller
 
         $orderService = new \App\Services\OrderService();
 
+        // Filter bulan / tahun untuk rekap. Kalau salah satu tidak valid,
+        // tetap fallback ke total keseluruhan (perilaku lama).
+        $month = isset($_GET['month']) && ctype_digit((string) $_GET['month']) ? (int) $_GET['month'] : null;
+        $year = isset($_GET['year']) && ctype_digit((string) $_GET['year']) ? (int) $_GET['year'] : null;
+        if ($month !== null && ($month < 1 || $month > 12)) {
+            $month = null;
+        }
+        if ($year !== null && ($year < 2000 || $year > 2100)) {
+            $year = null;
+        }
+        // Wajib pasangan: kalau cuma satu yang valid, abaikan keduanya
+        // supaya query SQL konsisten.
+        if ($month === null || $year === null) {
+            $month = null;
+            $year = null;
+        }
+
         try {
-            $summary = $orderService->getSummary();
-            $allOrders = $orderService->getAllOrders();
-            $recentOrders = array_slice($allOrders, 0, 5);
+            $summary = $orderService->getSummary($month, $year);
+            $recentOrders = $orderService->getRecentOrdersForDashboard($month, $year, 5);
 
             $data = [
                 'total_revenue' => (int) $summary['total_revenue'],
                 'active_orders' => (int) $summary['active_orders'],
                 'pending_payments' => (int) $summary['pending_payments'],
-                'recent_orders' => $recentOrders
+                'recent_orders' => $recentOrders,
+                'period' => [
+                    'month' => $month,
+                    'year' => $year,
+                ]
             ];
 
             return $this->jsonResponse([
