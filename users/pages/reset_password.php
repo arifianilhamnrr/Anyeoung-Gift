@@ -59,13 +59,37 @@ if ($token !== '') {
                 <input type="hidden" name="token" value="<?= htmlspecialchars($token); ?>">
                 <div>
                     <label class="block text-xs font-medium mb-2 text-gray-400 uppercase tracking-wider">Password Baru</label>
-                    <input type="password" name="new_password" required minlength="6"
-                        class="w-full p-3 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
+                    <div class="relative">
+                        <input type="password" name="new_password" id="new_password" required minlength="6"
+                            class="w-full p-3 pr-12 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
+                        <button type="button" onclick="toggleResetPwd('new_password', this)"
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gold-500 hover:bg-gold-500/10 transition"
+                            aria-label="Tampilkan password">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-2 text-gray-400 uppercase tracking-wider">Konfirmasi Password</label>
-                    <input type="password" name="confirm_password" required minlength="6"
-                        class="w-full p-3 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
+                    <div class="relative">
+                        <input type="password" name="confirm_password" id="confirm_password" required minlength="6"
+                            class="w-full p-3 pr-12 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
+                        <button type="button" onclick="toggleResetPwd('confirm_password', this)"
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gold-500 hover:bg-gold-500/10 transition"
+                            aria-label="Tampilkan password">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit"
                     class="w-full bg-gold-500 text-gray-900 font-bold py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">
@@ -78,6 +102,20 @@ if ($token !== '') {
             <a href="index.php?page=login" class="text-gold-500 font-semibold hover:text-gold-400 underline underline-offset-4">Kembali ke Login</a>
         </div>
     </div>
+
+    <script>
+        // Toggle show/hide password untuk form reset password.
+        function toggleResetPwd(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            btn.setAttribute('aria-label', showing ? 'Tampilkan password' : 'Sembunyikan password');
+            btn.innerHTML = showing
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.58 10.58a3 3 0 104.24 4.24M9.88 5.09A10.94 10.94 0 0112 5c6.5 0 10.5 7 10.5 7a17.43 17.43 0 01-3.32 4.16M6.1 6.1A17.55 17.55 0 001.5 12s4 7 10.5 7c1.6 0 3.07-.32 4.39-.85" /></svg>';
+        }
+    </script>
 </body>
 
 </html>

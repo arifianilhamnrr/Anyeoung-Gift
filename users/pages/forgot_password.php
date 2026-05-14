@@ -1,7 +1,8 @@
 <?php
 $resetError = $_SESSION['password_reset_error'] ?? null;
 $resetSuccess = $_SESSION['password_reset_success'] ?? null;
-unset($_SESSION['password_reset_error'], $_SESSION['password_reset_success']);
+$resetEmail = $_SESSION['password_reset_email'] ?? '';
+unset($_SESSION['password_reset_error'], $_SESSION['password_reset_success'], $_SESSION['password_reset_email']);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -39,7 +40,16 @@ unset($_SESSION['password_reset_error'], $_SESSION['password_reset_success']);
 
         <?php if ($resetError): ?>
             <div class="bg-red-500/20 border border-red-500/30 text-red-400 p-4 rounded-xl mb-5 text-sm">
-                <?= htmlspecialchars($resetError); ?>
+                <div><?= htmlspecialchars($resetError); ?></div>
+                <?php if (strpos($resetError, 'belum terdaftar') !== false): ?>
+                    <div class="mt-2 text-xs text-red-300">
+                        Belum punya akun?
+                        <a href="index.php?page=login"
+                            class="text-gold-400 font-semibold hover:text-gold-500 underline underline-offset-4">
+                            Daftar sekarang
+                        </a>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
 
@@ -47,6 +57,7 @@ unset($_SESSION['password_reset_error'], $_SESSION['password_reset_success']);
             <div>
                 <label class="block text-xs font-medium mb-2 text-gray-400 uppercase tracking-wider">Alamat Email</label>
                 <input type="email" name="email" required placeholder="email@gmail.com"
+                    value="<?= htmlspecialchars($resetEmail); ?>"
                     class="w-full p-3 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
             </div>
             <button type="submit"
