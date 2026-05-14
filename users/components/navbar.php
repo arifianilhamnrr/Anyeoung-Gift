@@ -10,6 +10,9 @@ $cartCount = 0;
 if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
     $cartCount = count($_SESSION['cart']);
 }
+
+// Nama toko dinamis dari pengaturan (fallback "Anyeong Gift")
+$navbarStoreName = storeNameRaw($pdo ?? null);
 ?>
 
 <nav class="fixed top-0 left-0 w-full z-[90] bg-black/60 backdrop-blur-xl border-b border-gold/20 shadow-lg">
@@ -27,7 +30,7 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
         <div class="flex justify-center md:justify-start">
             <a href="index.php?page=home"
                 class="text-2xl font-title text-gold drop-shadow-sm hover:scale-105 transition-transform whitespace-nowrap">
-                Anyeong Gift
+                <?= htmlspecialchars($navbarStoreName); ?>
             </a>
         </div>
 
@@ -56,7 +59,13 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             <div class="w-px h-4 bg-white/20"></div>
 
             <?php if ($isLoggedIn): ?>
-                <a href="actions/logout.php" class="text-red-500 hover:text-red-400 font-bold transition">Keluar</a>
+                <a href="actions/logout.php"
+                    data-confirm
+                    data-confirm-title="Keluar dari Akun?"
+                    data-confirm-message="Sesi kamu akan diakhiri dan kamu perlu login ulang untuk melanjutkan."
+                    data-confirm-tone="danger"
+                    data-confirm-ok="Ya, Keluar"
+                    class="text-red-500 hover:text-red-400 font-bold transition">Keluar</a>
             <?php else: ?>
                 <a href="index.php?page=login" class="text-gold hover:text-yellow-400 font-bold transition">Masuk</a>
             <?php endif; ?>
@@ -115,6 +124,11 @@ if (isset($_SESSION['cart']) && is_array($_SESSION['cart'])) {
             <div class="mt-auto border-t border-white/10 pt-6">
                 <?php if ($isLoggedIn): ?>
                     <a href="actions/logout.php"
+                        data-confirm
+                        data-confirm-title="Keluar dari Akun?"
+                        data-confirm-message="Sesi kamu akan diakhiri dan kamu perlu login ulang untuk melanjutkan."
+                        data-confirm-tone="danger"
+                        data-confirm-ok="Ya, Keluar"
                         class="flex items-center gap-2 text-red-500 hover:text-red-400 font-bold hover:translate-x-2 transition-all duration-300">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

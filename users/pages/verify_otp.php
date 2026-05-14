@@ -33,7 +33,7 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verifikasi OTP - Anyeong Gift</title>
+    <title>Verifikasi OTP - <?= htmlspecialchars(storeNameRaw($pdo ?? null)); ?></title>
     <link href="../assets/css/main.css" rel="stylesheet">
     <link
         href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;500;600&display=swap"

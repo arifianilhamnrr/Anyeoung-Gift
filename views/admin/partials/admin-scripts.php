@@ -45,6 +45,47 @@
             }
         }
 
+        // --- KONFIRMASI MODAL (REUSABLE) ---
+        // Pengganti window.confirm() bawaan supaya konsisten dengan tampilan
+        // dashboard. Memakai #adminConfirmModal di admin-modals.php.
+        // Pemakaian:  const ok = await showConfirmModal({ title, message, tone, okText, cancelText });
+        // tone: 'warning' (default, kuning) | 'danger' (merah) | 'info' (biru).
+        function showConfirmModal(opts = {}) {
+            return new Promise((resolve) => {
+                const modal = document.getElementById('adminConfirmModal');
+                if (!modal) { resolve(window.confirm(opts.message || 'Yakin?')); return; }
+                const titleEl = document.getElementById('adminConfirmTitle');
+                const msgEl = document.getElementById('adminConfirmMessage');
+                const okBtn = document.getElementById('adminConfirmOkBtn');
+                const cancelBtn = document.getElementById('adminConfirmCancelBtn');
+                const iconWrap = document.getElementById('adminConfirmIconWrap');
+                const tone = opts.tone || 'warning';
+                const toneStyles = {
+                    warning: { wrap: 'bg-yellow-500/15 text-yellow-400 border-yellow-500/30', ok: 'bg-gold-500 text-gray-900 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)]' },
+                    danger: { wrap: 'bg-red-500/15 text-red-400 border-red-500/30', ok: 'bg-red-500 text-white hover:shadow-[0_8px_20px_rgba(239,68,68,0.3)]' },
+                    info: { wrap: 'bg-blue-500/15 text-blue-400 border-blue-500/30', ok: 'bg-blue-500 text-white hover:shadow-[0_8px_20px_rgba(59,130,246,0.3)]' }
+                };
+                const style = toneStyles[tone] || toneStyles.warning;
+                if (titleEl) titleEl.textContent = opts.title || 'Konfirmasi';
+                if (msgEl) msgEl.textContent = opts.message || 'Yakin ingin melanjutkan?';
+                if (iconWrap) iconWrap.className = `w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border ${style.wrap}`;
+                if (okBtn) {
+                    okBtn.textContent = opts.okText || 'OK';
+                    okBtn.className = `flex-1 py-2.5 rounded-xl font-bold text-sm transition hover:-translate-y-0.5 ${style.ok}`;
+                }
+                if (cancelBtn) cancelBtn.textContent = opts.cancelText || 'Batal';
+
+                const cleanup = (result) => {
+                    okBtn.onclick = null; cancelBtn.onclick = null;
+                    toggleModal('adminConfirmModal', false);
+                    resolve(result);
+                };
+                okBtn.onclick = () => cleanup(true);
+                cancelBtn.onclick = () => cleanup(false);
+                toggleModal('adminConfirmModal', true);
+            });
+        }
+
         // --- LOADER ADMIN ---
         // Modal loading dengan 3-dot bouncing yang muncul saat aksi konfirmasi
         // / perubahan (simpan, hapus, ubah status, dll). Backdrop redup supaya
@@ -172,7 +213,14 @@
         }
 
         async function handleLogout() {
-            if (!confirm('Apakah Anda yakin ingin keluar?')) return;
+            const ok = await showConfirmModal({
+                title: 'Keluar dari Admin?',
+                message: 'Sesi admin Anda akan diakhiri dan Anda perlu login ulang untuk mengakses dashboard.',
+                tone: 'danger',
+                okText: 'Ya, Keluar',
+                cancelText: 'Batal'
+            });
+            if (!ok) return;
             showAdminLoader('Keluar...', 'Sedang mengakhiri sesi.');
             try { const res = await fetch(`${BASE_URL}/api/logout`, { method: 'POST' }); const data = await res.json(); if (data.status === 'success') window.location.href = `${BASE_URL}/login`; else hideAdminLoader(); } catch (e) { hideAdminLoader(); showToast('Kesalahan jaringan', 'error'); }
         }
@@ -421,7 +469,17 @@
         }
 
         async function toggleProductStatus(id, status) {
-            if (!confirm('Yakin ubah status?')) return;
+            const isActivating = String(status) === '1' || status === 1 || status === true;
+            const ok = await showConfirmModal({
+                title: isActivating ? 'Aktifkan Produk?' : 'Nonaktifkan Produk?',
+                message: isActivating
+                    ? 'Produk akan tampil di storefront pelanggan dan bisa dipesan.'
+                    : 'Produk akan disembunyikan dari storefront dan tidak bisa dipesan.',
+                tone: isActivating ? 'info' : 'warning',
+                okText: isActivating ? 'Ya, Aktifkan' : 'Ya, Nonaktifkan',
+                cancelText: 'Batal'
+            });
+            if (!ok) return;
             showAdminLoader('Mengubah status...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(`${BASE_URL}/api/products/toggle-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) });
@@ -431,7 +489,14 @@
             finally { hideAdminLoader(); }
         }
         async function deleteProduct(id) {
-            if (!confirm('Hapus permanen produk ini?')) return;
+            const ok = await showConfirmModal({
+                title: 'Hapus Produk?',
+                message: 'Produk akan dihapus permanen beserta opsi & gambarnya. Tindakan ini tidak dapat dibatalkan.',
+                tone: 'danger',
+                okText: 'Ya, Hapus',
+                cancelText: 'Batal'
+            });
+            if (!ok) return;
             showAdminLoader('Menghapus produk...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(`${BASE_URL}/api/products/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
@@ -635,18 +700,41 @@
         }
 
         async function confirmOnsiteOrder(orderId) {
-            if (!confirm('Konfirmasi pesanan Cash on Pick Up ini sebagai sudah dibayar?')) return;
-            await setOrderStatus(orderId, 'paid');
+            const ok = await showConfirmModal({
+                title: 'Konfirmasi Pesanan COD?',
+                message: 'Tandai pesanan Cash on Pick Up ini sebagai sudah dibayar. Pesanan akan masuk antrian untuk diproses.',
+                tone: 'info',
+                okText: 'Ya, Konfirmasi',
+                cancelText: 'Batal'
+            });
+            if (!ok) return;
+            await setOrderStatus(orderId, 'paid', { skipConfirm: true });
         }
 
-        async function setOrderStatus(orderId, status) {
-            if (status === 'cancelled' && !confirm('Yakin membatalkan pesanan ini?')) return;
+        async function setOrderStatus(orderId, status, opts = {}) {
+            if (!opts.skipConfirm) {
+                const confirms = {
+                    paid: { title: 'Konfirmasi Pesanan Dibayar?', message: 'Tandai pesanan ini sebagai sudah dibayar. Pesanan akan masuk antrian untuk diproses.', tone: 'info', okText: 'Ya, Konfirmasi' },
+                    ready_pickup: { title: 'Tandai Pesanan Siap?', message: 'Pesanan akan masuk status siap diambil dan pembeli akan dapat menyelesaikan pesanan.', tone: 'info', okText: 'Ya, Tandai Siap' },
+                    completed: { title: 'Tandai Pesanan Selesai?', message: 'Pesanan akan dikunci sebagai selesai. Tindakan ini tidak dapat dibatalkan.', tone: 'warning', okText: 'Ya, Selesaikan' },
+                    cancelled: { title: 'Batalkan Pesanan?', message: 'Pesanan yang dibatalkan tidak dapat diaktifkan kembali. Pastikan sudah berkoordinasi dengan pembeli.', tone: 'danger', okText: 'Ya, Batalkan' }
+                };
+                const cfg = confirms[status];
+                if (cfg) {
+                    const ok = await showConfirmModal({ title: cfg.title, message: cfg.message, tone: cfg.tone, okText: cfg.okText, cancelText: 'Batal' });
+                    if (!ok) return;
+                }
+            }
             const labels = { paid: 'mengkonfirmasi pesanan', ready_pickup: 'menandai pesanan siap diambil', completed: 'menandai pesanan selesai', cancelled: 'membatalkan pesanan' };
             showAdminLoader('Memperbarui status...', 'Sedang menyimpan perubahan ke server.');
             try {
                 const res = await fetch(`${BASE_URL}/api/orders/update-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderId, status }) });
                 const data = await res.json();
-                if (data.status === 'success') { showToast('Berhasil ' + (labels[status] || 'memperbarui status'), 'success'); loadOrdersData(); }
+                if (data.status === 'success') {
+                    showToast('Berhasil ' + (labels[status] || 'memperbarui status'), 'success');
+                    loadOrdersData();
+                    if (typeof opts.onSuccess === 'function') opts.onSuccess();
+                }
                 else showToast(data.message || 'Gagal memperbarui status', 'error');
             } catch (e) { showToast('Kesalahan jaringan', 'error'); }
             finally { hideAdminLoader(); }
@@ -675,18 +763,25 @@
             return `https://wa.me/${normalized}${text}`;
         }
 
+        // Template WhatsApp untuk setiap status pesanan. {toko} otomatis
+        // di-replace dengan store_name dari settingsCache supaya nama toko
+        // sesuai dengan pengaturan terbaru.
         const WA_TEMPLATES = {
-            waiting_payment: 'Halo {nama}, terima kasih telah memesan di Anyeong Gift. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran agar kami dapat memproses pesanan Anda. Terima kasih!',
-            pending: 'Halo {nama}, terima kasih telah memesan di Anyeong Gift. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran agar kami dapat memproses pesanan Anda. Terima kasih!',
+            waiting_payment: 'Halo {nama}, terima kasih telah memesan di {toko}. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran agar kami dapat memproses pesanan Anda. Terima kasih!',
+            pending: 'Halo {nama}, terima kasih telah memesan di {toko}. Pesanan {kode} sudah kami terima. Mohon segera lakukan pembayaran agar kami dapat memproses pesanan Anda. Terima kasih!',
             paid: 'Halo {nama}, pembayaran untuk pesanan {kode} telah kami terima. Pesanan Anda akan segera kami siapkan. Terima kasih!',
             ready_pickup: 'Halo {nama}, kabar baik! Pesanan {kode} sudah siap untuk diambil di toko kami. Silakan datang sesuai jam operasional. Sampai jumpa!',
-            completed: 'Halo {nama}, terima kasih telah berbelanja di Anyeong Gift untuk pesanan {kode}. Semoga puas! Sampai jumpa di pesanan berikutnya!',
+            completed: 'Halo {nama}, terima kasih telah berbelanja di {toko} untuk pesanan {kode}. Semoga puas! Sampai jumpa di pesanan berikutnya!',
             cancelled: 'Halo {nama}, dengan berat hati pesanan {kode} telah dibatalkan. Jika ada pertanyaan, hubungi kami kembali. Terima kasih.'
         };
 
         function buildWhatsappMessageForStatus(status, recipientName, orderCode) {
-            const tpl = WA_TEMPLATES[status] || `Halo {nama}, kami dari Anyeong Gift ingin menginformasikan terkait pesanan {kode}.`;
-            return tpl.replace(/{nama}/g, recipientName).replace(/{kode}/g, orderCode);
+            const storeName = (settingsCache && settingsCache.store_name) || 'Anyeong Gift';
+            const tpl = WA_TEMPLATES[status] || `Halo {nama}, kami dari {toko} ingin menginformasikan terkait pesanan {kode}.`;
+            return tpl
+                .replace(/{nama}/g, recipientName)
+                .replace(/{kode}/g, orderCode)
+                .replace(/{toko}/g, storeName);
         }
 
         function renderCustomerContactSection(order) {
@@ -818,21 +913,20 @@
         }
 
         async function confirmOrderFromModal(orderId, status) {
-            const confirms = { paid: 'Konfirmasi pesanan ini sebagai sudah dibayar?', ready_pickup: 'Tandai pesanan ini siap untuk diambil?', completed: 'Tandai pesanan ini selesai?', cancelled: 'Yakin membatalkan pesanan ini?' };
-            if (confirms[status] && !confirm(confirms[status])) return;
-            showAdminLoader('Memperbarui status...', 'Sedang menyimpan perubahan ke server.');
-            try {
-                const res = await fetch(`${BASE_URL}/api/orders/update-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderId, status }) });
-                const data = await res.json();
-                if (data.status === 'success') { showToast('Status pesanan diperbarui', 'success'); fetchOrderDetails(orderId); if (typeof loadOrdersData === 'function') loadOrdersData(); }
-                else showToast(data.message || 'Gagal memperbarui status', 'error');
-            } catch (e) { showToast('Kesalahan jaringan', 'error'); }
-            finally { hideAdminLoader(); }
+            // Reuse setOrderStatus tetapi tetap refresh detail modal setelah sukses.
+            await setOrderStatus(orderId, status, { onSuccess: () => fetchOrderDetails(orderId) });
         }
 
         async function confirmOnlinePayment(orderId) {
-            if (!confirm('Konfirmasi pembayaran untuk pesanan ini?')) return;
-            await setOrderStatus(orderId, 'paid');
+            const ok = await showConfirmModal({
+                title: 'Konfirmasi Pembayaran?',
+                message: 'Tandai pembayaran pesanan ini sebagai terverifikasi. Pesanan akan masuk antrian untuk diproses.',
+                tone: 'info',
+                okText: 'Ya, Konfirmasi',
+                cancelText: 'Batal'
+            });
+            if (!ok) return;
+            await setOrderStatus(orderId, 'paid', { skipConfirm: true });
         }
 
         async function fetchOrderDetails(orderId) {
@@ -873,8 +967,11 @@
             }).join('');
             const win = window.open('', '_blank', 'width=820,height=1000');
             if (!win) { showToast('Pop-up diblokir browser', 'error'); return; }
-            const storeName = <?= json_encode($_SESSION['admin_name'] ?? 'Anyeong Gift') ?>;
-            win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"/><title>Invoice ${invoiceNo}</title><style>*{box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,sans-serif;color:#111;margin:0;padding:24px;background:#fff}.wrap{max-width:720px;margin:0 auto}.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:18px}.brand{font-size:22px;font-weight:800;letter-spacing:1px}.brand small{display:block;font-size:11px;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase}.meta{text-align:right;font-size:12px;color:#333}.meta .no{font-size:16px;font-weight:700;color:#000}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.card{border:1px solid #ddd;border-radius:6px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#666}.card p{margin:2px 0;font-size:13px}table{width:100%;border-collapse:collapse;margin-bottom:18px}thead th{background:#111;color:#fff;text-align:left;padding:8px 10px;font-size:12px}thead th.qty,thead th.right{text-align:center}thead th.right{text-align:right}tbody td{padding:10px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}tbody td.qty{text-align:center}tbody td.right{text-align:right;white-space:nowrap}.iname{font-weight:700}.opts{margin-top:4px;color:#555;font-size:12px}.opt{padding-left:8px}.total-row{display:flex;justify-content:flex-end}.total{min-width:280px;border-top:2px solid #111;padding-top:10px}.total .line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.total .grand{font-size:16px;font-weight:800;border-top:1px dashed #aaa;margin-top:6px;padding-top:6px}.foot{margin-top:26px;text-align:center;font-size:11px;color:#666}@media print{body{padding:0}.wrap{max-width:none}}</style></head><body><div class="wrap"><div class="head"><div class="brand">${escapeHtml(storeName)}<small>Invoice Pesanan</small></div><div class="meta"><div class="no">${invoiceNo}</div><div>Tanggal Pesanan: ${escapeHtml(orderDate)}</div><div>Dicetak: ${escapeHtml(printedAt)}</div></div></div><div class="grid"><div class="card"><h4>Pemesan</h4><p><strong>${escapeHtml(customerName)}</strong></p><p>${escapeHtml(customerPhone)}</p>${customerEmail ? `<p>${escapeHtml(customerEmail)}</p>` : ''}${customerAddress ? `<p style="margin-top:6px;white-space:pre-line">${escapeHtml(customerAddress)}</p>` : ''}${customerNotes ? `<p style="margin-top:6px;font-style:italic;color:#555">Catatan: ${escapeHtml(customerNotes)}</p>` : ''}</div><div class="card"><h4>Pembayaran</h4><p><strong>${escapeHtml(paymentMethodLabel)}</strong></p><p>Status: ${escapeHtml(paymentStatusLabel)}</p>${payment && payment.paid_at ? `<p>Diunggah: ${escapeHtml(new Date(payment.paid_at).toLocaleString('id-ID'))}</p>` : ''}</div></div><table><thead><tr><th>Item</th><th class="qty">Qty</th><th class="right">Subtotal</th></tr></thead><tbody>${itemsRows || '<tr><td colspan="3" style="text-align:center;color:#666;padding:18px">Tidak ada item.</td></tr>'}</tbody></table><div class="total-row"><div class="total"><div class="line"><span>Subtotal</span><span>${formatRupiah(grandTotal)}</span></div><div class="line grand"><span>Total</span><span>${formatRupiah(grandTotal)}</span></div></div></div><div class="foot">Terima kasih telah berbelanja di Anyeong Gift.</div></div><script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),250)});<\/script></body></html>`);
+            // Nama toko untuk invoice diambil dari settingsCache (store_settings)
+            // dengan fallback ke nama admin atau "Anyeong Gift".
+            const storeName = (settingsCache && settingsCache.store_name)
+                || <?= json_encode($_SESSION['admin_name'] ?? 'Anyeong Gift') ?>;
+            win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"/><title>Invoice ${invoiceNo}</title><style>*{box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,sans-serif;color:#111;margin:0;padding:24px;background:#fff}.wrap{max-width:720px;margin:0 auto}.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:18px}.brand{font-size:22px;font-weight:800;letter-spacing:1px}.brand small{display:block;font-size:11px;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase}.meta{text-align:right;font-size:12px;color:#333}.meta .no{font-size:16px;font-weight:700;color:#000}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.card{border:1px solid #ddd;border-radius:6px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#666}.card p{margin:2px 0;font-size:13px}table{width:100%;border-collapse:collapse;margin-bottom:18px}thead th{background:#111;color:#fff;text-align:left;padding:8px 10px;font-size:12px}thead th.qty,thead th.right{text-align:center}thead th.right{text-align:right}tbody td{padding:10px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}tbody td.qty{text-align:center}tbody td.right{text-align:right;white-space:nowrap}.iname{font-weight:700}.opts{margin-top:4px;color:#555;font-size:12px}.opt{padding-left:8px}.total-row{display:flex;justify-content:flex-end}.total{min-width:280px;border-top:2px solid #111;padding-top:10px}.total .line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.total .grand{font-size:16px;font-weight:800;border-top:1px dashed #aaa;margin-top:6px;padding-top:6px}.foot{margin-top:26px;text-align:center;font-size:11px;color:#666}@media print{body{padding:0}.wrap{max-width:none}}</style></head><body><div class="wrap"><div class="head"><div class="brand">${escapeHtml(storeName)}<small>Invoice Pesanan</small></div><div class="meta"><div class="no">${invoiceNo}</div><div>Tanggal Pesanan: ${escapeHtml(orderDate)}</div><div>Dicetak: ${escapeHtml(printedAt)}</div></div></div><div class="grid"><div class="card"><h4>Pemesan</h4><p><strong>${escapeHtml(customerName)}</strong></p><p>${escapeHtml(customerPhone)}</p>${customerEmail ? `<p>${escapeHtml(customerEmail)}</p>` : ''}${customerAddress ? `<p style="margin-top:6px;white-space:pre-line">${escapeHtml(customerAddress)}</p>` : ''}${customerNotes ? `<p style="margin-top:6px;font-style:italic;color:#555">Catatan: ${escapeHtml(customerNotes)}</p>` : ''}</div><div class="card"><h4>Pembayaran</h4><p><strong>${escapeHtml(paymentMethodLabel)}</strong></p><p>Status: ${escapeHtml(paymentStatusLabel)}</p>${payment && payment.paid_at ? `<p>Diunggah: ${escapeHtml(new Date(payment.paid_at).toLocaleString('id-ID'))}</p>` : ''}</div></div><table><thead><tr><th>Item</th><th class="qty">Qty</th><th class="right">Subtotal</th></tr></thead><tbody>${itemsRows || '<tr><td colspan="3" style="text-align:center;color:#666;padding:18px">Tidak ada item.</td></tr>'}</tbody></table><div class="total-row"><div class="total"><div class="line"><span>Subtotal</span><span>${formatRupiah(grandTotal)}</span></div><div class="line grand"><span>Total</span><span>${formatRupiah(grandTotal)}</span></div></div></div><div class="foot">Terima kasih telah berbelanja di ${escapeHtml(storeName)}.</div></div><script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),250)});<\/script></body></html>`);
             win.document.close();
         }
 
@@ -1047,6 +1144,9 @@
             const d = settingsCache;
             document.getElementById('set_store_name').value = d.store_name || '';
             document.getElementById('set_wa_admin').value = d.whatsapp_admin || '';
+            document.getElementById('set_admin_name').value = d.admin_name || '';
+            document.getElementById('set_admin_email').value = d.admin_email || '';
+            document.getElementById('set_store_address').value = d.store_address_text || '';
             document.getElementById('set_wa_template').value = d.whatsapp_message_template || '';
             toggleModal('storeProfileModal', true);
         }
@@ -1060,6 +1160,9 @@
                 store_name: document.getElementById('set_store_name').value,
                 whatsapp_admin: document.getElementById('set_wa_admin').value,
                 whatsapp_message_template: document.getElementById('set_wa_template').value,
+                admin_name: document.getElementById('set_admin_name').value,
+                admin_email: document.getElementById('set_admin_email').value,
+                store_address_text: document.getElementById('set_store_address').value,
                 // Teruskan nilai email yang belum diubah dari cache. Kolom
                 // sensitif (password / API key) dikirim string kosong supaya
                 // backend mempertahankan nilai existing-nya.
@@ -1130,6 +1233,9 @@
                 store_name: settingsCache.store_name,
                 whatsapp_admin: settingsCache.whatsapp_admin,
                 whatsapp_message_template: settingsCache.whatsapp_message_template,
+                admin_name: settingsCache.admin_name,
+                admin_email: settingsCache.admin_email,
+                store_address_text: settingsCache.store_address_text,
                 email_enabled: document.getElementById('set_email_enabled').checked,
                 email_driver: document.getElementById('set_email_driver').value,
                 email_from_name: document.getElementById('set_email_from_name').value,

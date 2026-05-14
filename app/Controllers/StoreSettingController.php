@@ -149,7 +149,50 @@ class StoreSettingController extends Controller {
                 'email_from_name' => $emailFromName,
                 'email_from_address' => $emailFromAddress,
             ]);
-            
+
+            // --- Update profil admin (nama & email toko) ---
+            // Hanya dijalankan kalau payload menyertakan field-nya. Email
+            // divalidasi karena dipakai juga untuk login.
+            $existingAdmin = $model->getAdminUser();
+            if ($existingAdmin) {
+                $adminName = isset($data['admin_name']) ? trim((string) $data['admin_name']) : ($existingAdmin['name'] ?? '');
+                $adminEmail = isset($data['admin_email']) ? trim((string) $data['admin_email']) : ($existingAdmin['email'] ?? '');
+                if ($adminEmail !== '' && !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                    return $this->jsonResponse(['status' => 'error', 'message' => 'Email toko tidak valid.'], 400);
+                }
+                if ($adminName === '') {
+                    $adminName = $existingAdmin['name'] ?? '';
+                }
+                if ($adminEmail === '') {
+                    $adminEmail = $existingAdmin['email'] ?? '';
+                }
+                if ($adminName !== ($existingAdmin['name'] ?? '') || $adminEmail !== ($existingAdmin['email'] ?? '')) {
+                    try {
+                        $model->updateAdminUser((int) $existingAdmin['id'], $adminName, $adminEmail);
+                        // Sinkronkan ke session supaya invoice / sidebar pakai nilai terbaru.
+                        $_SESSION['admin_name'] = $adminName;
+                        $_SESSION['admin_email'] = $adminEmail;
+                    } catch (\PDOException $e) {
+                        // Email unik. Kasih pesan ramah ke admin.
+                        if ((int) $e->getCode() === 23000 || stripos($e->getMessage(), 'duplicate') !== false) {
+                            return $this->jsonResponse(['status' => 'error', 'message' => 'Email tersebut sudah dipakai akun lain.'], 400);
+                        }
+                        throw $e;
+                    }
+                }
+            }
+
+            // --- Update alamat toko (type=store) ---
+            if (array_key_exists('store_address_text', $data)) {
+                $addressText = trim((string) $data['store_address_text']);
+                $existingAddress = $model->getStoreAddress();
+                $recipientName = $existingAddress['recipient_name'] ?? ($data['store_name'] ?? 'Toko');
+                $whatsappNumber = $existingAddress['whatsapp_number'] ?? ($data['whatsapp_admin'] ?? '');
+                if ($addressText !== '' || $existingAddress) {
+                    $model->upsertStoreAddressText($addressText, $recipientName, $whatsappNumber);
+                }
+            }
+
             return $this->jsonResponse(['status' => 'success', 'message' => 'Pengaturan berhasil disimpan.']);
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);

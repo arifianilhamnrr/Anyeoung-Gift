@@ -1,9 +1,12 @@
+<?php
+$headerStoreName = storeNameRaw($pdo ?? null);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Anyeong Gift</title>
+    <title><?= htmlspecialchars($headerStoreName); ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
 
@@ -27,5 +30,10 @@
 
 <body class="bg-darkbg text-white flex flex-col min-h-screen">
 
+    <?php
+    // Modal konfirmasi reusable global -- bisa dipanggil dengan
+    // showUserConfirmModal() atau via atribut data-confirm.
+    include 'components/confirm-modal.php';
+    ?>
 
     <?php include 'components/navbar.php'; ?>
