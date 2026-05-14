@@ -600,34 +600,30 @@
             </div>
             <form id="emailSettingsForm" onsubmit="submitEmailSettingsForm(event)">
                 <div class="space-y-4">
-                    <p class="text-xs text-gray-500">Gunakan App Password Gmail (smtp.gmail.com) agar pengiriman email
-                        berjalan lancar.</p>
+                    <p class="text-xs text-gray-500">Pilih driver email yang tersedia. Driver API (Brevo, MailerSend, SendPulse)
+                        berguna sebagai alternatif kalau port SMTP diblokir penyedia hosting.</p>
                     <label
                         class="flex items-center justify-between bg-dark-base border border-dark-border rounded-xl px-4 py-3 text-sm cursor-pointer">
                         <span class="text-gray-300 font-medium">Aktifkan email notifikasi</span>
                         <input type="checkbox" id="set_email_enabled" class="w-4 h-4 accent-gold-500">
                     </label>
+
+                    <!-- Dropdown driver email. Field di bawahnya akan berubah
+                         menyesuaikan driver yang dipilih. -->
+                    <div>
+                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Driver Email</label>
+                        <select id="set_email_driver" onchange="updateEmailDriverFields()"
+                            class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            <option value="smtp">SMTP (PHPMailer)</option>
+                            <option value="brevo">Brevo API</option>
+                            <option value="mailersend">MailerSend API</option>
+                            <option value="sendpulse">SendPulse API</option>
+                        </select>
+                        <p id="set_email_driver_help" class="text-xs text-gray-500 mt-1.5"></p>
+                    </div>
+
+                    <!-- Field umum yang dipakai semua driver -->
                     <div class="grid gap-4 sm:grid-cols-2">
-                        <div>
-                            <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Host</label>
-                            <input type="text" id="set_email_host" placeholder="smtp.gmail.com"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Port</label>
-                            <input type="number" id="set_email_port" placeholder="587"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Username</label>
-                            <input type="email" id="set_email_user" placeholder="email@gmail.com"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Password</label>
-                            <input type="password" id="set_email_pass" placeholder="App Password"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                        </div>
                         <div>
                             <label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Pengirim</label>
                             <input type="text" id="set_email_from_name" placeholder="Anyeong Gift"
@@ -635,19 +631,94 @@
                         </div>
                         <div>
                             <label class="block text-sm text-gray-400 font-medium mb-1.5">Email Pengirim</label>
-                            <input type="email" id="set_email_from_address" placeholder="email@gmail.com"
+                            <input type="email" id="set_email_from_address" placeholder="email@domainmu.com"
                                 class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                        </div>
-                        <div class="sm:col-span-2">
-                            <label class="block text-sm text-gray-400 font-medium mb-1.5">Enkripsi</label>
-                            <select id="set_email_encryption"
-                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
-                                <option value="tls">TLS (Recommended)</option>
-                                <option value="ssl">SSL</option>
-                            </select>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500">Kosongkan password jika tidak ingin mengubah kredensial email.</p>
+
+                    <!-- Field khusus SMTP -->
+                    <div id="set_email_driver_smtp" class="space-y-4">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Host</label>
+                                <input type="text" id="set_email_host" placeholder="smtp.gmail.com"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Port</label>
+                                <input type="number" id="set_email_port" placeholder="587"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Username</label>
+                                <input type="email" id="set_email_user" placeholder="email@gmail.com"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SMTP Password</label>
+                                <input type="password" id="set_email_pass" placeholder="App Password"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">Enkripsi</label>
+                                <select id="set_email_encryption"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                                    <option value="tls">TLS (Recommended)</option>
+                                    <option value="ssl">SSL</option>
+                                </select>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500">Kosongkan password jika tidak ingin mengubah kredensial SMTP.</p>
+                    </div>
+
+                    <!-- Field khusus Brevo -->
+                    <div id="set_email_driver_brevo" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-sm text-gray-400 font-medium mb-1.5">Brevo API Key</label>
+                            <input type="password" id="set_email_brevo_api_key" placeholder="xkeysib-..."
+                                autocomplete="new-password"
+                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            <p id="set_email_brevo_api_key_hint" class="text-xs text-gray-500 mt-1.5">
+                                Ambil di Brevo Dashboard → SMTP &amp; API → API Keys. Pastikan domain pengirim sudah diverifikasi.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Field khusus MailerSend -->
+                    <div id="set_email_driver_mailersend" class="space-y-4 hidden">
+                        <div>
+                            <label class="block text-sm text-gray-400 font-medium mb-1.5">MailerSend API Token</label>
+                            <input type="password" id="set_email_mailersend_api_key" placeholder="mlsn...."
+                                autocomplete="new-password"
+                                class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            <p id="set_email_mailersend_api_key_hint" class="text-xs text-gray-500 mt-1.5">
+                                Ambil di MailerSend Dashboard → API Tokens. Pakai domain yang sudah di-verify di MailerSend.
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Field khusus SendPulse -->
+                    <div id="set_email_driver_sendpulse" class="space-y-4 hidden">
+                        <div class="grid gap-4 sm:grid-cols-2">
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SendPulse Client ID</label>
+                                <input type="text" id="set_email_sendpulse_client_id" placeholder="client_id..."
+                                    autocomplete="off"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-400 font-medium mb-1.5">SendPulse Client Secret</label>
+                                <input type="password" id="set_email_sendpulse_client_secret" placeholder="client_secret..."
+                                    autocomplete="new-password"
+                                    class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                            </div>
+                        </div>
+                        <p id="set_email_sendpulse_hint" class="text-xs text-gray-500">
+                            Ambil di SendPulse Dashboard → Settings → API. Sender email harus di-verify di SendPulse SMTP.
+                        </p>
+                    </div>
+
+                    <p class="text-xs text-gray-500">Kosongkan API key / secret jika tidak ingin mengubah kredensial yang sudah tersimpan.</p>
                 </div>
                 <div class="flex gap-3 mt-6">
                     <button type="button" onclick="toggleModal('emailSettingsModal', false)"
@@ -818,7 +889,7 @@
                                 </div>
                                 <div>
                                     <div class="font-bold text-gray-100 text-sm">Notifikasi Email</div>
-                                    <div class="text-xs text-gray-500">Konfigurasi SMTP untuk email otomatis</div>
+                                    <div class="text-xs text-gray-500">Konfigurasi SMTP / API untuk email otomatis</div>
                                 </div>
                             </div>
                             <button onclick="openEmailSettingsModal()" class="flex items-center gap-2 text-xs font-bold bg-gold-500/10 text-gold-500 border border-gold-500/30 hover:bg-gold-500 hover:text-gray-900 px-3 py-2 rounded-lg transition">
@@ -827,27 +898,35 @@
                             </button>
                         </div>
                         <div class="p-6 grid sm:grid-cols-2 gap-4">
-                            <div class="settings-display-card sm:col-span-2">
+                            <div class="settings-display-card">
                                 <div class="label">Status</div>
                                 <div id="disp_email_enabled" class="mt-1">
                                     <span class="px-3 py-1 bg-gray-500/15 text-gray-400 border border-gray-500/30 rounded-full text-xs font-bold">Tidak Aktif</span>
                                 </div>
                             </div>
                             <div class="settings-display-card">
+                                <div class="label">Driver</div>
+                                <div class="value" id="disp_email_driver">SMTP (PHPMailer)</div>
+                            </div>
+                            <div class="settings-display-card" id="disp_card_email_host">
                                 <div class="label">SMTP Host</div>
                                 <div class="value mono" id="disp_email_host"></div>
                             </div>
-                            <div class="settings-display-card">
+                            <div class="settings-display-card" id="disp_card_email_port">
                                 <div class="label">SMTP Port</div>
                                 <div class="value mono" id="disp_email_port"></div>
                             </div>
-                            <div class="settings-display-card">
+                            <div class="settings-display-card" id="disp_card_email_user">
                                 <div class="label">Username</div>
                                 <div class="value" id="disp_email_user"></div>
                             </div>
-                            <div class="settings-display-card">
+                            <div class="settings-display-card" id="disp_card_email_encryption">
                                 <div class="label">Enkripsi</div>
                                 <div class="value" id="disp_email_encryption"></div>
+                            </div>
+                            <div class="settings-display-card hidden" id="disp_card_email_api">
+                                <div class="label">API Credential</div>
+                                <div class="value" id="disp_email_api_status">-</div>
                             </div>
                             <div class="settings-display-card">
                                 <div class="label">Nama Pengirim</div>
@@ -1750,6 +1829,37 @@
             setText('disp_email_from_name', data.email_from_name);
             setText('disp_email_from_address', data.email_from_address);
 
+            // Driver email + tampilkan kartu yang relevan saja
+            const driver = (data.email_driver || 'smtp').toLowerCase();
+            const driverLabels = {
+                smtp: 'SMTP (PHPMailer)',
+                brevo: 'Brevo API',
+                mailersend: 'MailerSend API',
+                sendpulse: 'SendPulse API'
+            };
+            setText('disp_email_driver', driverLabels[driver] || driver);
+            const smtpCardIds = ['disp_card_email_host', 'disp_card_email_port', 'disp_card_email_user', 'disp_card_email_encryption'];
+            smtpCardIds.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('hidden', driver !== 'smtp');
+            });
+            const apiCard = document.getElementById('disp_card_email_api');
+            const apiStatus = document.getElementById('disp_email_api_status');
+            if (apiCard && apiStatus) {
+                const apiKeyFlags = {
+                    brevo: !!data.email_brevo_api_key_set,
+                    mailersend: !!data.email_mailersend_api_key_set,
+                    sendpulse: !!data.email_sendpulse_client_secret_set
+                };
+                if (driver === 'smtp') {
+                    apiCard.classList.add('hidden');
+                } else {
+                    apiCard.classList.remove('hidden');
+                    apiStatus.textContent = apiKeyFlags[driver] ? 'Tersimpan' : 'Belum diisi';
+                    apiStatus.classList.toggle('muted', !apiKeyFlags[driver]);
+                }
+            }
+
             const emailEnabledEl = document.getElementById('disp_email_enabled');
             if (emailEnabledEl) {
                 const enabled = Number(data.email_enabled || 0) === 1;
@@ -1757,6 +1867,32 @@
                     ? '<span class="px-3 py-1 bg-green-500/15 text-green-400 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>'
                     : '<span class="px-3 py-1 bg-gray-500/15 text-gray-400 border border-gray-500/30 rounded-full text-xs font-bold">Tidak Aktif</span>';
             }
+        }
+
+        /** Tampilkan/sembunyikan field credential di modal Pengaturan Email
+         *  berdasarkan driver yang dipilih di dropdown. */
+        function updateEmailDriverFields() {
+            const select = document.getElementById('set_email_driver');
+            if (!select) return;
+            const driver = (select.value || 'smtp').toLowerCase();
+            const wrappers = {
+                smtp: document.getElementById('set_email_driver_smtp'),
+                brevo: document.getElementById('set_email_driver_brevo'),
+                mailersend: document.getElementById('set_email_driver_mailersend'),
+                sendpulse: document.getElementById('set_email_driver_sendpulse')
+            };
+            Object.entries(wrappers).forEach(([key, el]) => {
+                if (!el) return;
+                el.classList.toggle('hidden', key !== driver);
+            });
+            const helps = {
+                smtp: 'Pakai SMTP klasik (mis. Gmail App Password). Bisa terblok di hosting tertentu.',
+                brevo: 'Kirim via HTTPS ke api.brevo.com — tidak butuh port SMTP.',
+                mailersend: 'Kirim via HTTPS ke api.mailersend.com — tidak butuh port SMTP.',
+                sendpulse: 'Kirim via HTTPS ke api.sendpulse.com — OAuth2 token diambil otomatis.'
+            };
+            const helpEl = document.getElementById('set_email_driver_help');
+            if (helpEl) helpEl.textContent = helps[driver] || '';
         }
 
         /** Buka modal Edit Profil Toko dan isi form dari cache */
@@ -1777,14 +1913,22 @@
                 store_name: document.getElementById('set_store_name').value,
                 whatsapp_admin: document.getElementById('set_wa_admin').value,
                 whatsapp_message_template: document.getElementById('set_wa_template').value,
-                // Teruskan nilai email yang belum diubah dari cache
+                // Teruskan nilai email yang belum diubah dari cache. Kolom
+                // sensitif (password / API key) dikirim string kosong supaya
+                // backend mempertahankan nilai existing-nya.
                 email_enabled: settingsCache.email_enabled,
+                email_driver: settingsCache.email_driver,
                 email_smtp_host: settingsCache.email_smtp_host,
                 email_smtp_port: settingsCache.email_smtp_port,
                 email_smtp_username: settingsCache.email_smtp_username,
+                email_smtp_password: '',
+                email_smtp_encryption: settingsCache.email_smtp_encryption,
+                email_brevo_api_key: '',
+                email_mailersend_api_key: '',
+                email_sendpulse_client_id: settingsCache.email_sendpulse_client_id,
+                email_sendpulse_client_secret: '',
                 email_from_name: settingsCache.email_from_name,
-                email_from_address: settingsCache.email_from_address,
-                email_smtp_encryption: settingsCache.email_smtp_encryption
+                email_from_address: settingsCache.email_from_address
             };
             showAdminLoader('Menyimpan profil toko...', 'Mohon tunggu sebentar.');
             try {
@@ -1799,17 +1943,34 @@
             finally { hideAdminLoader(); btn.innerText = ' Simpan'; btn.disabled = false; }
         }
 
-        /** Buka modal Pengaturan Email dan isi form dari cache */
+        /** Buka modal Pengaturan Email dan isi form dari cache.
+         *  Field credential (password / API key) sengaja dibiarkan kosong
+         *  supaya admin tidak salah menimpa nilai yang sudah tersimpan. */
         function openEmailSettingsModal() {
             const d = settingsCache;
             document.getElementById('set_email_enabled').checked = Number(d.email_enabled || 0) === 1;
+            document.getElementById('set_email_driver').value = (d.email_driver || 'smtp').toLowerCase();
+            // Sender
+            document.getElementById('set_email_from_name').value = d.email_from_name || '';
+            document.getElementById('set_email_from_address').value = d.email_from_address || '';
+            // SMTP
             document.getElementById('set_email_host').value = d.email_smtp_host || '';
             document.getElementById('set_email_port').value = d.email_smtp_port || '';
             document.getElementById('set_email_user').value = d.email_smtp_username || '';
             document.getElementById('set_email_pass').value = '';
-            document.getElementById('set_email_from_name').value = d.email_from_name || '';
-            document.getElementById('set_email_from_address').value = d.email_from_address || '';
+            document.getElementById('set_email_pass').placeholder = d.email_smtp_password_set ? '•••••• (tersimpan)' : 'App Password';
             document.getElementById('set_email_encryption').value = d.email_smtp_encryption || 'tls';
+            // Brevo
+            document.getElementById('set_email_brevo_api_key').value = '';
+            document.getElementById('set_email_brevo_api_key').placeholder = d.email_brevo_api_key_set ? '•••••• (tersimpan)' : 'xkeysib-...';
+            // MailerSend
+            document.getElementById('set_email_mailersend_api_key').value = '';
+            document.getElementById('set_email_mailersend_api_key').placeholder = d.email_mailersend_api_key_set ? '•••••• (tersimpan)' : 'mlsn....';
+            // SendPulse
+            document.getElementById('set_email_sendpulse_client_id').value = d.email_sendpulse_client_id || '';
+            document.getElementById('set_email_sendpulse_client_secret').value = '';
+            document.getElementById('set_email_sendpulse_client_secret').placeholder = d.email_sendpulse_client_secret_set ? '•••••• (tersimpan)' : 'client_secret...';
+            updateEmailDriverFields();
             toggleModal('emailSettingsModal', true);
         }
 
@@ -1823,13 +1984,18 @@
                 whatsapp_admin: settingsCache.whatsapp_admin,
                 whatsapp_message_template: settingsCache.whatsapp_message_template,
                 email_enabled: document.getElementById('set_email_enabled').checked,
+                email_driver: document.getElementById('set_email_driver').value,
+                email_from_name: document.getElementById('set_email_from_name').value,
+                email_from_address: document.getElementById('set_email_from_address').value,
                 email_smtp_host: document.getElementById('set_email_host').value,
                 email_smtp_port: document.getElementById('set_email_port').value,
                 email_smtp_username: document.getElementById('set_email_user').value,
                 email_smtp_password: document.getElementById('set_email_pass').value,
-                email_from_name: document.getElementById('set_email_from_name').value,
-                email_from_address: document.getElementById('set_email_from_address').value,
-                email_smtp_encryption: document.getElementById('set_email_encryption').value
+                email_smtp_encryption: document.getElementById('set_email_encryption').value,
+                email_brevo_api_key: document.getElementById('set_email_brevo_api_key').value,
+                email_mailersend_api_key: document.getElementById('set_email_mailersend_api_key').value,
+                email_sendpulse_client_id: document.getElementById('set_email_sendpulse_client_id').value,
+                email_sendpulse_client_secret: document.getElementById('set_email_sendpulse_client_secret').value
             };
             showAdminLoader('Menyimpan pengaturan email...', 'Mohon tunggu sebentar.');
             try {
@@ -1839,6 +2005,9 @@
                     showToast('Pengaturan email berhasil disimpan!', 'success');
                     toggleModal('emailSettingsModal', false);
                     document.getElementById('set_email_pass').value = '';
+                    document.getElementById('set_email_brevo_api_key').value = '';
+                    document.getElementById('set_email_mailersend_api_key').value = '';
+                    document.getElementById('set_email_sendpulse_client_secret').value = '';
                     await loadSettingsData();
                 } else { showToast(data.message, 'error'); }
             } catch (err) { showToast('Kesalahan jaringan', 'error'); }

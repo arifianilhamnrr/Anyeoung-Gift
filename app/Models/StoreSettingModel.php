@@ -22,11 +22,16 @@ class StoreSettingModel extends Model {
                     whatsapp_admin = :wa,
                     whatsapp_message_template = :template,
                     email_enabled = :email_enabled,
+                    email_driver = :email_driver,
                     email_smtp_host = :email_smtp_host,
                     email_smtp_port = :email_smtp_port,
                     email_smtp_username = :email_smtp_username,
                     email_smtp_password = :email_smtp_password,
                     email_smtp_encryption = :email_smtp_encryption,
+                    email_brevo_api_key = :email_brevo_api_key,
+                    email_mailersend_api_key = :email_mailersend_api_key,
+                    email_sendpulse_client_id = :email_sendpulse_client_id,
+                    email_sendpulse_client_secret = :email_sendpulse_client_secret,
                     email_from_name = :email_from_name,
                     email_from_address = :email_from_address
                 WHERE id = :id");
@@ -34,21 +39,32 @@ class StoreSettingModel extends Model {
         } else {
             // Jika tabel masih kosong, kita Insert baru
             $this->query("INSERT INTO store_settings
-                (store_name, whatsapp_admin, whatsapp_message_template, email_enabled, email_smtp_host, email_smtp_port,
-                 email_smtp_username, email_smtp_password, email_smtp_encryption, email_from_name, email_from_address)
-                VALUES (:name, :wa, :template, :email_enabled, :email_smtp_host, :email_smtp_port, :email_smtp_username,
-                 :email_smtp_password, :email_smtp_encryption, :email_from_name, :email_from_address)");
+                (store_name, whatsapp_admin, whatsapp_message_template, email_enabled, email_driver,
+                 email_smtp_host, email_smtp_port, email_smtp_username, email_smtp_password,
+                 email_smtp_encryption, email_brevo_api_key, email_mailersend_api_key,
+                 email_sendpulse_client_id, email_sendpulse_client_secret,
+                 email_from_name, email_from_address)
+                VALUES (:name, :wa, :template, :email_enabled, :email_driver,
+                 :email_smtp_host, :email_smtp_port, :email_smtp_username, :email_smtp_password,
+                 :email_smtp_encryption, :email_brevo_api_key, :email_mailersend_api_key,
+                 :email_sendpulse_client_id, :email_sendpulse_client_secret,
+                 :email_from_name, :email_from_address)");
         }
         
         $this->bind(':name', $data['store_name']);
         $this->bind(':wa', $data['whatsapp_admin']);
         $this->bind(':template', $data['whatsapp_message_template']);
         $this->bind(':email_enabled', $data['email_enabled']);
+        $this->bind(':email_driver', $data['email_driver']);
         $this->bind(':email_smtp_host', $data['email_smtp_host']);
         $this->bind(':email_smtp_port', $data['email_smtp_port']);
         $this->bind(':email_smtp_username', $data['email_smtp_username']);
         $this->bind(':email_smtp_password', $data['email_smtp_password']);
         $this->bind(':email_smtp_encryption', $data['email_smtp_encryption']);
+        $this->bind(':email_brevo_api_key', $data['email_brevo_api_key']);
+        $this->bind(':email_mailersend_api_key', $data['email_mailersend_api_key']);
+        $this->bind(':email_sendpulse_client_id', $data['email_sendpulse_client_id']);
+        $this->bind(':email_sendpulse_client_secret', $data['email_sendpulse_client_secret']);
         $this->bind(':email_from_name', $data['email_from_name']);
         $this->bind(':email_from_address', $data['email_from_address']);
         
