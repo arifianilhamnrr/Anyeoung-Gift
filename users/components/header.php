@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Anyeong Gift</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
 
     <!-- <script src="https://cdn.tailwindcss.com"></script> //css tailwind cdn link -->
     <link href="../assets/css/main.css" rel="stylesheet">

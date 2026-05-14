@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'Anyeong Gift Admin' ?></title>
+    <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <link href="../assets/css/main.css" rel="stylesheet">
     <script>
