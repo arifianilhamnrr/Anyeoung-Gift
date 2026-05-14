@@ -16,3 +16,6 @@ define('DB_NAME', 'anyeoung_gift');
 define('APP_NAME', 'Anyeong Gift Admin');
 define('TIMEZONE', 'Asia/Jakarta');
 date_default_timezone_set(TIMEZONE);
+
+// Helper global (storeName, storeSettings, dsb.)
+require_once __DIR__ . '/app/helpers.php';

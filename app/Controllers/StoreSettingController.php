@@ -149,10 +149,226 @@ class StoreSettingController extends Controller {
                 'email_from_name' => $emailFromName,
                 'email_from_address' => $emailFromAddress,
             ]);
-            
+
+            // --- Update profil admin (nama & email toko) ---
+            // Hanya dijalankan kalau payload menyertakan field-nya. Email
+            // divalidasi karena dipakai juga untuk login.
+            $existingAdmin = $model->getAdminUser();
+            if ($existingAdmin) {
+                $adminName = isset($data['admin_name']) ? trim((string) $data['admin_name']) : ($existingAdmin['name'] ?? '');
+                $adminEmail = isset($data['admin_email']) ? trim((string) $data['admin_email']) : ($existingAdmin['email'] ?? '');
+                if ($adminEmail !== '' && !filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                    return $this->jsonResponse(['status' => 'error', 'message' => 'Email toko tidak valid.'], 400);
+                }
+                if ($adminName === '') {
+                    $adminName = $existingAdmin['name'] ?? '';
+                }
+                if ($adminEmail === '') {
+                    $adminEmail = $existingAdmin['email'] ?? '';
+                }
+                if ($adminName !== ($existingAdmin['name'] ?? '') || $adminEmail !== ($existingAdmin['email'] ?? '')) {
+                    try {
+                        $model->updateAdminUser((int) $existingAdmin['id'], $adminName, $adminEmail);
+                        // Sinkronkan ke session supaya invoice / sidebar pakai nilai terbaru.
+                        $_SESSION['admin_name'] = $adminName;
+                        $_SESSION['admin_email'] = $adminEmail;
+                    } catch (\PDOException $e) {
+                        // Email unik. Kasih pesan ramah ke admin.
+                        if ((int) $e->getCode() === 23000 || stripos($e->getMessage(), 'duplicate') !== false) {
+                            return $this->jsonResponse(['status' => 'error', 'message' => 'Email tersebut sudah dipakai akun lain.'], 400);
+                        }
+                        throw $e;
+                    }
+                }
+            }
+
+            // --- Update alamat toko (type=store) ---
+            if (array_key_exists('store_address_text', $data)) {
+                $addressText = trim((string) $data['store_address_text']);
+                $existingAddress = $model->getStoreAddress();
+                $recipientName = $existingAddress['recipient_name'] ?? ($data['store_name'] ?? 'Toko');
+                $whatsappNumber = $existingAddress['whatsapp_number'] ?? ($data['whatsapp_admin'] ?? '');
+                if ($addressText !== '' || $existingAddress) {
+                    $model->upsertStoreAddressText($addressText, $recipientName, $whatsappNumber);
+                }
+            }
+
             return $this->jsonResponse(['status' => 'success', 'message' => 'Pengaturan berhasil disimpan.']);
         } catch (\Exception $e) {
             return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
         }
+    }
+
+    /**
+     * Ambil pemakaian kuota harian Brevo (transactional email).
+     *
+     * Memanggil dua endpoint Brevo:
+     *  - GET /v3/account                              → plan info (free / paid).
+     *  - GET /v3/smtp/statistics/aggregatedReport     → jumlah email hari ini.
+     *
+     * Hasil dikembalikan dalam bentuk JSON yang bisa dirender langsung di
+     * card "Notifikasi Email" di halaman Settings. Daily limit default 300
+     * (kuota gratis Brevo). Admin yang berlangganan paket lebih besar bisa
+     * mengabaikan limit; UI tetap menampilkan jumlah yang terpakai.
+     */
+    public function brevoUsage()
+    {
+        if (!isset($_SESSION['admin_logged_in'])) {
+            return $this->jsonResponse(['status' => 'error'], 401);
+        }
+
+        try {
+            $model = new StoreSettingModel();
+            $settings = $model->getSettings() ?: [];
+            $apiKey = trim((string) ($settings['email_brevo_api_key'] ?? ''));
+            if ($apiKey === '') {
+                return $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => 'API Key Brevo belum diatur.',
+                ], 400);
+            }
+
+            $today = date('Y-m-d');
+            $account = $this->httpGetBrevo('https://api.brevo.com/v3/account', $apiKey);
+            $stats = $this->httpGetBrevo(
+                'https://api.brevo.com/v3/smtp/statistics/aggregatedReport?startDate=' . $today . '&endDate=' . $today,
+                $apiKey
+            );
+
+            // Validasi dasar -- kalau API key salah, Brevo balas 401.
+            if (!$account['ok']) {
+                $message = $account['status'] === 401
+                    ? 'API Key Brevo tidak valid atau tidak punya izin akses akun.'
+                    : 'Gagal mengambil info akun Brevo (HTTP ' . $account['status'] . ').';
+                return $this->jsonResponse([
+                    'status' => 'error',
+                    'message' => $message,
+                ], 502);
+            }
+
+            $accountData = json_decode($account['body'], true) ?: [];
+            $statsData = $stats['ok'] ? (json_decode($stats['body'], true) ?: []) : [];
+
+            // Brevo aggregatedReport kadang membungkus hasil dalam key `range`,
+            // kadang langsung berisi counters. Ambil counter teratas dengan
+            // fallback yang aman.
+            $requests = (int) ($statsData['requests'] ?? 0);
+            $delivered = (int) ($statsData['delivered'] ?? 0);
+
+            // Ambil nama plan (kalau ada beberapa, prioritaskan tipe email).
+            $planName = '';
+            $planType = '';
+            $planCredits = null;
+            if (!empty($accountData['plan']) && is_array($accountData['plan'])) {
+                foreach ($accountData['plan'] as $plan) {
+                    $type = strtolower((string) ($plan['type'] ?? ''));
+                    $creditsType = strtolower((string) ($plan['creditsType'] ?? ''));
+                    if ($type === 'free' || $creditsType === 'sendlimit' || $creditsType === 'email') {
+                        $planName = (string) ($plan['type'] ?? '');
+                        $planType = $type;
+                        if (isset($plan['credits'])) {
+                            $planCredits = (int) $plan['credits'];
+                        }
+                        break;
+                    }
+                }
+                if ($planName === '' && isset($accountData['plan'][0])) {
+                    $planName = (string) ($accountData['plan'][0]['type'] ?? '');
+                    $planType = strtolower($planName);
+                }
+            }
+
+            // Kuota harian default Brevo gratis adalah 300/hari. Untuk paket
+            // berbayar, tampilkan limit dari `credits` (bulanan) sebagai info
+            // saja; UI tetap menampilkan pemakaian harian.
+            $dailyLimit = $planType === 'free' || $planName === '' ? 300 : 0;
+
+            $remaining = $dailyLimit > 0 ? max(0, $dailyLimit - $requests) : null;
+            $percent = $dailyLimit > 0 ? min(100, round(($requests / $dailyLimit) * 100, 1)) : null;
+
+            return $this->jsonResponse([
+                'status' => 'success',
+                'data' => [
+                    'date' => $today,
+                    'plan_name' => $planName,
+                    'plan_type' => $planType,
+                    'monthly_credits' => $planCredits,
+                    'daily_limit' => $dailyLimit,
+                    'used_today' => $requests,
+                    'delivered_today' => $delivered,
+                    'remaining_today' => $remaining,
+                    'percent_used' => $percent,
+                    'account_email' => $accountData['email'] ?? '',
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return $this->jsonResponse([
+                'status' => 'error',
+                'message' => 'Gagal memuat pemakaian Brevo: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper GET ke Brevo dengan header api-key. Timeout dibatasi supaya
+     * permintaan admin tidak menggantung lama saat jaringan lambat.
+     *
+     * @return array{ok: bool, status: int, body: string}
+     */
+    private function httpGetBrevo(string $url, string $apiKey): array
+    {
+        $headers = [
+            'Accept: application/json',
+            'api-key: ' . $apiKey,
+        ];
+
+        if (function_exists('curl_init')) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 12,
+                CURLOPT_CONNECTTIMEOUT => 8,
+                CURLOPT_FOLLOWLOCATION => true,
+            ]);
+            $body = curl_exec($ch);
+            $status = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($body === false) {
+                return ['ok' => false, 'status' => 0, 'body' => ''];
+            }
+            return [
+                'ok' => $status >= 200 && $status < 300,
+                'status' => $status,
+                'body' => (string) $body,
+            ];
+        }
+
+        $context = stream_context_create([
+            'http' => [
+                'method' => 'GET',
+                'header' => implode("\r\n", $headers),
+                'timeout' => 12,
+                'ignore_errors' => true,
+            ],
+        ]);
+        $body = @file_get_contents($url, false, $context);
+        $status = 0;
+        if (isset($http_response_header) && is_array($http_response_header)) {
+            foreach ($http_response_header as $line) {
+                if (preg_match('#^HTTP/\S+\s+(\d+)#', $line, $m)) {
+                    $status = (int) $m[1];
+                    break;
+                }
+            }
+        }
+        if ($body === false) {
+            return ['ok' => false, 'status' => 0, 'body' => ''];
+        }
+        return [
+            'ok' => $status >= 200 && $status < 300,
+            'status' => $status,
+            'body' => (string) $body,
+        ];
     }
 }

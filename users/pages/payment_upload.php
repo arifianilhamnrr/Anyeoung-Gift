@@ -132,7 +132,7 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
                     <?php if ($isQrisMethod && !empty($qrisImage)): ?>
                         <div class="mt-4 bg-white/95 rounded-xl p-3 flex flex-col items-center gap-2">
                             <img src="../public/uploads/payment_methods/<?= htmlspecialchars($qrisImage); ?>"
-                                alt="QRIS Anyeong Gift" class="w-full max-w-[200px] aspect-square object-contain">
+                                alt="QRIS <?= htmlspecialchars(storeNameRaw($pdo ?? null)); ?>" class="w-full max-w-[200px] aspect-square object-contain">
                             <p class="text-[10px] uppercase tracking-wider text-gray-600 font-bold">Scan QRIS di atas</p>
                         </div>
                     <?php elseif ($isQrisMethod): ?>

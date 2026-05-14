@@ -25,6 +25,14 @@ class Model {
 
         try {
             $this->dbh = new PDO($dsn, $this->user, $this->pass, $options);
+            // Selaraskan zona waktu sesi MySQL ke Asia/Jakarta (+07:00) supaya
+            // NOW() / CURRENT_TIMESTAMP yang dipakai model konsisten dengan
+            // PHP date_default_timezone_set('Asia/Jakarta').
+            try {
+                $this->dbh->exec("SET time_zone = '+07:00'");
+            } catch (PDOException $e) {
+                // Diamkan: tidak semua hosting mengizinkan SET time_zone.
+            }
         } catch (PDOException $e) {
             // Jika koneksi gagal, hentikan aplikasi dan tampilkan error
             die(json_encode([

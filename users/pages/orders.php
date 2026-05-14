@@ -7,6 +7,9 @@ $checkoutSuccessOrderId = $_SESSION['checkout_success_order_id'] ?? null;
 
 unset($_SESSION['order_success'], $_SESSION['order_error'], $_SESSION['checkout_success_order_id']);
 
+// Nama toko dari pengaturan -- dipakai untuk salam di pesan WhatsApp.
+$ordersStoreName = storeNameRaw($pdo ?? null);
+
 // Pagination: 5 pesanan per halaman.
 $perPage = 5;
 $currentPage = max(1, (int) ($_GET['p'] ?? 1));
@@ -273,11 +276,11 @@ function getCombinedOrderStatus($order)
 
                                         // Siapkan Link WA
                                         if ($order['status'] === 'waiting_payment') {
-                                            $waOrderText = "Halo admin Anyeong Gift, saya ingin bertanya soal pembayaran pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
+                                            $waOrderText = "Halo admin {$ordersStoreName}, saya ingin bertanya soal pembayaran pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
                                         } elseif ($order['status'] === 'paid' || $order['status'] === 'ready_pickup') {
-                                            $waOrderText = "Halo admin Anyeong Gift, saya ingin menanyakan progres pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
+                                            $waOrderText = "Halo admin {$ordersStoreName}, saya ingin menanyakan progres pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
                                         } else {
-                                            $waOrderText = "Halo admin Anyeong Gift, saya ingin bertanya soal pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
+                                            $waOrderText = "Halo admin {$ordersStoreName}, saya ingin bertanya soal pesanan saya *#ORD-" . str_pad($order['id'], 5, '0', STR_PAD_LEFT) . "*.";
                                         }
                                         $waOrderLink = 'https://wa.me/' . preg_replace('/\D+/', '', $waAdminNumber) . '?text=' . urlencode($waOrderText);
                                         ?>
@@ -291,7 +294,11 @@ function getCombinedOrderStatus($order)
                                                 </a>
                                             <?php elseif ($showComplete): ?>
                                                 <form action="actions/complete-order.php" method="POST" class="flex-1 flex"
-                                                    onsubmit="return confirm('Tandai pesanan ini sebagai selesai?');">
+                                                    data-confirm
+                                                    data-confirm-title="Selesaikan Pesanan?"
+                                                    data-confirm-message="Pesanan akan ditandai sebagai selesai dan tidak bisa dibuka kembali. Pastikan pesanan sudah kamu terima."
+                                                    data-confirm-tone="warning"
+                                                    data-confirm-ok="Ya, Selesaikan">
                                                     <input type="hidden" name="order_id" value="<?= (int) $order['id']; ?>">
                                                     <button type="submit"
                                                         class="w-full inline-flex items-center justify-center bg-green-500 text-black px-3 py-3 rounded-xl font-bold text-sm hover:bg-green-400 transition-colors shadow-lg">
