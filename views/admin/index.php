@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $title ?? 'Anyeong Gift Admin' ?></title>
+    <title><?= htmlspecialchars($title ?? (storeNameRaw() . ' Admin')); ?></title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
     <!-- <script src="https://cdn.tailwindcss.com"></script> -->
     <link href="../assets/css/main.css" rel="stylesheet">
@@ -246,7 +246,7 @@
                     class="w-9 h-9 rounded-xl bg-gold-500/15 border border-gold-500/30 text-gold-500 flex items-center justify-center font-bold text-lg">
                     A</div>
                 <div class="leading-tight">
-                    <div class="text-sm font-bold text-gray-100 tracking-wide">Anyeong Gift</div>
+                    <div class="text-sm font-bold text-gray-100 tracking-wide"><?= htmlspecialchars($store_name ?? storeNameRaw()); ?></div>
                     <div class="text-[10px] text-gray-500 uppercase tracking-[0.2em]">Admin Panel</div>
                 </div>
             </div>

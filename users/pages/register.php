@@ -16,7 +16,7 @@ if (!headers_sent()) {
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="0; url=index.php?page=login">
-    <title>Daftar - Anyeong Gift</title>
+    <title>Daftar - <?= htmlspecialchars(storeNameRaw($pdo ?? null)); ?></title>
 </head>
 
 <body>

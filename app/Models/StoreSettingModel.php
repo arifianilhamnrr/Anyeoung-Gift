@@ -82,4 +82,39 @@ class StoreSettingModel extends Model {
         $this->query("SELECT * FROM addresses WHERE type = 'store' ORDER BY is_default DESC, id DESC LIMIT 1");
         return $this->single();
     }
+
+    /**
+     * Perbarui nama & email admin (untuk profil toko di dashboard).
+     * Email unik secara database, jadi caller harus menangani exception.
+     */
+    public function updateAdminUser(int $adminId, string $name, string $email): bool
+    {
+        $this->query("UPDATE users SET name = :name, email = :email WHERE id = :id AND role = 'admin'");
+        $this->bind(':name', $name);
+        $this->bind(':email', $email);
+        $this->bind(':id', $adminId);
+        return $this->execute();
+    }
+
+    /**
+     * Simpan atau update teks alamat toko default. Memakai recipient_name &
+     * whatsapp_number yang sudah ada kalau row store sudah pernah dibuat.
+     */
+    public function upsertStoreAddressText(string $addressText, string $recipientName, string $whatsappNumber): bool
+    {
+        $existing = $this->getStoreAddress();
+        if ($existing) {
+            $this->query("UPDATE addresses SET address_text = :addr, recipient_name = :name, whatsapp_number = :wa WHERE id = :id");
+            $this->bind(':addr', $addressText);
+            $this->bind(':name', $recipientName);
+            $this->bind(':wa', $whatsappNumber);
+            $this->bind(':id', $existing['id']);
+        } else {
+            $this->query("INSERT INTO addresses (user_id, type, recipient_name, whatsapp_number, address_text, is_default) VALUES (NULL, 'store', :name, :wa, :addr, 1)");
+            $this->bind(':addr', $addressText);
+            $this->bind(':name', $recipientName);
+            $this->bind(':wa', $whatsappNumber);
+        }
+        return $this->execute();
+    }
 }

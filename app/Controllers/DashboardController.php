@@ -18,10 +18,13 @@ class DashboardController extends Controller
             exit;
         }
 
-        // Data dasar untuk layout
+        // Data dasar untuk layout. Nama toko diambil dari pengaturan
+        // (fallback "Anyeong Gift") supaya konsisten di seluruh tampilan.
+        $storeName = storeNameRaw();
         $data = [
-            'title' => 'Dashboard - Anyeong Gift',
-            'admin_name' => $_SESSION['admin_name'] ?? 'Admin'
+            'title' => 'Dashboard - ' . $storeName,
+            'admin_name' => $_SESSION['admin_name'] ?? 'Admin',
+            'store_name' => $storeName,
         ];
 
         // Memanggil view utama

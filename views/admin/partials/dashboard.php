@@ -12,7 +12,7 @@ $bulanLabels = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
 <div class="mb-6 animate-fade-in-up flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
     <div>
         <h2 class="text-2xl font-bold text-gray-100 mb-1">Overview</h2>
-        <p class="text-gray-400 text-sm">Ringkasan performa toko Anyeong Gift. Pilih bulan untuk rekap pendapatan bulanan.</p>
+        <p class="text-gray-400 text-sm">Ringkasan performa toko <?= htmlspecialchars(storeNameRaw()); ?>. Pilih bulan untuk rekap pendapatan bulanan.</p>
     </div>
     <div class="flex items-end gap-2">
         <div>

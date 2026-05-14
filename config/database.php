@@ -23,3 +23,6 @@ try {
 if (!isset($_SESSION)) {
     session_start();
 }
+
+// Helper global (storeName, storeSettings, dsb.) -- aman dipanggil dari user side.
+require_once __DIR__ . '/../app/helpers.php';

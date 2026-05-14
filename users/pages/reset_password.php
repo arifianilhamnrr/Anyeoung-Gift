@@ -18,7 +18,7 @@ if ($token !== '') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Anyeong Gift</title>
+    <title>Reset Password - <?= htmlspecialchars(storeNameRaw($pdo ?? null)); ?></title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
     <link href="../assets/css/main.css" rel="stylesheet">
     <link

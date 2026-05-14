@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login Admin - Anyeong Gift</title>
+    <title>Login Admin - <?= htmlspecialchars(storeNameRaw()); ?></title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -40,7 +40,7 @@
 
         <div class="relative z-10">
             <div class="text-4xl mb-2">🎁</div>
-            <h2 class="text-2xl font-bold text-gray-100 mb-1">Anyeong Admin</h2>
+            <h2 class="text-2xl font-bold text-gray-100 mb-1"><?= htmlspecialchars(storeNameRaw()); ?> Admin</h2>
             <p class="text-gray-400 text-sm mb-8">Silakan masuk untuk mengelola toko.</p>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="text-left space-y-4">

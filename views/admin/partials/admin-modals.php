@@ -152,33 +152,53 @@
     <!-- ===== SETTINGS MODALS ===== -->
 
     <!-- Settings: Edit Profil Toko Modal -->
+    <!-- Layout grid disamakan dengan card "Profil Toko" pada views/admin/partials/settings.php
+         supaya tata letak input mengikuti tampilan tabel kartu (2 kolom dengan kolom penuh
+         untuk Alamat & Pesan Default). -->
     <div id="storeProfileModal"
         class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
         <div
-            class="bg-dark-surface w-full max-w-lg rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 relative">
+            class="bg-dark-surface w-full max-w-2xl max-h-[85vh] overflow-y-auto rounded-2xl p-6 md:p-8 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 custom-scrollbar relative">
             <div class="modal-header flex justify-between items-center">
                 <h3 class="text-xl font-bold text-gray-100"> Edit Profil Toko</h3>
                 <button onclick="toggleModal('storeProfileModal', false)"
                     class="text-gray-400 hover:text-white w-8 h-8 rounded-full hover:bg-red-500/20 transition">&times;</button>
             </div>
             <form id="storeProfileForm" onsubmit="submitStoreProfileForm(event)">
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Toko</label>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="settings-display-card">
+                        <label class="label" for="set_store_name">Nama Toko</label>
                         <input type="text" id="set_store_name"
-                            class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
                             required>
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 font-medium mb-1.5">WhatsApp Admin</label>
+                    <div class="settings-display-card">
+                        <label class="label" for="set_wa_admin">WhatsApp Admin</label>
                         <input type="number" id="set_wa_admin"
-                            class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition mono"
                             required>
                     </div>
-                    <div>
-                        <label class="block text-sm text-gray-400 font-medium mb-1.5">Pesan Default Pembeli</label>
+                    <div class="settings-display-card">
+                        <label class="label" for="set_admin_name">Nama Admin</label>
+                        <input type="text" id="set_admin_name"
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                    </div>
+                    <div class="settings-display-card">
+                        <label class="label" for="set_admin_email">Email Toko</label>
+                        <input type="email" id="set_admin_email"
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
+                            placeholder="email@domainmu.com">
+                    </div>
+                    <div class="settings-display-card sm:col-span-2">
+                        <label class="label" for="set_store_address">Alamat Toko</label>
+                        <textarea id="set_store_address" rows="3"
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition custom-scrollbar"
+                            placeholder="Jalan, kota, provinsi, kode pos"></textarea>
+                    </div>
+                    <div class="settings-display-card sm:col-span-2">
+                        <label class="label" for="set_wa_template">Pesan Default Pembeli</label>
                         <textarea id="set_wa_template" rows="4"
-                            class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition custom-scrollbar"></textarea>
+                            class="w-full mt-1 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition custom-scrollbar"></textarea>
                     </div>
                 </div>
                 <div class="flex gap-3 mt-6">
@@ -230,7 +250,7 @@
                     <div class="grid gap-4 sm:grid-cols-2">
                         <div>
                             <label class="block text-sm text-gray-400 font-medium mb-1.5">Nama Pengirim</label>
-                            <input type="text" id="set_email_from_name" placeholder="Anyeong Gift"
+                            <input type="text" id="set_email_from_name" placeholder="<?= htmlspecialchars(storeNameRaw()); ?>"
                                 class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
                         </div>
                         <div>
@@ -374,5 +394,34 @@
                         Simpan</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Reusable Confirmation Modal (admin) -->
+    <!-- Dipakai oleh helper showConfirmModal() di admin-scripts.php untuk
+         menggantikan semua confirm() bawaan browser. Komponen ini dibagi
+         dua varian (warning kuning / danger merah) lewat data-tone. -->
+    <div id="adminConfirmModal"
+        class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[2000] hidden justify-center items-center opacity-0 transition-opacity duration-300">
+        <div
+            class="bg-dark-surface w-full max-w-sm rounded-2xl p-6 md:p-7 border border-dark-border shadow-2xl m-4 transform scale-95 transition-transform duration-300 relative">
+            <div class="text-center">
+                <div id="adminConfirmIconWrap"
+                    class="w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-3 border bg-yellow-500/15 text-yellow-400 border-yellow-500/30">
+                    <svg id="adminConfirmIcon" class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 id="adminConfirmTitle" class="text-lg font-bold text-gray-100 mb-1">Konfirmasi</h3>
+                <p id="adminConfirmMessage" class="text-sm text-gray-400 leading-relaxed">Yakin ingin melanjutkan?</p>
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button type="button" id="adminConfirmCancelBtn"
+                    class="flex-1 py-2.5 rounded-xl border border-dark-border text-gray-300 hover:text-gray-100 hover:border-gray-500 transition font-semibold text-sm">Batal</button>
+                <button type="button" id="adminConfirmOkBtn"
+                    class="flex-1 py-2.5 rounded-xl bg-gold-500 text-gray-900 font-bold text-sm hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">OK</button>
+            </div>
         </div>
     </div>

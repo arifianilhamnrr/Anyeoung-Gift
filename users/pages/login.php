@@ -4,6 +4,8 @@ $authSuccess = $_SESSION['success'] ?? null;
 $activeAuthView = $_SESSION['active_auth_view'] ?? null;
 
 unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
+
+$authStoreName = storeNameRaw($pdo ?? null);
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -11,7 +13,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Anyeong Gift - Masuk</title>
+    <title><?= htmlspecialchars($authStoreName); ?> - Masuk</title>
     <link rel="icon" type="image/svg+xml" href="../assets/images/anyeong-logo.svg">
     <link href="../assets/css/main.css" rel="stylesheet">
     <link
@@ -136,7 +138,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                     kita, menciptakan <span class="font-bold text-gold">rasa memiliki dan saling mendukung.</span>"
                 </p>
                 <p class="mt-4 text-[10px] tracking-[0.25em] text-gray-500 uppercase font-bold">
-                    Anyeong GIFT
+                    <?= htmlspecialchars(strtoupper($authStoreName)); ?>
                 </p>
             </div>
         </div>
@@ -152,10 +154,10 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
             <div class="bg-gold px-6 pt-4 pb-12 min-h-[40vh] flex flex-col justify-center items-center relative z-10">
                 <div class="w-full max-w-md text-center">
                     <h1 class="font-title text-3xl md:text-4xl font-bold text-black mb-4 leading-tight">
-                        Selamat Datang di <br><span class="text-white drop-shadow-md">Anyeong Gift</span>
+                        Selamat Datang di <br><span class="text-white drop-shadow-md"><?= htmlspecialchars($authStoreName); ?></span>
                     </h1>
 
-                    <img src="../assets/images/anyeong-logo.svg" alt="Logo Anyeong Gift" class="w-24 h-auto mx-auto mb-6">
+                    <img src="../assets/images/anyeong-logo.svg" alt="Logo <?= htmlspecialchars($authStoreName); ?>" class="w-24 h-auto mx-auto mb-6">
 
                     <p class="text-black/80 text-sm mb-8 px-4 leading-relaxed font-medium">
                         Kami bangga melayani ribuan pelanggan dengan menghadirkan hadiah terbaik untuk setiap momen
@@ -340,7 +342,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-sm text-gray-300 flex-1 leading-relaxed">
                 <p><strong class="text-white">1. Ketentuan Umum</strong><br>Dengan mendaftar dan menggunakan layanan
-                    Anyeong Gift, Anda setuju untuk mematuhi semua syarat dan ketentuan yang berlaku.</p>
+                    <?= htmlspecialchars($authStoreName); ?>, Anda setuju untuk mematuhi semua syarat dan ketentuan yang berlaku.</p>
                 <p><strong class="text-white">2. Pemesanan</strong><br>Setiap pesanan akan diproses apabila proses
                     *checkout* dan validasi pembayaran telah berhasil dilakukan.</p>
                 <p><strong class="text-white">3. Pembayaran</strong><br>Pengguna wajib mengunggah bukti pembayaran
@@ -378,7 +380,7 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                 </button>
             </div>
             <div class="p-6 overflow-y-auto custom-scrollbar space-y-4 text-sm text-gray-300 flex-1 leading-relaxed">
-                <p>Kami di Anyeong Gift sangat menghargai privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana
+                <p>Kami di <?= htmlspecialchars($authStoreName); ?> sangat menghargai privasi Anda. Kebijakan Privasi ini menjelaskan bagaimana
                     kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda.</p>
                 <p><strong class="text-white">Pengumpulan Data</strong><br>Kami hanya mengumpulkan informasi yang Anda
                     berikan saat mendaftar, seperti nama, email, dan nomor WhatsApp. Kami juga menyimpan riwayat pesanan
