@@ -321,7 +321,7 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
                                         <?= htmlspecialchars($method['name']); ?>
                                     </div>
                                     <div class="text-gray-400 text-[11px] sm:text-xs mt-0.5 truncate">
-                                        <?= $method['type'] === 'onsite' ? 'Bayar tunai di toko' : 'Transfer Bank / E-Wallet' ?>
+                                        <?= $method['type'] === 'onsite' ? 'Cash on Pick Up  bayar tunai saat ambil pesanan' : 'Transfer Bank / E-Wallet' ?>
                                     </div>
                                 </div>
                                 <input type="radio" name="payment_method_id" value="<?= $method['id']; ?>"

@@ -1,13 +1,48 @@
-<div class="mb-6 animate-fade-in-up">
-    <h2 class="text-2xl font-bold text-gray-100 mb-1">Overview</h2>
-    <p class="text-gray-400 text-sm">Ringkasan performa toko Anyeong Gift hari ini.</p>
+<?php
+$now = new DateTime('now');
+$currentMonth = (int) $now->format('n');
+$currentYear = (int) $now->format('Y');
+$yearOptions = [];
+for ($y = $currentYear; $y >= $currentYear - 5; $y--) {
+    $yearOptions[] = $y;
+}
+$bulanLabels = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+?>
+<div class="mb-6 animate-fade-in-up flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-100 mb-1">Overview</h2>
+        <p class="text-gray-400 text-sm">Ringkasan performa toko Anyeong Gift. Pilih bulan untuk rekap pendapatan bulanan.</p>
+    </div>
+    <div class="flex items-end gap-2">
+        <div>
+            <label class="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">Bulan</label>
+            <select id="dashboardMonthFilter" onchange="loadDashboardData()"
+                class="w-full sm:w-40 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                <option value="all">Semua</option>
+                <?php foreach ($bulanLabels as $idx => $label): $num = $idx + 1; ?>
+                    <option value="<?= $num ?>" <?= $num === $currentMonth ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div>
+            <label class="block text-[11px] uppercase tracking-wider text-gray-500 mb-1">Tahun</label>
+            <select id="dashboardYearFilter" onchange="loadDashboardData()"
+                class="w-full sm:w-32 p-2.5 bg-dark-base border border-dark-border text-gray-200 rounded-lg text-sm focus:border-gold-500 focus:ring-1 outline-none transition">
+                <option value="all">Semua</option>
+                <?php foreach ($yearOptions as $y): ?>
+                    <option value="<?= $y ?>" <?= $y === $currentYear ? 'selected' : '' ?>><?= $y ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    </div>
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 animate-fade-in-up">
 
     <div class="relative bg-dark-surface p-6 rounded-2xl border border-dark-border shadow-sm overflow-hidden">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-gray-400 text-xs font-semibold uppercase tracking-wider">Total Pendapatan</h3>
+            <h3 class="text-gray-400 text-xs font-semibold uppercase tracking-wider">Pendapatan Bulan Ini</h3>
             <div class="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/20 text-gold-500 flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-2 0-3 1-3 2s1 2 3 2 3 1 3 2-1 2-3 2m0-8V6m0 12v-2M3 12a9 9 0 1118 0 9 9 0 01-18 0z" />
@@ -15,7 +50,7 @@
             </div>
         </div>
         <div class="text-3xl font-bold text-gray-100" id="stat-revenue">Rp 0</div>
-        <p class="text-xs text-gray-500 mt-1">Akumulasi pesanan yang sudah dibayar.</p>
+        <p class="text-xs text-gray-500 mt-1" id="stat-revenue-period">Memuat periode...</p>
     </div>
 
     <div class="relative bg-dark-surface p-6 rounded-2xl border border-dark-border shadow-sm overflow-hidden">
