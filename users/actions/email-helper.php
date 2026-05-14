@@ -50,3 +50,40 @@ function sendConfiguredEmail(PDO $pdo, string $toEmail, string $toName, string $
     $mailer = new MailerService($settings);
     return $mailer->send($toEmail, $toName, $subject, $htmlBody, $textBody);
 }
+
+/**
+ * Kirim response (termasuk header Location) ke browser sekarang juga, lalu
+ * biarkan script PHP terus berjalan di background untuk pekerjaan lama seperti
+ * mengirim email via SMTP. Tanpa ini, request HTTP akan menggantung selama
+ * proses SMTP berjalan (bisa puluhan detik di server produksi).
+ */
+function flushResponseAndContinue(): void
+{
+    // Pastikan script tidak dibunuh saat browser disconnect / redirect.
+    ignore_user_abort(true);
+
+    // Naikkan limit eksekusi untuk pekerjaan background (email SMTP).
+    @set_time_limit(60);
+
+    // Tutup session supaya request lain dari user yang sama tidak nge-block.
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
+
+    // Beritahu browser jangan tunggu data lagi.
+    if (!headers_sent()) {
+        header('Connection: close');
+        header('Content-Length: 0');
+    }
+
+    // Flush semua output buffer.
+    while (ob_get_level() > 0) {
+        @ob_end_flush();
+    }
+    @flush();
+
+    // PHP-FPM: sinyal selesai ke web server, browser dapat redirect langsung.
+    if (function_exists('fastcgi_finish_request')) {
+        fastcgi_finish_request();
+    }
+}

@@ -354,6 +354,13 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
     <?php endif; ?>
 </div>
 
+<?php
+$loaderId = 'checkoutLoadingModal';
+$loaderTitle = 'Memproses Pesanan...';
+$loaderText = 'Mohon tunggu sebentar, pesananmu sedang dibuat.<br>Jangan tutup atau refresh halaman ini.';
+include __DIR__ . '/../components/truck-loader-modal.php';
+?>
+
 <style>
     .custom-scrollbar::-webkit-scrollbar { width: 6px; }
     .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -416,4 +423,11 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
     const paymentModalContent = document.getElementById('paymentModalContent');
     function openPaymentModal() { animateOpen(paymentModal, paymentModalContent); }
     function closePaymentModal() { animateClose(paymentModal, paymentModalContent); }
+
+    // Modal loading saat submit checkout. Modal otomatis tertutup ketika
+    // halaman navigasi ke halaman berikutnya (payment_upload atau orders)
+    // setelah server selesai memproses pesanan.
+    if (typeof window.attachTruckLoaderToForm === 'function') {
+        window.attachTruckLoaderToForm('checkoutForm', 'checkoutLoadingModal');
+    }
 </script>

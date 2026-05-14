@@ -110,6 +110,8 @@ $stmt = $pdo->prepare("
 ");
 $stmt->execute([$newFileName, $order['payment_id']]);
 
+// Siapkan email notifikasi (dikirim setelah response di-flush ke browser).
+$emailJob = null;
 try {
     $storeSettings = fetchStoreSettings($pdo);
     $storeName = $storeSettings['store_name'] ?? 'Anyeong Gift';
@@ -159,18 +161,44 @@ try {
         $textBody .= "Metode pembayaran: {$methodName}. Total: Rp {$total}.\n";
         $textBody .= "Silakan verifikasi di dashboard admin.";
 
-        foreach ($adminRecipients as $admin) {
+        $emailJob = [
+            'recipients' => $adminRecipients,
+            'subject' => $subject,
+            'body' => $body,
+            'text' => $textBody,
+        ];
+    }
+} catch (Exception $e) {
+    error_log('Upload payment email prep failed: ' . $e->getMessage());
+}
+
+$_SESSION['order_success'] = 'Bukti pembayaran berhasil diupload. Silakan tunggu konfirmasi admin.';
+header('Location: ../index.php?page=orders');
+
+// Lepas response ke browser dulu, lalu kirim email di background supaya
+// halaman tidak nge-loading lama menunggu SMTP.
+flushResponseAndContinue();
+
+if ($emailJob !== null) {
+    try {
+        foreach ($emailJob['recipients'] as $admin) {
             $adminEmail = $admin['email'] ?? '';
             if ($adminEmail === '') {
                 continue;
             }
             $adminName = $admin['name'] ?? 'Admin';
-            sendConfiguredEmail($pdo, $adminEmail, $adminName, $subject, $body, $textBody);
+            sendConfiguredEmail(
+                $pdo,
+                $adminEmail,
+                $adminName,
+                $emailJob['subject'],
+                $emailJob['body'],
+                $emailJob['text']
+            );
         }
+    } catch (Exception $e) {
+        error_log('Upload payment background email failed: ' . $e->getMessage());
     }
-} catch (Exception $e) {
 }
 
-$_SESSION['order_success'] = 'Bukti pembayaran berhasil diupload. Silakan tunggu konfirmasi admin.';
-header('Location: ../index.php?page=orders');
 exit;

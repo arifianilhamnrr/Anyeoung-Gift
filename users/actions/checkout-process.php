@@ -194,6 +194,10 @@ try {
 
     $pdo->commit();
 
+    // Siapkan data buat email (tetapi belum kirim). Kirim email dilakukan
+    // setelah response di-flush ke browser supaya halaman tidak ngegantung
+    // menunggu SMTP.
+    $emailData = null;
     try {
         $stmt = $pdo->prepare("SELECT name, email FROM users WHERE id = ? LIMIT 1");
         $stmt->execute([$userId]);
@@ -261,8 +265,8 @@ try {
                 ? '<p style="margin:8px 0 0;">Link pembayaran: <a href="' . $paymentLink . '">' . $paymentLink . '</a></p>'
                 : '';
 
-            $subject = "Pesanan {$orderNumber} Berhasil Dibuat - {$storeName}";
-            $body = "
+            $customerSubject = "Pesanan {$orderNumber} Berhasil Dibuat - {$storeName}";
+            $customerBody = "
                 <div style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #111;\">
                     <div style=\"margin-bottom:12px;\"><img src=\"{$logoUrl}\" alt=\"Logo {$storeName}\" style=\"height:48px;\" /></div>
                     <h2 style=\"margin: 0 0 8px;\">Konfirmasi Pesanan</h2>
@@ -295,26 +299,24 @@ try {
                     <p style=\"margin-top:16px;\">Terima kasih telah berbelanja di {$storeName}.</p>
                 </div>
             ";
-            $textBody = "Halo {$user['name']}, terima kasih telah berbelanja di {$storeName}.\n";
-            $textBody .= "Nomor pesanan: {$orderNumber}\n";
-            $textBody .= "Tanggal pesanan: {$orderDate}\n";
-            $textBody .= "Status: {$statusLabel}\n";
-            $textBody .= "Metode pembayaran: {$methodName}\n";
-            $textBody .= "Total: Rp {$totalFormatted}\n\n";
-            $textBody .= "Detail pesanan:\n" . implode("\n", $itemLines) . "\n\n";
-            $textBody .= $nextStep . "\n";
+            $customerText = "Halo {$user['name']}, terima kasih telah berbelanja di {$storeName}.\n";
+            $customerText .= "Nomor pesanan: {$orderNumber}\n";
+            $customerText .= "Tanggal pesanan: {$orderDate}\n";
+            $customerText .= "Status: {$statusLabel}\n";
+            $customerText .= "Metode pembayaran: {$methodName}\n";
+            $customerText .= "Total: Rp {$totalFormatted}\n\n";
+            $customerText .= "Detail pesanan:\n" . implode("\n", $itemLines) . "\n\n";
+            $customerText .= $nextStep . "\n";
             if ($methodType !== 'onsite') {
-                $textBody .= "Link pembayaran: {$paymentLink}\n\n";
+                $customerText .= "Link pembayaran: {$paymentLink}\n\n";
             }
             if ($storeAddressText !== '') {
-                $textBody .= "Alamat toko:\n{$storeAddressText}\n";
+                $customerText .= "Alamat toko:\n{$storeAddressText}\n";
             }
             if ($storeWhatsapp !== '') {
-                $textBody .= "WhatsApp toko: {$storeWhatsapp}\n";
+                $customerText .= "WhatsApp toko: {$storeWhatsapp}\n";
             }
-            $textBody .= "\nTerima kasih telah berbelanja di {$storeName}.";
-
-            sendConfiguredEmail($pdo, $user['email'], $user['name'], $subject, $body, $textBody);
+            $customerText .= "\nTerima kasih telah berbelanja di {$storeName}.";
 
             $adminRecipients = fetchAdminRecipients($pdo);
             if (!empty($adminRecipients)) {
@@ -347,18 +349,26 @@ try {
                 ";
                 $adminText = "Pesanan baru {$orderNumber} telah dibuat. Total Rp {$totalFormatted}.";
                 $adminText .= "\nDetail pesanan:\n" . implode("\n", $itemLines);
-
-                foreach ($adminRecipients as $admin) {
-                    $adminEmail = $admin['email'] ?? '';
-                    if ($adminEmail === '') {
-                        continue;
-                    }
-                    $adminName = $admin['name'] ?? 'Admin';
-                    sendConfiguredEmail($pdo, $adminEmail, $adminName, $adminSubject, $adminBody, $adminText);
-                }
+            } else {
+                $adminSubject = '';
+                $adminBody = '';
+                $adminText = '';
             }
+
+            $emailData = [
+                'customer_email' => $user['email'],
+                'customer_name' => $user['name'],
+                'customer_subject' => $customerSubject,
+                'customer_body' => $customerBody,
+                'customer_text' => $customerText,
+                'admin_recipients' => $adminRecipients,
+                'admin_subject' => $adminSubject,
+                'admin_body' => $adminBody,
+                'admin_text' => $adminText,
+            ];
         }
     } catch (Exception $e) {
+        error_log('Checkout email prep failed: ' . $e->getMessage());
     }
 
     // Bersihkan hanya bucket yang dipakai. Buy now tidak menyentuh keranjang
@@ -380,6 +390,43 @@ try {
     } else {
         header('Location: ../index.php?page=orders');
     }
+
+    // Lepaskan response ke browser dulu (header redirect sudah dikirim).
+    // Email SMTP dikirim setelah ini di background supaya halaman checkout
+    // tidak menggantung menunggu SMTP merespons.
+    flushResponseAndContinue();
+
+    if ($emailData !== null) {
+        try {
+            sendConfiguredEmail(
+                $pdo,
+                $emailData['customer_email'],
+                $emailData['customer_name'],
+                $emailData['customer_subject'],
+                $emailData['customer_body'],
+                $emailData['customer_text']
+            );
+
+            foreach ($emailData['admin_recipients'] as $admin) {
+                $adminEmail = $admin['email'] ?? '';
+                if ($adminEmail === '') {
+                    continue;
+                }
+                $adminName = $admin['name'] ?? 'Admin';
+                sendConfiguredEmail(
+                    $pdo,
+                    $adminEmail,
+                    $adminName,
+                    $emailData['admin_subject'],
+                    $emailData['admin_body'],
+                    $emailData['admin_text']
+                );
+            }
+        } catch (Exception $e) {
+            error_log('Checkout background email failed: ' . $e->getMessage());
+        }
+    }
+
     exit;
 
 } catch (Exception $e) {
