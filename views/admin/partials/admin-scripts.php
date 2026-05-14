@@ -1111,6 +1111,133 @@
                     ? '<span class="px-3 py-1 bg-green-500/15 text-green-400 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>'
                     : '<span class="px-3 py-1 bg-gray-500/15 text-gray-400 border border-gray-500/30 rounded-full text-xs font-bold">Tidak Aktif</span>';
             }
+
+            // Card pemakaian Brevo hanya muncul saat driver=brevo dan API key
+            // sudah terisi. Setiap kali settings di-render ulang, kita evaluasi
+            // ulang visibilitas card-nya.
+            const brevoCard = document.getElementById('brevo_usage_card');
+            if (brevoCard) {
+                const driverIsBrevo = driver === 'brevo';
+                const hasApiKey = !!data.email_brevo_api_key_set;
+                if (driverIsBrevo && hasApiKey) {
+                    brevoCard.classList.remove('hidden');
+                    loadBrevoUsage(false);
+                } else {
+                    brevoCard.classList.add('hidden');
+                }
+            }
+        }
+
+        // ==========================================
+        // --- BREVO DAILY QUOTA USAGE ---
+        // ==========================================
+        // Cache singkat supaya tidak hit API Brevo tiap kali settings di-render.
+        let brevoUsageCache = { fetchedAt: 0, data: null };
+        const BREVO_USAGE_TTL_MS = 60 * 1000; // 1 menit
+
+        async function loadBrevoUsage(force = false) {
+            const card = document.getElementById('brevo_usage_card');
+            if (!card) return;
+            if (card.classList.contains('hidden') && !force) {
+                // Card belum kelihatan dan tidak di-force -- tidak perlu fetch.
+                return;
+            }
+            const loadingEl = document.getElementById('brevo_usage_loading');
+            const errorEl = document.getElementById('brevo_usage_error');
+            const dataEl = document.getElementById('brevo_usage_data');
+
+            // Pakai cache kalau masih segar dan tidak di-force.
+            const now = Date.now();
+            if (!force && brevoUsageCache.data && (now - brevoUsageCache.fetchedAt) < BREVO_USAGE_TTL_MS) {
+                renderBrevoUsage(brevoUsageCache.data);
+                return;
+            }
+
+            if (loadingEl) loadingEl.classList.remove('hidden');
+            if (errorEl) errorEl.classList.add('hidden');
+            if (dataEl) dataEl.classList.add('hidden');
+
+            try {
+                const res = await fetch(`${BASE_URL}/api/settings/brevo-usage`);
+                const result = await res.json();
+                if (result.status === 'success' && result.data) {
+                    brevoUsageCache = { fetchedAt: now, data: result.data };
+                    renderBrevoUsage(result.data);
+                } else {
+                    showBrevoUsageError(result.message || 'Gagal memuat data Brevo.');
+                }
+            } catch (e) {
+                console.error('Gagal mengambil pemakaian Brevo', e);
+                showBrevoUsageError('Gagal menghubungi server.');
+            }
+        }
+
+        function showBrevoUsageError(message) {
+            const loadingEl = document.getElementById('brevo_usage_loading');
+            const errorEl = document.getElementById('brevo_usage_error');
+            const dataEl = document.getElementById('brevo_usage_data');
+            if (loadingEl) loadingEl.classList.add('hidden');
+            if (dataEl) dataEl.classList.add('hidden');
+            if (errorEl) {
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        function renderBrevoUsage(data) {
+            const loadingEl = document.getElementById('brevo_usage_loading');
+            const errorEl = document.getElementById('brevo_usage_error');
+            const dataEl = document.getElementById('brevo_usage_data');
+            if (loadingEl) loadingEl.classList.add('hidden');
+            if (errorEl) errorEl.classList.add('hidden');
+            if (dataEl) dataEl.classList.remove('hidden');
+
+            const setText = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val == null || val === '' ? '-' : val;
+            };
+
+            setText('brevo_usage_date', data.date || '-');
+            const planLabel = (data.plan_name || '').replace(/^./, c => c.toUpperCase()) || '-';
+            setText('brevo_usage_plan', planLabel + (data.plan_type === 'free' ? ' (gratis)' : ''));
+            setText('brevo_usage_account', data.account_email || '-');
+            setText('brevo_usage_used', new Intl.NumberFormat('id-ID').format(data.used_today || 0));
+            setText('brevo_usage_delivered', new Intl.NumberFormat('id-ID').format(data.delivered_today || 0));
+            setText('brevo_usage_remaining',
+                data.remaining_today === null
+                    ? 'Tanpa batas harian'
+                    : new Intl.NumberFormat('id-ID').format(data.remaining_today) + ' email'
+            );
+
+            const progressWrap = document.getElementById('brevo_usage_progress_wrap');
+            const bar = document.getElementById('brevo_usage_bar');
+            const percentEl = document.getElementById('brevo_usage_percent');
+            const limitEl = document.getElementById('brevo_usage_limit');
+            if (data.daily_limit && data.daily_limit > 0 && progressWrap) {
+                progressWrap.classList.remove('hidden');
+                const percent = Math.max(0, Math.min(100, Number(data.percent_used) || 0));
+                if (bar) {
+                    bar.style.width = percent + '%';
+                    // Ubah warna saat mendekati limit supaya admin sadar.
+                    bar.classList.remove(
+                        'from-emerald-500', 'to-emerald-400',
+                        'from-amber-500', 'to-amber-400',
+                        'from-red-500', 'to-red-400'
+                    );
+                    if (percent >= 90) {
+                        bar.classList.add('from-red-500', 'to-red-400');
+                    } else if (percent >= 70) {
+                        bar.classList.add('from-amber-500', 'to-amber-400');
+                    } else {
+                        bar.classList.add('from-emerald-500', 'to-emerald-400');
+                    }
+                }
+                if (percentEl) percentEl.textContent = percent;
+                if (limitEl) limitEl.textContent = new Intl.NumberFormat('id-ID').format(data.daily_limit);
+            } else if (progressWrap) {
+                // Paket berbayar tanpa limit harian -- sembunyikan progress bar.
+                progressWrap.classList.add('hidden');
+            }
         }
 
         /** Tampilkan/sembunyikan field credential di modal Pengaturan Email

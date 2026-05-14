@@ -11,6 +11,16 @@
  * dan menampilkan nama dari halaman pengaturan toko.
  */
 
+// Pastikan seluruh aplikasi (admin & user) memakai zona waktu Asia/Jakarta.
+// Admin sudah men-set ini lewat config.php, tapi sisi user hanya memuat
+// config/database.php sehingga PHP date() bisa jatuh ke zona default server
+// (biasanya UTC). Pakai konstanta TIMEZONE bila sudah didefinisikan supaya
+// tetap satu sumber kebenaran.
+if (function_exists('date_default_timezone_set')) {
+    $appTimezone = defined('TIMEZONE') ? TIMEZONE : 'Asia/Jakarta';
+    date_default_timezone_set($appTimezone);
+}
+
 if (!function_exists('storeSettings')) {
     /**
      * Ambil baris store_settings (di-cache di static var). Mengembalikan
