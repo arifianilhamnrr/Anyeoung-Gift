@@ -59,6 +59,12 @@ class MailerService
             $mail->Password = $password;
             $mail->Port = $port ?: 587;
 
+            // Batasi waktu koneksi SMTP supaya request HTTP tidak menggantung
+            // berlama-lama saat server SMTP tidak terjangkau (mis. port 587
+            // diblok hosting). Default PHPMailer 300 detik => terlalu lama.
+            $mail->Timeout = 10;
+            $mail->SMTPKeepAlive = false;
+
             if ($encryption === 'ssl') {
                 $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
             } elseif ($encryption === 'tls') {
@@ -74,6 +80,7 @@ class MailerService
 
             return $mail->send();
         } catch (Exception $e) {
+            error_log('MailerService send failed: ' . $e->getMessage());
             return false;
         }
     }

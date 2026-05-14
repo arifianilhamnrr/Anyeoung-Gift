@@ -211,7 +211,7 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
                 </div>
             <?php endif; ?>
 
-            <form action="actions/upload-payment.php" method="POST" enctype="multipart/form-data"
+            <form id="paymentUploadForm" action="actions/upload-payment.php" method="POST" enctype="multipart/form-data"
                 class="space-y-4 md:space-y-5">
                 <input type="hidden" name="order_id" value="<?= (int) $order['id']; ?>">
 
@@ -244,6 +244,13 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
         </div>
     </div>
 </div>
+
+<?php
+$loaderId = 'paymentUploadLoadingModal';
+$loaderTitle = 'Mengunggah Bukti...';
+$loaderText = 'Mohon tunggu sebentar, bukti pembayaranmu sedang diproses.<br>Jangan tutup atau refresh halaman ini.';
+include __DIR__ . '/../components/truck-loader-modal.php';
+?>
 
 <div id="copyToast"
     class="fixed top-24 left-1/2 -translate-x-1/2 z-[150] bg-green-500/90 text-black px-4 py-2 rounded-full font-bold text-sm shadow-[0_5px_20px_rgba(34,197,94,0.4)] flex items-center gap-2 transform -translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
@@ -288,5 +295,10 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
             toast.classList.remove('opacity-100', 'translate-y-0');
             toast.classList.add('opacity-0', '-translate-y-10');
         }, 2000);
+    }
+
+    // Modal loading saat upload bukti pembayaran.
+    if (typeof window.attachTruckLoaderToForm === 'function') {
+        window.attachTruckLoaderToForm('paymentUploadForm', 'paymentUploadLoadingModal');
     }
 </script>
