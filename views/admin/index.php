@@ -183,6 +183,56 @@
 <body
     class="bg-dark-base text-gray-200 flex h-screen overflow-hidden antialiased selection:bg-gold-500 selection:text-gray-900">
 
+    <!-- Modal loading admin: backdrop redup + 3-dot bouncing loader.
+         Muncul saat aksi konfirmasi / perubahan (simpan, hapus, ubah status). -->
+    <div id="adminLoaderModal"
+        class="fixed inset-0 z-[2000] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm"></div>
+        <div id="adminLoaderModalContent"
+            class="relative bg-dark-surface/95 backdrop-blur-2xl border border-dark-border shadow-2xl rounded-2xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300">
+            <div class="p-8 text-center flex flex-col items-center">
+                <div class="dot-loader mb-5" role="status" aria-label="Memuat">
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <h3 id="adminLoaderTitle" class="text-lg font-bold text-white mb-1">Memproses...</h3>
+                <p id="adminLoaderText" class="text-gray-400 text-sm">Mohon tunggu sebentar.</p>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        /* 3-dot bouncing loader - by Javierrocadev (Uiverse.io) */
+        .dot-loader {
+            display: flex;
+            flex-direction: row;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+        }
+        .dot-loader .dot {
+            width: 1rem;
+            height: 1rem;
+            border-radius: 9999px;
+            background-color: #1d4ed8; /* tailwind blue-700 */
+            animation: dotBounce 1s infinite;
+        }
+        .dot-loader .dot:nth-child(1) { animation-delay: 0.7s; }
+        .dot-loader .dot:nth-child(2) { animation-delay: 0.3s; }
+        .dot-loader .dot:nth-child(3) { animation-delay: 0.7s; }
+        @keyframes dotBounce {
+            0%, 100% {
+                transform: translateY(-25%);
+                animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+            }
+            50% {
+                transform: none;
+                animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+        }
+    </style>
+
     <div id="sidebar-overlay"
         class="fixed inset-0 bg-black/50 backdrop-blur-md z-40 hidden transition-all duration-300 md:hidden"
         onclick="toggleSidebar()"></div>
@@ -893,6 +943,44 @@
             }
         }
 
+        // --- LOADER ADMIN ---
+        // Modal loading dengan 3-dot bouncing yang muncul saat aksi konfirmasi
+        // / perubahan (simpan, hapus, ubah status, dll). Backdrop redup supaya
+        // loader-nya terlihat dan user tidak bisa klik tombol lain.
+        function showAdminLoader(title, message) {
+            const modal = document.getElementById('adminLoaderModal');
+            if (!modal) return;
+            const content = document.getElementById('adminLoaderModalContent');
+            const titleEl = document.getElementById('adminLoaderTitle');
+            const textEl = document.getElementById('adminLoaderText');
+            if (titleEl) titleEl.textContent = title || 'Memproses...';
+            if (textEl) textEl.textContent = message || 'Mohon tunggu sebentar.';
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                if (content) {
+                    content.classList.remove('scale-95');
+                    content.classList.add('scale-100');
+                }
+            }, 10);
+        }
+
+        function hideAdminLoader() {
+            const modal = document.getElementById('adminLoaderModal');
+            if (!modal) return;
+            const content = document.getElementById('adminLoaderModalContent');
+            modal.classList.add('opacity-0');
+            if (content) {
+                content.classList.remove('scale-100');
+                content.classList.add('scale-95');
+            }
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 300);
+        }
+
         const rowMenuIcons = {
             eye: '<path stroke-linecap="round" stroke-linejoin="round" d="M2.04 12.32a1.01 1.01 0 010-.64C3.42 7.51 7.36 4.5 12 4.5c4.64 0 8.58 3.01 9.96 7.18.07.2.07.43 0 .64C20.58 16.49 16.64 19.5 12 19.5c-4.64 0-8.58-3.01-9.96-7.18z"/><circle cx="12" cy="12" r="3"/>',
             edit: '<path stroke-linecap="round" stroke-linejoin="round" d="M16.5 3.75a2.121 2.121 0 113 3L7 19.25l-4 1 1-4L16.5 3.75z"/>',
@@ -983,7 +1071,8 @@
 
         async function handleLogout() {
             if (!confirm('Apakah Anda yakin ingin keluar?')) return;
-            try { const res = await fetch(`${BASE_URL}/api/logout`, { method: 'POST' }); const data = await res.json(); if (data.status === 'success') window.location.href = `${BASE_URL}/login`; } catch (e) { showToast('Kesalahan jaringan', 'error'); }
+            showAdminLoader('Keluar...', 'Sedang mengakhiri sesi.');
+            try { const res = await fetch(`${BASE_URL}/api/logout`, { method: 'POST' }); const data = await res.json(); if (data.status === 'success') window.location.href = `${BASE_URL}/login`; else hideAdminLoader(); } catch (e) { hideAdminLoader(); showToast('Kesalahan jaringan', 'error'); }
         }
 
         const pageTitleMap = { dashboard: 'Dashboard', orders: 'Pesanan', products: 'Produk', payments: 'Pembayaran', settings: 'Pengaturan' };
@@ -1138,13 +1227,14 @@
             if (imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
             if (editProductId) formData.append('product_id', editProductId);
             const apiUrl = editProductId ? `${BASE_URL}/api/products/update` : `${BASE_URL}/api/products`;
+            showAdminLoader(editProductId ? 'Memperbarui produk...' : 'Menyimpan produk...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(apiUrl, { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') { showToast(data.message || 'Produk tersimpan!', 'success'); closeProductModal(); loadProductsData(); }
                 else showToast(data.message, 'error');
             } catch (err) { showToast('Error Jaringan', 'error'); }
-            finally { btn.innerText = editProductId ? ' Perbarui Produk' : ' Simpan Produk Baru'; btn.disabled = false; }
+            finally { hideAdminLoader(); btn.innerText = editProductId ? ' Perbarui Produk' : ' Simpan Produk Baru'; btn.disabled = false; }
         }
 
         let productsCache = [];
@@ -1201,8 +1291,27 @@
             renderPagination('products-pagination', productsCurrentPage, totalPages, filtered.length, (page) => { productsCurrentPage = page; renderProductsTable(); });
         }
 
-        async function toggleProductStatus(id, status) { if (!confirm('Yakin ubah status?')) return; try { const res = await fetch(`${BASE_URL}/api/products/toggle-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) }); const data = await res.json(); if (data.status === 'success') { showToast('Status diubah', 'success'); loadProductsData(); } } catch (e) { } }
-        async function deleteProduct(id) { if (!confirm('Hapus permanen produk ini?')) return; try { const res = await fetch(`${BASE_URL}/api/products/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); const data = await res.json(); if (data.status === 'success') { showToast('Produk dihapus', 'success'); loadProductsData(); } else showToast(data.message, 'error'); } catch (e) { } }
+        async function toggleProductStatus(id, status) {
+            if (!confirm('Yakin ubah status?')) return;
+            showAdminLoader('Mengubah status...', 'Mohon tunggu sebentar.');
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/toggle-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status }) });
+                const data = await res.json();
+                if (data.status === 'success') { showToast('Status diubah', 'success'); loadProductsData(); }
+            } catch (e) { showToast('Kesalahan jaringan', 'error'); }
+            finally { hideAdminLoader(); }
+        }
+        async function deleteProduct(id) {
+            if (!confirm('Hapus permanen produk ini?')) return;
+            showAdminLoader('Menghapus produk...', 'Mohon tunggu sebentar.');
+            try {
+                const res = await fetch(`${BASE_URL}/api/products/delete`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+                const data = await res.json();
+                if (data.status === 'success') { showToast('Produk dihapus', 'success'); loadProductsData(); }
+                else showToast(data.message, 'error');
+            } catch (e) { showToast('Kesalahan jaringan', 'error'); }
+            finally { hideAdminLoader(); }
+        }
 
         function openProductDetailModal(id) { document.getElementById('product-detail-content').innerHTML = `<div class="animate-pulse h-40 bg-dark-hover rounded-xl w-full"></div>`; toggleModal('productDetailModal', true); fetchProductDetails(id); }
         function closeProductDetailModal() { toggleModal('productDetailModal', false); }
@@ -1328,12 +1437,14 @@
         async function setOrderStatus(orderId, status) {
             if (status === 'cancelled' && !confirm('Yakin membatalkan pesanan ini?')) return;
             const labels = { paid: 'mengkonfirmasi pesanan', ready_pickup: 'menandai pesanan siap diambil', completed: 'menandai pesanan selesai', cancelled: 'membatalkan pesanan' };
+            showAdminLoader('Memperbarui status...', 'Sedang menyimpan perubahan ke server.');
             try {
                 const res = await fetch(`${BASE_URL}/api/orders/update-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderId, status }) });
                 const data = await res.json();
                 if (data.status === 'success') { showToast('Berhasil ' + (labels[status] || 'memperbarui status'), 'success'); loadOrdersData(); }
                 else showToast(data.message || 'Gagal memperbarui status', 'error');
             } catch (e) { showToast('Kesalahan jaringan', 'error'); }
+            finally { hideAdminLoader(); }
         }
 
         function openOrderDetailModal(orderId, customerName) {
@@ -1485,12 +1596,14 @@
         async function confirmOrderFromModal(orderId, status) {
             const confirms = { paid: 'Konfirmasi pesanan ini sebagai sudah dibayar?', ready_pickup: 'Tandai pesanan ini siap untuk diambil?', completed: 'Tandai pesanan ini selesai?', cancelled: 'Yakin membatalkan pesanan ini?' };
             if (confirms[status] && !confirm(confirms[status])) return;
+            showAdminLoader('Memperbarui status...', 'Sedang menyimpan perubahan ke server.');
             try {
                 const res = await fetch(`${BASE_URL}/api/orders/update-status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ order_id: orderId, status }) });
                 const data = await res.json();
                 if (data.status === 'success') { showToast('Status pesanan diperbarui', 'success'); fetchOrderDetails(orderId); if (typeof loadOrdersData === 'function') loadOrdersData(); }
                 else showToast(data.message || 'Gagal memperbarui status', 'error');
             } catch (e) { showToast('Kesalahan jaringan', 'error'); }
+            finally { hideAdminLoader(); }
         }
 
         async function confirmOnlinePayment(orderId) {
@@ -1587,13 +1700,14 @@
             const imageInput = document.getElementById('pm_image');
             if (imageInput && imageInput.files && imageInput.files.length > 0) formData.append('image', imageInput.files[0]);
             const apiUrl = editPaymentId ? `${BASE_URL}/api/payment-methods/update` : `${BASE_URL}/api/payment-methods`;
+            showAdminLoader(editPaymentId ? 'Memperbarui metode...' : 'Menyimpan metode...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(apiUrl, { method: 'POST', body: formData });
                 const data = await res.json();
                 if (data.status === 'success') { showToast(data.message || 'Metode berhasil disimpan!', 'success'); closePaymentMethodModal(); loadPaymentsData(); }
                 else showToast(data.message, 'error');
             } catch (e) { showToast('Error jaringan', 'error'); }
-            finally { btn.innerText = editPaymentId ? ' Perbarui Metode' : ' Simpan Metode'; btn.disabled = false; }
+            finally { hideAdminLoader(); btn.innerText = editPaymentId ? ' Perbarui Metode' : ' Simpan Metode'; btn.disabled = false; }
         }
 
         // ==========================================
@@ -1672,6 +1786,7 @@
                 email_from_address: settingsCache.email_from_address,
                 email_smtp_encryption: settingsCache.email_smtp_encryption
             };
+            showAdminLoader('Menyimpan profil toko...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(`${BASE_URL}/api/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
@@ -1681,7 +1796,7 @@
                     await loadSettingsData();
                 } else { showToast(data.message, 'error'); }
             } catch (err) { showToast('Kesalahan jaringan', 'error'); }
-            finally { btn.innerText = ' Simpan'; btn.disabled = false; }
+            finally { hideAdminLoader(); btn.innerText = ' Simpan'; btn.disabled = false; }
         }
 
         /** Buka modal Pengaturan Email dan isi form dari cache */
@@ -1716,6 +1831,7 @@
                 email_from_address: document.getElementById('set_email_from_address').value,
                 email_smtp_encryption: document.getElementById('set_email_encryption').value
             };
+            showAdminLoader('Menyimpan pengaturan email...', 'Mohon tunggu sebentar.');
             try {
                 const res = await fetch(`${BASE_URL}/api/settings`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 const data = await res.json();
@@ -1726,7 +1842,7 @@
                     await loadSettingsData();
                 } else { showToast(data.message, 'error'); }
             } catch (err) { showToast('Kesalahan jaringan', 'error'); }
-            finally { btn.innerText = ' Simpan'; btn.disabled = false; }
+            finally { hideAdminLoader(); btn.innerText = ' Simpan'; btn.disabled = false; }
         }
 
         /** Buka modal ubah password admin */
@@ -1754,7 +1870,7 @@
                     document.getElementById('adminPasswordForm').reset();
                 } else { showToast(data.message || 'Gagal memperbarui password.', 'error'); }
             } catch (err) { showToast('Kesalahan jaringan', 'error'); }
-            finally { btn.innerText = ' Simpan'; btn.disabled = false; }
+            finally { hideAdminLoader(); btn.innerText = ' Simpan'; btn.disabled = false; }
         }
     </script>
 </body>

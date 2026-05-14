@@ -358,7 +358,7 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
 $loaderId = 'checkoutLoadingModal';
 $loaderTitle = 'Memproses Pesanan...';
 $loaderText = 'Mohon tunggu sebentar, pesananmu sedang dibuat.<br>Jangan tutup atau refresh halaman ini.';
-include __DIR__ . '/../components/truck-loader-modal.php';
+include __DIR__ . '/../components/loader-modal.php';
 ?>
 
 <style>

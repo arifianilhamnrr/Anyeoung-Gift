@@ -249,7 +249,7 @@ unset($_SESSION['upload_success'], $_SESSION['upload_error']);
 $loaderId = 'paymentUploadLoadingModal';
 $loaderTitle = 'Mengunggah Bukti...';
 $loaderText = 'Mohon tunggu sebentar, bukti pembayaranmu sedang diproses.<br>Jangan tutup atau refresh halaman ini.';
-include __DIR__ . '/../components/truck-loader-modal.php';
+include __DIR__ . '/../components/loader-modal.php';
 ?>
 
 <div id="copyToast"
