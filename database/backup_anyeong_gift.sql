@@ -159,6 +159,28 @@ CREATE TABLE `password_resets` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `registration_otps`
+--
+
+DROP TABLE IF EXISTS `registration_otps`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `registration_otps` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(191) NOT NULL,
+  `password_hash` varchar(255) NOT NULL,
+  `otp_hash` varchar(64) NOT NULL,
+  `attempts` tinyint unsigned NOT NULL DEFAULT '0',
+  `expires_at` datetime NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_registration_otps_email` (`email`),
+  KEY `idx_registration_otps_expires_at` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Dumping data for table `password_resets`
 --
 

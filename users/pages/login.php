@@ -85,6 +85,43 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
             background-color: rgba(255, 255, 255, 0.1);
             box-shadow: 0 0 0 4px rgba(166, 138, 86, 0.15);
         }
+
+        /* Wrapper input password: kasih ruang untuk tombol mata di kanan */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper .custom-input {
+            padding-right: 3.25rem;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 0.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 9999px;
+            color: rgba(255, 255, 255, 0.55);
+            transition: color 0.2s ease, background-color 0.2s ease;
+            cursor: pointer;
+            background-color: transparent;
+            border: 0;
+        }
+
+        .toggle-password:hover {
+            color: #A68A56;
+            background-color: rgba(166, 138, 86, 0.1);
+        }
+
+        .toggle-password svg {
+            width: 1.25rem;
+            height: 1.25rem;
+        }
     </style>
 </head>
 
@@ -166,8 +203,20 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                     <div>
                         <label class="block text-xs font-medium mb-2 pl-1 text-gray-400 uppercase tracking-wider">Kata
                             Sandi</label>
-                        <input type="password" name="password" placeholder="Buat kata sandi" class="custom-input"
-                            required minlength="6">
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="register-password" placeholder="Buat kata sandi"
+                                class="custom-input" required minlength="6">
+                            <button type="button" class="toggle-password"
+                                onclick="togglePassword('register-password', this)"
+                                aria-label="Tampilkan kata sandi">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="mt-auto pt-8">
@@ -235,8 +284,20 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
                     <div>
                         <label class="block text-xs font-medium mb-2 pl-1 text-gray-400 uppercase tracking-wider">Kata
                             Sandi</label>
-                        <input type="password" name="password" placeholder="Masukkan kata sandi" class="custom-input"
-                            required>
+                        <div class="password-wrapper">
+                            <input type="password" name="password" id="login-password" placeholder="Masukkan kata sandi"
+                                class="custom-input" required>
+                            <button type="button" class="toggle-password"
+                                onclick="togglePassword('login-password', this)"
+                                aria-label="Tampilkan kata sandi">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                        d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+                                    <circle cx="12" cy="12" r="3" />
+                                </svg>
+                            </button>
+                        </div>
                         <div class="text-right mt-3">
                             <a href="index.php?page=forgot_password" class="text-gold/70 text-xs font-medium hover:text-gold transition-colors">Lupa
                                 Kata Sandi?</a>
@@ -338,6 +399,20 @@ unset($_SESSION['error'], $_SESSION['success'], $_SESSION['active_auth_view']);
     </div>
 
     <script>
+        // Toggle show/hide password. Berlaku untuk semua input password
+        // dengan tombol mata di sebelah kanan.
+        function togglePassword(inputId, btn) {
+            const input = document.getElementById(inputId);
+            if (!input) return;
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            btn.setAttribute('aria-label', showing ? 'Tampilkan kata sandi' : 'Sembunyikan kata sandi');
+            // Ganti ikon: kalau visible (text), tampilkan ikon mata-coret.
+            btn.innerHTML = showing
+                ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.58 10.58a3 3 0 104.24 4.24M9.88 5.09A10.94 10.94 0 0112 5c6.5 0 10.5 7 10.5 7a17.43 17.43 0 01-3.32 4.16M6.1 6.1A17.55 17.55 0 001.5 12s4 7 10.5 7c1.6 0 3.07-.32 4.39-.85" /></svg>';
+        }
+
         // Fungsi Swipe View Login/Register/Welcome
         function goTo(fromId, toId) {
             const fromEl = document.getElementById(fromId);

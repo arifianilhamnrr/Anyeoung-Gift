@@ -54,8 +54,20 @@
                 </div>
 
                 <div>
-                    <input type="password" id="password" required placeholder="Password"
-                        class="w-full p-3.5 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition duration-300 placeholder-gray-500">
+                    <div class="relative">
+                        <input type="password" id="password" required placeholder="Password"
+                            class="w-full p-3.5 pr-12 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500 transition duration-300 placeholder-gray-500">
+                        <button type="button" id="toggle-password" onclick="togglePassword()"
+                            class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gold-500 hover:bg-gold-500/10 transition"
+                            aria-label="Tampilkan password">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <button type="submit" id="btn-submit"
@@ -67,6 +79,19 @@
     </div>
 
     <script>
+        // Toggle show/hide password di form login admin.
+        function togglePassword() {
+            const input = document.getElementById('password');
+            const btn = document.getElementById('toggle-password');
+            if (!input || !btn) return;
+            const showing = input.type === 'text';
+            input.type = showing ? 'password' : 'text';
+            btn.setAttribute('aria-label', showing ? 'Tampilkan password' : 'Sembunyikan password');
+            btn.innerHTML = showing
+                ? '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>'
+                : '<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.58 10.58a3 3 0 104.24 4.24M9.88 5.09A10.94 10.94 0 0112 5c6.5 0 10.5 7 10.5 7a17.43 17.43 0 01-3.32 4.16M6.1 6.1A17.55 17.55 0 001.5 12s4 7 10.5 7c1.6 0 3.07-.32 4.39-.85" /></svg>';
+        }
+
         async function handleLogin(e) {
             e.preventDefault();
             const btn = document.getElementById('btn-submit');
