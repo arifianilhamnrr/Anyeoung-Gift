@@ -47,8 +47,15 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
             font-family: 'Playfair Display', serif;
         }
 
+        .otp-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 0.5rem;
+        }
+
         .otp-input {
-            width: 100%; /* Mengisi penuh kolom grid */
+            width: 100%;
+            /* Mengisi penuh kolom grid */
             height: 3.5rem;
             text-align: center;
             font-size: 1.5rem;
@@ -100,14 +107,19 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
         <?php endif; ?>
 
         <form id="otpForm" action="actions/verify-otp.php" method="POST" class="space-y-5">
-            <!-- Diubah menggunakan Grid agar otomatis membagi rata lebar layar -->
-            <div class="grid grid-cols-6 gap-2 sm:gap-3" id="otpFields">
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="0" required>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="1" required>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="2" required>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="3" required>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="4" required>
-                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="5" required>
+            <div class="otp-container" id="otpFields">
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="0" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="1" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="2" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="3" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="4" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input"
+                    data-otp-index="5" required>
             </div>
             <input type="hidden" name="otp" id="otpValue">
 
@@ -116,7 +128,7 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
                 Verifikasi
             </button>
         </form>
-
+        
         <div class="mt-6 text-center text-sm text-gray-400">
             Belum dapat email?
             <form action="actions/resend-otp.php" method="POST" class="inline">
