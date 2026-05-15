@@ -55,7 +55,6 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
 
         .otp-input {
             width: 100%;
-            /* Mengisi penuh kolom grid */
             height: 3.5rem;
             text-align: center;
             font-size: 1.5rem;
@@ -74,7 +73,6 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
             box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
         }
 
-        /* Penyesuaian ekstra untuk layar HP yang sangat kecil (contoh: iPhone SE) */
         @media (max-width: 360px) {
             .otp-input {
                 height: 3rem;
@@ -128,13 +126,13 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
                 Verifikasi
             </button>
         </form>
-        
+
         <div class="mt-6 text-center text-sm text-gray-400">
             Belum dapat email?
-            <form action="actions/resend-otp.php" method="POST" class="inline">
-                <button type="submit"
-                    class="text-gold-400 font-semibold hover:text-gold-500 underline underline-offset-4">
-                    Kirim ulang kode
+            <form action="actions/resend-otp.php" method="POST" class="inline" id="resendForm">
+                <button type="submit" id="resendBtn"
+                    class="text-gray-500 font-semibold cursor-not-allowed transition" disabled>
+                    Kirim ulang kode<span id="timerText"></span>
                 </button>
             </form>
         </div>
@@ -149,8 +147,9 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
     </div>
 
     <script>
-        // Input OTP: pindah fokus otomatis, paste 6 digit langsung sebar ke
-        // tiap field, backspace mundur ke field sebelumnya.
+        // =====================================
+        // LOGIC INPUT OTP 
+        // =====================================
         const fields = document.querySelectorAll('.otp-input');
         const hidden = document.getElementById('otpValue');
         const form = document.getElementById('otpForm');
@@ -188,7 +187,6 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
             });
         });
 
-        // Auto-focus ke input pertama saat halaman dibuka.
         if (fields[0]) fields[0].focus();
 
         form.addEventListener('submit', (e) => {
@@ -198,6 +196,57 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
                 alert('Masukkan 6 digit kode OTP.');
             }
         });
+
+        // =====================================
+        // LOGIC COUNTDOWN KIRIM ULANG OTP
+        // =====================================
+        const resendForm = document.getElementById('resendForm');
+        const resendBtn = document.getElementById('resendBtn');
+        const timerText = document.getElementById('timerText');
+        
+        const COOLDOWN_KEY = 'otp_resend_cooldown';
+        const COOLDOWN_SECONDS = 60; // Set mau berapa lama nunggunya di sini
+
+        function initResendTimer() {
+            let endTime = localStorage.getItem(COOLDOWN_KEY);
+
+            // Kalau user baru pertama kali buka halaman, mulai timer dari sekarang
+            if (!endTime) {
+                endTime = Date.now() + (COOLDOWN_SECONDS * 1000);
+                localStorage.setItem(COOLDOWN_KEY, endTime);
+            }
+
+            const updateTimer = () => {
+                const now = Date.now();
+                const timeLeft = Math.ceil((parseInt(endTime) - now) / 1000);
+
+                if (timeLeft <= 0) {
+                    // Waktu habis: Tombol nyala, teks warna emas, bisa diklik
+                    clearInterval(timerInterval);
+                    resendBtn.disabled = false;
+                    resendBtn.className = 'text-gold-400 font-semibold hover:text-gold-500 underline underline-offset-4 transition';
+                    timerText.textContent = '';
+                    localStorage.removeItem(COOLDOWN_KEY);
+                } else {
+                    // Waktu belum habis: Tombol mati, teks abu-abu, nggak bisa diklik
+                    resendBtn.disabled = true;
+                    resendBtn.className = 'text-gray-500 font-semibold cursor-not-allowed transition';
+                    timerText.textContent = ` (${timeLeft}s)`;
+                }
+            };
+
+            // Panggil sekali biar gak delay 1 detik pas direfresh, lalu set interval
+            updateTimer();
+            const timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        // Saat tombol "Kirim ulang" diklik, catat waktu baru ke storage
+        resendForm.addEventListener('submit', () => {
+            localStorage.setItem(COOLDOWN_KEY, Date.now() + (COOLDOWN_SECONDS * 1000));
+        });
+
+        // Jalankan function-nya saat DOM dimuat
+        initResendTimer();
     </script>
 </body>
 
