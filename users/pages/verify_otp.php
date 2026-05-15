@@ -48,7 +48,7 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
         }
 
         .otp-input {
-            width: 3rem;
+            width: 100%; /* Mengisi penuh kolom grid */
             height: 3.5rem;
             text-align: center;
             font-size: 1.5rem;
@@ -65,6 +65,15 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
         .otp-input:focus {
             border-color: #F59E0B;
             box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+        }
+
+        /* Penyesuaian ekstra untuk layar HP yang sangat kecil (contoh: iPhone SE) */
+        @media (max-width: 360px) {
+            .otp-input {
+                height: 3rem;
+                font-size: 1.25rem;
+                border-radius: 0.5rem;
+            }
         }
     </style>
 </head>
@@ -91,7 +100,8 @@ if ($pendingEmail && strpos($pendingEmail, '@') !== false) {
         <?php endif; ?>
 
         <form id="otpForm" action="actions/verify-otp.php" method="POST" class="space-y-5">
-            <div class="flex justify-between gap-2" id="otpFields">
+            <!-- Diubah menggunakan Grid agar otomatis membagi rata lebar layar -->
+            <div class="grid grid-cols-6 gap-2 sm:gap-3" id="otpFields">
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="0" required>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="1" required>
                 <input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1" class="otp-input" data-otp-index="2" required>
