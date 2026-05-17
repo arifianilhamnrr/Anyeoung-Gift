@@ -89,7 +89,7 @@ $cart = $_SESSION['cart'] ?? [];
 
                                 <button type="button"
                                     class="p-2 rounded-lg text-gray-400 hover:bg-red-500/20 hover:text-red-500 transition-colors focus:outline-none"
-                                    onclick="openDeleteModal(<?= $index; ?>, '<?= htmlspecialchars($item['product_name'], ENT_QUOTES); ?>')"
+                                    onclick="openDeleteModal(<?= (int) ($item['cart_item_id'] ?? 0); ?>, '<?= htmlspecialchars($item['product_name'], ENT_QUOTES); ?>')"
                                     title="Hapus Item">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -188,7 +188,7 @@ $cart = $_SESSION['cart'] ?? [];
                         Batal
                     </button>
                     <form action="actions/remove-cart-item.php" method="POST" class="flex-1 flex">
-                        <input type="hidden" name="index" id="deleteIndex">
+                        <input type="hidden" name="cart_item_id" id="deleteIndex">
                         <button type="submit"
                             class="w-full py-4 text-red-400 font-bold text-sm hover:bg-white/5 transition-colors">
                             Ya, Hapus
@@ -262,8 +262,8 @@ $cart = $_SESSION['cart'] ?? [];
             const inputDeleteIndex = document.getElementById('deleteIndex');
             const deleteProductName = document.getElementById('deleteProductName');
 
-            function openDeleteModal(index, productName) {
-                inputDeleteIndex.value = index;
+            function openDeleteModal(cartItemId, productName) {
+                inputDeleteIndex.value = cartItemId;
                 deleteProductName.textContent = productName;
 
                 deleteModal.classList.remove('hidden');
