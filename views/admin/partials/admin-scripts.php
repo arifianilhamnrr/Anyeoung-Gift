@@ -701,7 +701,7 @@
 
     async function confirmOnsiteOrder(orderId) {
         const ok = await showConfirmModal({
-            title: 'Konfirmasi Pesanan COD?',
+            title: 'Konfirmasi Pesanan COP?',
             message: 'Tandai pesanan Cash on Pick Up ini sebagai sudah dibayar. Pesanan akan masuk antrian untuk diproses.',
             tone: 'info',
             okText: 'Ya, Konfirmasi',
@@ -798,77 +798,81 @@
 
         // --- BARIS WHATSAPP ---
         const phoneRow = phone
-            ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2">
-               <span class="text-gray-400 shrink-0">WhatsApp</span>
-               <span class="font-mono text-gray-100 truncate">${escapeHtml(phone)}</span>
-           </div>`
+            ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2 min-w-0">
+                   <span class="text-gray-400 shrink-0">WhatsApp</span>
+                   <span class="font-mono text-gray-100 truncate min-w-0">${escapeHtml(phone)}</span>
+               </div>`
             : `<div class="bg-dark-base/60 border border-dashed border-dark-border rounded-lg px-3 py-2 text-gray-500 text-center">
-               Nomor WhatsApp tidak tersedia
-           </div>`;
+                   Nomor WhatsApp tidak tersedia
+               </div>`;
 
         // --- BARIS EMAIL ---
         const emailRow = order.customer_email
-            ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2">
-               <span class="text-gray-400 shrink-0">Email</span>
-               <span class="text-gray-100 truncate">${escapeHtml(order.customer_email)}</span>
-           </div>`
+            ? `<div class="flex items-center justify-between gap-3 bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2 min-w-0">
+                   <span class="text-gray-400 shrink-0">Email</span>
+                   <span class="text-gray-100 truncate min-w-0">${escapeHtml(order.customer_email)}</span>
+               </div>`
             : '';
 
         // --- BARIS ALAMAT ---
         const addressRow = address.address_text
             ? `<div class="bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2">
-               <div class="text-xs text-gray-500 mb-1">Alamat</div>
-               <div class="text-gray-200 whitespace-pre-line leading-relaxed">${escapeHtml(address.address_text)}</div>
-           </div>`
+                   <div class="text-xs text-gray-500 mb-1">Alamat</div>
+                   <div class="text-gray-200 whitespace-pre-line leading-relaxed">${escapeHtml(address.address_text)}</div>
+               </div>`
             : '';
 
         // --- BARIS CATATAN ---
         const notesRow = address.notes
-            ? `<div class="bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2 mt-2">
-               <div class="text-xs text-gray-500 mb-1">Catatan</div>
-               <div class="text-gray-200 italic leading-relaxed">${escapeHtml(address.notes)}</div>
-           </div>`
+            ? `<div class="bg-dark-base/60 border border-dark-border rounded-lg px-3 py-2">
+                   <div class="text-xs text-gray-500 mb-1">Catatan</div>
+                   <div class="text-gray-200 italic leading-relaxed">${escapeHtml(address.notes)}</div>
+               </div>`
             : '';
 
         // --- TOMBOL WA ---
-        // Ditambahkan w-full sm:w-auto agar di HP memanjang, di PC menyesuaikan isi
+        // Tombol diletakkan di baris terpisah di bawah supaya tidak memaksa
+        // kontainer nama untuk shrink (yang menyebabkan nama pecah per huruf
+        // di kasus ekstrem). Di mobile tombol full-width, di desktop hanya
+        // selebar isinya.
         const waButton = waLink
-            ? `<a href="${waLink}" target="_blank" rel="noopener" 
-              class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/40 hover:bg-[#25D366] hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold transition shrink-0">
-              <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-              </svg>
-              Chat WhatsApp
-           </a>`
-            : `<button type="button" disabled 
-              class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-dark-base text-gray-500 border border-dark-border px-4 py-2.5 rounded-lg text-sm font-bold cursor-not-allowed shrink-0">
-              WhatsApp tidak tersedia
-           </button>`;
+            ? `<a href="${waLink}" target="_blank" rel="noopener"
+                  class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-[#25D366]/10 text-[#25D366] border border-[#25D366]/40 hover:bg-[#25D366] hover:text-white px-4 py-2.5 rounded-lg text-sm font-bold transition">
+                  <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 00-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                  </svg>
+                  <span>Chat WhatsApp</span>
+               </a>`
+            : `<button type="button" disabled
+                  class="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-dark-base text-gray-500 border border-dark-border px-4 py-2.5 rounded-lg text-sm font-bold cursor-not-allowed">
+                  <span>WhatsApp tidak tersedia</span>
+               </button>`;
 
         // --- RENDER AKHIR ---
+        // Layout disusun vertikal supaya lebar tombol WA tidak pernah
+        // mengompres area nama. Header (label + nama) selalu full-width.
         return `
-        <div class="bg-dark-base border border-dark-border rounded-xl p-4 space-y-4">
-            <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div class="min-w-0 flex-1">
+            <div class="bg-dark-base border border-dark-border rounded-xl p-4 space-y-4">
+                <div class="min-w-0">
                     <div class="text-xs text-gray-500 uppercase tracking-wider">Kontak Pelanggan</div>
-                    <div class="font-bold text-gray-100 text-lg mt-0.5 break-words">
+                    <div class="font-bold text-gray-100 text-lg mt-0.5 break-words leading-tight">
                         ${escapeHtml(recipientName)}
                     </div>
                 </div>
-                <div class="shrink-0 w-full sm:w-auto">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                    ${phoneRow}
+                    ${emailRow}
+                </div>
+
+                ${addressRow}
+                ${notesRow}
+
+                <div class="pt-1">
                     ${waButton}
                 </div>
             </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
-                ${phoneRow}
-                ${emailRow}
-            </div>
-
-            ${addressRow}
-            ${notesRow}
-        </div>
-    `;
+        `;
     }
 
     function formatRupiah(amount) { const n = parseInt(amount); return 'Rp ' + (isNaN(n) ? '0' : n.toLocaleString('id-ID')); }
@@ -1000,42 +1004,102 @@
         const status = order.status;
         const paymentType = (payment && payment.method_type ? payment.method_type : '').toLowerCase();
         const isOnsite = paymentType === 'onsite';
-        const buttons = [];
+
+        // Tombol "lanjutkan progress" (positif) dipisah dari tombol "batalkan"
+        // (negatif) supaya layout-nya jelas: aksi utama di kiri, aksi
+        // destructive di kanan. Banner status (ready_pickup/completed/cancelled)
+        // muncul sebagai elemen terpisah di bawah tombol.
+        const primaryButtons = [];
+        const dangerButtons = [];
+        let infoBanner = '';
 
         const btnPrimary = (label, onclick) =>
-            `<button type="button" onclick="${onclick}" class="inline-flex items-center gap-2 bg-gold-500 hover:bg-gold-400 text-gray-900 font-bold px-4 py-2 rounded-lg text-sm transition">${label}</button>`;
+            `<button type="button" onclick="${onclick}" class="inline-flex items-center justify-center gap-2 bg-gold-500 hover:bg-gold-400 text-gray-900 font-bold px-4 py-2.5 rounded-lg text-sm transition shadow-sm hover:shadow-md w-full sm:w-auto">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
+                <span>${label}</span>
+            </button>`;
         const btnDanger = (label, onclick) =>
-            `<button type="button" onclick="${onclick}" class="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white px-4 py-2 rounded-lg text-sm font-bold transition">${label}</button>`;
+            `<button type="button" onclick="${onclick}" class="inline-flex items-center justify-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500 hover:text-white hover:border-red-500 px-4 py-2.5 rounded-lg text-sm font-bold transition w-full sm:w-auto">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+                <span>${label}</span>
+            </button>`;
+        const banner = (toneClass, iconPath, text) =>
+            `<div class="flex items-center gap-2.5 text-xs ${toneClass} rounded-lg px-3 py-2.5">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="${iconPath}"/>
+                </svg>
+                <span class="leading-snug">${text}</span>
+            </div>`;
 
-        // Konfirmasi pembayaran  hanya saat belum dibayar
+        // Konfirmasi pembayaran -- hanya saat belum dibayar
         if (status === 'pending' || status === 'waiting_payment') {
-            if (isOnsite) {
-                buttons.push(btnPrimary(' Konfirmasi Pesanan', `confirmOrderFromModal(${order.id}, 'paid')`));
-            } else {
-                buttons.push(btnPrimary(' Konfirmasi Pembayaran', `confirmOrderFromModal(${order.id}, 'paid')`));
-            }
+            primaryButtons.push(
+                isOnsite
+                    ? btnPrimary('Konfirmasi Pesanan', `confirmOrderFromModal(${order.id}, 'paid')`)
+                    : btnPrimary('Konfirmasi Pembayaran', `confirmOrderFromModal(${order.id}, 'paid')`)
+            );
         }
-        // Tandai siap  saat sudah dibayar
+        // Tandai siap -- saat sudah dibayar
         if (status === 'paid') {
-            buttons.push(btnPrimary(' Tandai Pesanan Siap', `confirmOrderFromModal(${order.id}, 'ready_pickup')`));
+            primaryButtons.push(btnPrimary('Tandai Pesanan Siap', `confirmOrderFromModal(${order.id}, 'ready_pickup')`));
         }
-        // Batalkan  HANYA saat belum dibayar
+        // Batalkan -- HANYA saat belum dibayar
         if (canCancelOrder(status)) {
-            buttons.push(btnDanger(' Batalkan Pesanan', `confirmOrderFromModal(${order.id}, 'cancelled')`));
+            dangerButtons.push(btnDanger('Batalkan Pesanan', `confirmOrderFromModal(${order.id}, 'cancelled')`));
         }
-        // Info: saat ready_pickup atau completed  tampilkan keterangan ringan
+        // Banner status untuk pesanan yang sudah final/menunggu pembeli
         if (status === 'ready_pickup') {
-            buttons.push(`<div class="flex items-center gap-2 text-xs text-purple-400 bg-purple-500/10 border border-purple-500/30 rounded-lg px-3 py-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z"/></svg>Menunggu konfirmasi pembeli  auto-selesai dalam 3 hari</div>`);
-        }
-        if (status === 'completed') {
-            buttons.push(`<div class="flex items-center gap-2 text-xs text-green-400 bg-green-500/10 border border-green-500/30 rounded-lg px-3 py-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M12 2a10 10 0 100 20A10 10 0 0012 2z"/></svg>Pesanan telah selesai</div>`);
-        }
-        if (status === 'cancelled') {
-            buttons.push(`<div class="flex items-center gap-2 text-xs text-red-400 bg-red-500/10 border border-red-500/30 rounded-lg px-3 py-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M12 2a10 10 0 100 20A10 10 0 0012 2z"/></svg>Pesanan dibatalkan</div>`);
+            infoBanner = banner(
+                'text-purple-300 bg-purple-500/10 border border-purple-500/30',
+                'M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z',
+                'Menunggu konfirmasi pembeli &mdash; auto-selesai dalam 3 hari.'
+            );
+        } else if (status === 'completed') {
+            infoBanner = banner(
+                'text-green-300 bg-green-500/10 border border-green-500/30',
+                'M9 12l2 2 4-4M12 2a10 10 0 100 20A10 10 0 0012 2z',
+                'Pesanan telah selesai.'
+            );
+        } else if (status === 'cancelled') {
+            infoBanner = banner(
+                'text-red-300 bg-red-500/10 border border-red-500/30',
+                'M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M12 2a10 10 0 100 20A10 10 0 0012 2z',
+                'Pesanan dibatalkan.'
+            );
         }
 
-        if (buttons.length === 0) return '';
-        return `<div class="bg-dark-base border border-dark-border rounded-xl p-4 flex flex-wrap gap-2">${buttons.join('')}</div>`;
+        const hasButtons = primaryButtons.length > 0 || dangerButtons.length > 0;
+        if (!hasButtons && !infoBanner) return '';
+
+        // Layout:
+        // - Mobile : tombol full-width, ditumpuk vertikal (primary di atas, danger di bawah).
+        // - Desktop: dua kelompok dipisah justify-between -- aksi utama di kiri, aksi destructive di kanan.
+        // - Banner status muncul sebagai baris tersendiri di bawah supaya tidak mengganggu alur tombol.
+        const buttonsRow = hasButtons
+            ? `<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3">
+                   <div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">${primaryButtons.join('')}</div>
+                   ${dangerButtons.length > 0
+                ? `<div class="flex flex-col sm:flex-row sm:flex-wrap gap-2">${dangerButtons.join('')}</div>`
+                : ''}
+               </div>`
+            : '';
+
+        return `
+            <div class="bg-dark-base border border-dark-border rounded-xl p-4 space-y-3">
+                <div class="flex items-center gap-2 text-[11px] uppercase tracking-wider text-gray-500 font-semibold">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
+                    Aksi Cepat
+                </div>
+                ${buttonsRow}
+                ${infoBanner}
+            </div>
+        `;
     }
 
     async function confirmOrderFromModal(orderId, status) {
