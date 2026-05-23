@@ -2,6 +2,7 @@
 session_start();
 require_once '../../config/database.php';
 require_once __DIR__ . '/email-helper.php';
+require_once __DIR__ . '/cart-helper.php';
 
 if (!isset($_SESSION['user_id'])) {
     header('Location: ../index.php?page=login');
@@ -372,11 +373,32 @@ try {
     }
 
     // Bersihkan hanya bucket yang dipakai. Buy now tidak menyentuh keranjang
-    // utama, jadi isi keranjang tetap utuh setelah pesanan buy now selesai.
+    // utama (item buy now memang bukan dari tabel cart_items), jadi DB cart
+    // tetap utuh setelah pesanan buy now selesai.
     if ($isBuyNow) {
         unset($_SESSION['buy_now']);
     } else {
-        unset($_SESSION['cart']);
+        // Hapus dari DB hanya item yang baru saja dicheckout. Sisa item di
+        // cart (yang tidak ikut dicentang user di halaman cart) harus tetap
+        // ada supaya user bisa checkout terpisah lain kali.
+        $checkedOutIds = [];
+        foreach ($cart as $item) {
+            if (!empty($item['cart_item_id'])) {
+                $checkedOutIds[] = (int) $item['cart_item_id'];
+            }
+        }
+
+        if (!empty($checkedOutIds)) {
+            $placeholders = implode(',', array_fill(0, count($checkedOutIds), '?'));
+            $params = array_merge($checkedOutIds, [$userId]);
+            $stmt = $pdo->prepare("DELETE FROM cart_items WHERE id IN ($placeholders) AND user_id = ?");
+            $stmt->execute($params);
+        }
+
+        unset($_SESSION['cart'], $_SESSION['checkout_items']);
+        // Refresh cache session dari DB supaya navbar/halaman cart langsung
+        // menunjukkan sisa item (kalau ada).
+        syncCartSession($pdo);
     }
     $_SESSION['checkout_success_order_id'] = $orderId;
 

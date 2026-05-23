@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '../../config/database.php';
+require_once __DIR__ . '/cart-helper.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../index.php?page=login");
@@ -45,12 +46,11 @@ if ($buyNow) {
     exit;
 }
 
-// Mode "Tambah ke Keranjang": tetap di halaman produk dan tampilkan toast.
-if (!isset($_SESSION['cart'])) {
-    $_SESSION['cart'] = [];
-}
-
-$_SESSION['cart'][] = $item;
+// Mode "Tambah ke Keranjang": simpan ke DB agar tetap ada setelah logout,
+// lalu refresh cache session dari DB.
+$userId = (int) $_SESSION['user_id'];
+addCartItem($pdo, $userId, $item);
+syncCartSession($pdo);
 
 header("Location: ../index.php?page=product&id=" . (int) $product_id . "&added=1");
 exit;

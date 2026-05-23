@@ -8,9 +8,9 @@ define('BASE_URL', $protocol . "://" . $host . $scriptDir);
 
 // Konfigurasi Database MariaDB
 define('DB_HOST', 'localhost');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-define('DB_NAME', 'anyeoung_gift');
+define('DB_USER', 'anyeong-gift');
+define('DB_PASS', 'hM8fkwKfxK34bLn4');
+define('DB_NAME', 'anyeong-gift');
 
 // Konfigurasi Aplikasi
 define('APP_NAME', 'Anyeong Gift Admin');

@@ -1,5 +1,6 @@
 <?php
 require_once '../config/database.php';
+require_once __DIR__ . '/actions/cart-helper.php';
 
 try {
     $pdo->exec("
@@ -14,6 +15,15 @@ try {
 
 if (!isset($_SESSION)) {
     session_start();
+}
+
+// Sinkronkan keranjang dari DB ke session di setiap request. Pakai try/catch
+// supaya error DB tidak menggagalkan render halaman -- kalau gagal, biarkan
+// session cart yang lama (kalau ada) atau kosong.
+try {
+    syncCartSession($pdo);
+} catch (Exception $e) {
+    // Abaikan: navbar/halaman cart akan menampilkan keranjang kosong saja.
 }
 
 $page = $_GET['page'] ?? 'home';
