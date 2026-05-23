@@ -190,7 +190,7 @@ $authStoreName = storeNameRaw($pdo ?? null);
                 <h2 class="font-title text-3xl md:text-4xl font-bold mb-2 text-white">Buat Akun</h2>
                 <p class="text-gray-400 text-sm mb-8">Lengkapi data diri Anda di bawah ini.</p>
 
-                <form action="actions/register-process.php" method="POST" class="space-y-5 flex-1 flex flex-col">
+                <form id="registerForm" action="actions/register-process.php" method="POST" class="space-y-5 flex-1 flex flex-col">
                     <div>
                         <label class="block text-xs font-medium mb-2 pl-1 text-gray-400 uppercase tracking-wider">Nama
                             Lengkap</label>
@@ -401,6 +401,8 @@ $authStoreName = storeNameRaw($pdo ?? null);
         </div>
     </div>
 
+    <?php include __DIR__ . '/../components/confirm-modal.php'; ?>
+
     <script>
         // Toggle show/hide password. Berlaku untuk semua input password
         // dengan tombol mata di sebelah kanan.
@@ -415,6 +417,30 @@ $authStoreName = storeNameRaw($pdo ?? null);
                 ? '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M1.5 12s4-7 10.5-7 10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z" /><circle cx="12" cy="12" r="3" /></svg>'
                 : '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M3 3l18 18M10.58 10.58a3 3 0 104.24 4.24M9.88 5.09A10.94 10.94 0 0112 5c6.5 0 10.5 7 10.5 7a17.43 17.43 0 01-3.32 4.16M6.1 6.1A17.55 17.55 0 001.5 12s4 7 10.5 7c1.6 0 3.07-.32 4.39-.85" /></svg>';
         }
+
+        // Handle register form confirmation
+        document.addEventListener('DOMContentLoaded', function() {
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', async function(e) {
+                    if (this.dataset.confirmed === '1') return;
+                    e.preventDefault();
+
+                    const ok = await showUserConfirmModal({
+                        title: 'Konfirmasi Pendaftaran',
+                        message: 'Pastikan data yang Anda masukkan sudah benar. Lanjutkan pendaftaran?',
+                        tone: 'info',
+                        okText: 'Ya, Daftar',
+                        cancelText: 'Periksa Lagi'
+                    });
+
+                    if (ok) {
+                        this.dataset.confirmed = '1';
+                        this.submit();
+                    }
+                });
+            }
+        });
 
         // Fungsi Swipe View Login/Register/Welcome
         function goTo(fromId, toId) {

@@ -147,7 +147,7 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
             <h3 class="text-2xl font-title text-gold mb-1 text-center">Tambah Kontak</h3>
             <p class="text-gray-400 text-sm text-center mb-6">Isi data pemesan dengan lengkap.</p>
 
-            <form action="actions/save-address.php" method="POST" class="space-y-3">
+            <form id="addAddressForm" action="actions/save-address.php" method="POST" class="space-y-3">
                 <div class="space-y-1">
                     <input type="text" name="recipient_name" required placeholder="Nama Pemesan / Penerima"
                         class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
@@ -323,6 +323,7 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
     </div>
 <?php endif; ?>
 
+<?php include __DIR__ . '/../components/confirm-modal.php'; ?>
 
 <script>
     // FUNGSI ANIMASI MODAL UMUM
@@ -400,4 +401,31 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
             }, 300);
         }
     <?php endif; ?>
+
+    // Handle add address form confirmation
+    document.addEventListener('DOMContentLoaded', function() {
+        const addAddressForm = document.getElementById('addAddressForm');
+        if (addAddressForm) {
+            addAddressForm.addEventListener('submit', async function(e) {
+                if (this.dataset.confirmed === '1') return;
+                e.preventDefault();
+
+                const recipientName = this.querySelector('[name="recipient_name"]').value;
+                const whatsappNumber = this.querySelector('[name="whatsapp_number"]').value;
+
+                const ok = await showUserConfirmModal({
+                    title: 'Konfirmasi Simpan Kontak',
+                    message: `Simpan kontak atas nama "${recipientName}" dengan nomor WhatsApp ${whatsappNumber}?`,
+                    tone: 'info',
+                    okText: 'Ya, Simpan',
+                    cancelText: 'Periksa Lagi'
+                });
+
+                if (ok) {
+                    this.dataset.confirmed = '1';
+                    this.submit();
+                }
+            });
+        }
+    });
 </script>
