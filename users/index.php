@@ -56,29 +56,19 @@ if ($page !== 'checkout' && isset($_SESSION['buy_now'])) {
 }
 
 // halaman yang TIDAK perlu login
-$public_pages = ['home', 'products', 'product', 'login', 'register', 'forgot_password', 'reset_password', 'verify_otp'];
+$public_pages = ['login', 'register', 'forgot_password', 'reset_password', 'verify_otp'];
 
-// halaman yang WAJIB login
-$protected_pages = [
-    'cart',
-    'checkout',
-    'profile',
-    'orders',
-    'addresses',
-    'payment_upload'
-];
+// halaman auth (tanpa layout)
+$auth_pages = ['login', 'register', 'forgot_password', 'reset_password', 'verify_otp'];
 
 // 🔥 AUTH GUARD
-if (in_array($page, $protected_pages) && !isset($_SESSION['user_id'])) {
+if (!in_array($page, $public_pages) && !isset($_SESSION['user_id'])) {
     // simpan tujuan biar bisa balik setelah login (optional)
     $_SESSION['redirect_after_login'] = $page;
 
     header('Location: index.php?page=login');
     exit;
 }
-
-// halaman auth (tanpa layout)
-$auth_pages = ['login', 'register', 'forgot_password', 'reset_password', 'verify_otp'];
 
 $use_sidebar = in_array($page, ['profile', 'orders', 'addresses']);
 ?>
