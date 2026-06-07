@@ -16,7 +16,8 @@ $addresses = $stmt->fetchAll();
 
 $addressSuccess = $_SESSION['address_success'] ?? null;
 $addressError = $_SESSION['address_error'] ?? null;
-unset($_SESSION['address_success'], $_SESSION['address_error']);
+$offerContinueCheckout = !empty($_SESSION['offer_continue_checkout']);
+unset($_SESSION['address_success'], $_SESSION['address_error'], $_SESSION['offer_continue_checkout']);
 ?>
 
 <div class="space-y-6 relative">
@@ -286,7 +287,8 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
 <?php if ($addressSuccess || $addressError): ?>
     <div id="notifModal"
         class="fixed inset-0 z-[110] flex items-center justify-center p-4 opacity-0 transition-opacity duration-300">
-        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeNotifModal()"></div>
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onclick="<?= ($addressSuccess && $offerContinueCheckout) ? 'closeContinueCheckoutModal(false)' : 'closeNotifModal()'; ?>"></div>
 
         <div class="relative bg-white/10 backdrop-blur-2xl border border-white/20 shadow-2xl rounded-3xl w-full max-w-sm overflow-hidden transform scale-95 transition-transform duration-300"
             id="notifModalContent">
@@ -300,6 +302,11 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
                     </div>
                     <h3 class="text-xl font-bold text-white mb-2">Berhasil!</h3>
                     <p class="text-gray-300 text-sm leading-relaxed"><?= htmlspecialchars($addressSuccess); ?></p>
+                    <?php if ($offerContinueCheckout): ?>
+                        <p class="text-gray-400 text-sm leading-relaxed mt-4">
+                            Lanjutkan checkout dengan produk yang kamu pilih tadi?
+                        </p>
+                    <?php endif; ?>
                 <?php else: ?>
                     <div
                         class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/30">
@@ -314,10 +321,21 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
             </div>
 
             <div class="flex border-t border-white/10">
-                <button type="button" onclick="closeNotifModal()"
-                    class="w-full py-4 text-gold font-bold text-sm hover:bg-white/5 transition-colors">
-                    Oke, Mengerti
-                </button>
+                <?php if ($addressSuccess && $offerContinueCheckout): ?>
+                    <button type="button" onclick="closeContinueCheckoutModal(false)"
+                        class="flex-1 py-4 text-gray-300 font-medium text-sm hover:bg-white/5 transition-colors border-r border-white/10">
+                        Tidak
+                    </button>
+                    <button type="button" onclick="closeContinueCheckoutModal(true)"
+                        class="flex-1 py-4 text-gold font-bold text-sm hover:bg-white/5 transition-colors">
+                        Ya, Lanjutkan
+                    </button>
+                <?php else: ?>
+                    <button type="button" onclick="closeNotifModal()"
+                        class="w-full py-4 text-gold font-bold text-sm hover:bg-white/5 transition-colors">
+                        Oke, Mengerti
+                    </button>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -400,6 +418,15 @@ unset($_SESSION['address_success'], $_SESSION['address_error']);
                 notifModal.style.display = 'none';
             }, 300);
         }
+
+        <?php if ($addressSuccess && $offerContinueCheckout): ?>
+        function closeContinueCheckoutModal(shouldContinue) {
+            closeNotifModal();
+            if (shouldContinue) {
+                window.location.href = 'index.php?page=checkout';
+            }
+        }
+        <?php endif; ?>
     <?php endif; ?>
 
     // Handle add address form confirmation

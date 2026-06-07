@@ -1,2 +1,4 @@
 config.php
 config/database.php
+public/uploads/payments/*
+!public/uploads/payments/.gitkeep

@@ -71,6 +71,13 @@ $stmt->execute([
     $isDefault
 ]);
 
-$_SESSION['address_success'] = 'Alamat berhasil ditambahkan.';
+$hasPendingCheckout = !empty($_SESSION['pending_checkout_after_address'])
+    && (!empty($_SESSION['buy_now']) || !empty($_SESSION['checkout_items']));
+
+if ($hasPendingCheckout) {
+    $_SESSION['offer_continue_checkout'] = true;
+}
+
+$_SESSION['address_success'] = 'Kontak berhasil ditambahkan.';
 header('Location: ../index.php?page=addresses');
 exit;

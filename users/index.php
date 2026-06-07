@@ -49,10 +49,12 @@ if (!in_array($page, $allowed_pages)) {
     $page = 'home';
 }
 
-// Bucket "Bayar Sekarang" hanya hidup di halaman checkout. Begitu user pindah
-// ke halaman lain (kembali ke produk, cart, dll), batalkan intent buy now.
-if ($page !== 'checkout' && isset($_SESSION['buy_now'])) {
-    unset($_SESSION['buy_now']);
+// Bucket "Bayar Sekarang" hanya hidup di halaman checkout (dan halaman kontak
+// saat user ditengah proses checkout). Begitu user pindah ke halaman lain,
+// batalkan intent buy now.
+$pagesKeepingBuyNow = ['checkout', 'addresses'];
+if (!in_array($page, $pagesKeepingBuyNow, true) && isset($_SESSION['buy_now'])) {
+    unset($_SESSION['buy_now'], $_SESSION['pending_checkout_after_address']);
 }
 
 // halaman yang TIDAK perlu login

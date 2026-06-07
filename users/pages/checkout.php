@@ -77,6 +77,7 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
     </div>
 
     <?php if (empty($addresses)): ?>
+        <?php $_SESSION['pending_checkout_after_address'] = true; ?>
         <div class="max-w-3xl mx-auto bg-white/5 border border-white/10 backdrop-blur-md rounded-3xl p-8 md:p-10 text-center shadow-lg mx-4 md:mx-0">
             <div class="w-16 h-16 bg-white/5 text-gray-500 rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">

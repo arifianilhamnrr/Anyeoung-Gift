@@ -375,6 +375,8 @@ try {
     // Bersihkan hanya bucket yang dipakai. Buy now tidak menyentuh keranjang
     // utama (item buy now memang bukan dari tabel cart_items), jadi DB cart
     // tetap utuh setelah pesanan buy now selesai.
+    unset($_SESSION['pending_checkout_after_address'], $_SESSION['offer_continue_checkout']);
+
     if ($isBuyNow) {
         unset($_SESSION['buy_now']);
     } else {
