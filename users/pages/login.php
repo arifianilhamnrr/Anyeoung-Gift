@@ -190,6 +190,13 @@ $authStoreName = storeNameRaw($pdo ?? null);
                 <h2 class="font-title text-3xl md:text-4xl font-bold mb-2 text-white">Buat Akun</h2>
                 <p class="text-gray-400 text-sm mb-8">Lengkapi data diri Anda di bawah ini.</p>
 
+                <?php if ($authError && $activeAuthView === 'register'): ?>
+                    <div
+                        class="bg-red-500/20 border border-red-500/30 text-red-400 p-4 rounded-xl mb-6 text-sm backdrop-blur-sm">
+                        <?= htmlspecialchars($authError); ?>
+                    </div>
+                <?php endif; ?>
+
                 <form id="registerForm" action="actions/register-process.php" method="POST" class="space-y-5 flex-1 flex flex-col">
                     <div>
                         <label class="block text-xs font-medium mb-2 pl-1 text-gray-400 uppercase tracking-wider">Nama
