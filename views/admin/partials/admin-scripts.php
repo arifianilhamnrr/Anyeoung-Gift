@@ -228,6 +228,7 @@
     const pageTitleMap = { dashboard: 'Dashboard', orders: 'Pesanan', products: 'Produk', payments: 'Pembayaran', settings: 'Pengaturan' };
 
     document.addEventListener('DOMContentLoaded', () => {
+        loadSettingsData();
         loadView('dashboard');
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
@@ -1160,11 +1161,12 @@
         // Nama toko untuk invoice diambil dari settingsCache (store_settings)
         // dengan fallback ke nama admin atau "Anyeong Gift".
         const storeName = (settingsCache && settingsCache.store_name)
-            || <?= json_encode($_SESSION['admin_name'] ?? 'Anyeong Gift') ?>;
-        win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"/><title>Invoice ${invoiceNo}</title><style>*{box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,sans-serif;color:#111;margin:0;padding:24px;background:#fff}.wrap{max-width:720px;margin:0 auto}.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:18px}.brand{font-size:22px;font-weight:800;letter-spacing:1px}.brand small{display:block;font-size:11px;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase}.meta{text-align:right;font-size:12px;color:#333}.meta .no{font-size:16px;font-weight:700;color:#000}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.card{border:1px solid #ddd;border-radius:6px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#666}.card p{margin:2px 0;font-size:13px}table{width:100%;border-collapse:collapse;margin-bottom:18px}thead th{background:#111;color:#fff;text-align:left;padding:8px 10px;font-size:12px}thead th.qty,thead th.right{text-align:center}thead th.right{text-align:right}tbody td{padding:10px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}tbody td.qty{text-align:center}tbody td.right{text-align:right;white-space:nowrap}.iname{font-weight:700}.opts{margin-top:4px;color:#555;font-size:12px}.opt{padding-left:8px}.total-row{display:flex;justify-content:flex-end}.total{min-width:280px;border-top:2px solid #111;padding-top:10px}.total .line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.total .grand{font-size:16px;font-weight:800;border-top:1px dashed #aaa;margin-top:6px;padding-top:6px}.foot{margin-top:26px;text-align:center;font-size:11px;color:#666}@media print{body{padding:0}.wrap{max-width:none}}</style></head><body><div class="wrap"><div class="head"><div class="brand">${escapeHtml(storeName)}<small>Invoice Pesanan</small></div><div class="meta"><div class="no">${invoiceNo}</div><div>Tanggal Pesanan: ${escapeHtml(orderDate)}</div><div>Dicetak: ${escapeHtml(printedAt)}</div></div></div><div class="grid"><div class="card"><h4>Pemesan</h4><p><strong>${escapeHtml(customerName)}</strong></p><p>${escapeHtml(customerPhone)}</p>${customerEmail ? `<p>${escapeHtml(customerEmail)}</p>` : ''}${customerAddress ? `<p style="margin-top:6px;white-space:pre-line">${escapeHtml(customerAddress)}</p>` : ''}${customerNotes ? `<p style="margin-top:6px;font-style:italic;color:#555">Catatan: ${escapeHtml(customerNotes)}</p>` : ''}</div><div class="card"><h4>Pembayaran</h4><p><strong>${escapeHtml(paymentMethodLabel)}</strong></p><p>Status: ${escapeHtml(paymentStatusLabel)}</p>${payment && payment.paid_at ? `<p>Diunggah: ${escapeHtml(new Date(payment.paid_at).toLocaleString('id-ID'))}</p>` : ''}</div></div><table><thead><tr><th>Item</th><th class="qty">Qty</th><th class="right">Subtotal</th></tr></thead><tbody>${itemsRows || '<tr><td colspan="3" style="text-align:center;color:#666;padding:18px">Tidak ada item.</td></tr>'}</tbody></table><div class="total-row"><div class="total"><div class="line"><span>Subtotal</span><span>${formatRupiah(grandTotal)}</span></div><div class="line grand"><span>Total</span><span>${formatRupiah(grandTotal)}</span></div></div></div><div class="foot">Terima kasih telah berbelanja di ${escapeHtml(storeName)}.</div></div><script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),250)});<\/script></body></html>`);
+            || 'Anyeong Gift';
+        const storeAddress = (settingsCache && settingsCache.store_address_text) || '';
+        const logoUrl = `${BASE_URL.replace('/public', '')}/assets/images/anyeong-logo.svg`;
+        win.document.write(`<!doctype html><html lang="id"><head><meta charset="utf-8"/><title>Invoice ${invoiceNo}</title><style>*{box-sizing:border-box}body{font-family:'Segoe UI',Tahoma,sans-serif;color:#111;margin:0;padding:24px;background:#fff}.wrap{max-width:720px;margin:0 auto}.head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #111;padding-bottom:12px;margin-bottom:18px}.brand{display:flex;align-items:center;gap:12px}.brand img{width:40px;height:40px;object-fit:contain}.brand-text{font-size:22px;font-weight:800;letter-spacing:1px}.brand-text small{display:block;font-size:11px;font-weight:500;color:#555;letter-spacing:2px;text-transform:uppercase}.store-address{font-size:11px;color:#555;max-width:300px;margin-top:4px;white-space:pre-line}.meta{text-align:right;font-size:12px;color:#333}.meta .no{font-size:16px;font-weight:700;color:#000}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px}.card{border:1px solid #ddd;border-radius:6px;padding:12px 14px}.card h4{margin:0 0 6px 0;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#666}.card p{margin:2px 0;font-size:13px}table{width:100%;border-collapse:collapse;margin-bottom:18px}thead th{background:#111;color:#fff;text-align:left;padding:8px 10px;font-size:12px}thead th.qty,thead th.right{text-align:center}thead th.right{text-align:right}tbody td{padding:10px;border-bottom:1px solid #eee;font-size:13px;vertical-align:top}tbody td.qty{text-align:center}tbody td.right{text-align:right;white-space:nowrap}.iname{font-weight:700}.opts{margin-top:4px;color:#555;font-size:12px}.opt{padding-left:8px}.total-row{display:flex;justify-content:flex-end}.total{min-width:280px;border-top:2px solid #111;padding-top:10px}.total .line{display:flex;justify-content:space-between;padding:4px 0;font-size:13px}.total .grand{font-size:16px;font-weight:800;border-top:1px dashed #aaa;margin-top:6px;padding-top:6px}.foot{margin-top:26px;text-align:center;font-size:11px;color:#666}@media print{body{padding:0}.wrap{max-width:none}}</style></head><body><div class="wrap"><div class="head"><div class="brand"><img src="${logoUrl}" alt="Logo"/><div class="brand-text">${escapeHtml(storeName)}<small>Invoice Pesanan</small><div class="store-address">${escapeHtml(storeAddress)}</div></div></div><div class="meta"><div class="no">${invoiceNo}</div><div>Tanggal Pesanan: ${escapeHtml(orderDate)}</div><div>Dicetak: ${escapeHtml(printedAt)}</div></div></div><div class="grid"><div class="card"><h4>Pemesan</h4><p><strong>${escapeHtml(customerName)}</strong></p><p>${escapeHtml(customerPhone)}</p>${customerEmail ? `<p>${escapeHtml(customerEmail)}</p>` : ''}${customerAddress ? `<p style="margin-top:6px;white-space:pre-line">${escapeHtml(customerAddress)}</p>` : ''}${customerNotes ? `<p style="margin-top:6px;font-style:italic;color:#555">Catatan: ${escapeHtml(customerNotes)}</p>` : ''}</div><div class="card"><h4>Pembayaran</h4><p><strong>${escapeHtml(paymentMethodLabel)}</strong></p><p>Status: ${escapeHtml(paymentStatusLabel)}</p>${payment && payment.paid_at ? `<p>Diunggah: ${escapeHtml(new Date(payment.paid_at).toLocaleString('id-ID'))}</p>` : ''}</div></div><table><thead><tr><th>Item</th><th class="qty">Qty</th><th class="right">Subtotal</th></tr></thead><tbody>${itemsRows || '<tr><td colspan="3" style="text-align:center;color:#666;padding:18px">Tidak ada item.</td></tr>'}</tbody></table><div class="total-row"><div class="total"><div class="line"><span>Subtotal</span><span>${formatRupiah(grandTotal)}</span></div><div class="line grand"><span>Total</span><span>${formatRupiah(grandTotal)}</span></div></div></div><div class="foot">Terima kasih telah berbelanja di ${escapeHtml(storeName)}.</div></div><script>window.addEventListener('load',()=>{setTimeout(()=>window.print(),250)});<\/script></body></html>`);
         win.document.close();
     }
-
     // ==========================================
     // --- PAYMENT METHODS ---
     // ==========================================
@@ -1183,7 +1185,11 @@
                 else {
                     result.data.forEach(m => {
                         const isActive = m.is_active == 1;
-                        const menuItems = [{ label: 'Edit metode', onclick: `openEditPaymentMethodModal(${m.id})`, icon: 'edit' }];
+                        if (!isActive) return;
+                        const menuItems = [
+                            { label: 'Edit metode', onclick: `openEditPaymentMethodModal(${m.id})`, icon: 'edit' },
+                            { label: 'Hapus metode', onclick: `deletePaymentMethod(${m.id})`, icon: 'trash', danger: true }
+                        ];
                         const infoCell = m.type === 'qris' && m.image ? `<div class="flex items-center gap-3"><img src="${BASE_URL}/uploads/payment_methods/${escapeHtml(m.image)}" alt="QRIS" class="w-12 h-12 rounded-md object-cover border border-dark-border"><span class="text-gray-400 text-xs">${escapeHtml(m.account_info || 'QRIS')}</span></div>` : `<span class="text-gold-500 font-mono text-sm">${escapeHtml(m.account_info || '-')}</span>`;
                         html += `<tr class="border-b border-dark-border transition duration-200 hover:bg-dark-hover"><td class="p-4 font-bold text-gray-200">${escapeHtml(m.name)}</td><td class="p-4 uppercase text-xs text-gray-400 tracking-wider">${escapeHtml(m.type)}</td><td class="p-4">${infoCell}</td><td class="p-4">${isActive ? '<span class="px-3 py-1 bg-green-500/15 text-green-500 border border-green-500/30 rounded-full text-xs font-bold">Aktif</span>' : '<span class="px-3 py-1 bg-red-500/15 text-red-500 border border-red-500/30 rounded-full text-xs font-bold">Nonaktif</span>'}</td><td class="p-4 text-center">${renderRowMenu(`pm-${m.id}`, menuItems)}</td></tr>`;
                     });
@@ -1223,6 +1229,37 @@
         finally { hideAdminLoader(); btn.innerText = editPaymentId ? ' Perbarui Metode' : ' Simpan Metode'; btn.disabled = false; }
     }
 
+    async function deletePaymentMethod(id) {
+        const ok = await showConfirmModal({
+            title: 'Hapus Metode Pembayaran?',
+            message: 'Metode pembayaran ini tidak akan bisa dipilih lagi oleh pelanggan saat checkout. Lanjutkan menghapus?',
+            tone: 'danger',
+            okText: 'Ya, Hapus',
+            cancelText: 'Batal'
+        });
+        if (!ok) return;
+
+        showAdminLoader('Menghapus metode...', 'Mohon tunggu sebentar.');
+        try {
+            const res = await fetch(`${BASE_URL}/api/payment-methods/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            const data = await res.json();
+            if (data.status === 'success') {
+                showToast(data.message, 'success');
+                loadPaymentsData();
+            } else {
+                showToast(data.message, 'error');
+            }
+        } catch (e) {
+            showToast('Error jaringan', 'error');
+        } finally {
+            hideAdminLoader();
+        }
+    }
+
     // ==========================================
     // --- SETTINGS: Display + Modal Logic ---
     // ==========================================
@@ -1236,7 +1273,9 @@
             const result = await res.json();
             if (result.status === 'success' && result.data) {
                 settingsCache = result.data;
-                renderSettingsDisplay(result.data);
+                if (document.getElementById('disp_store_name')) {
+                    renderSettingsDisplay(result.data);
+                }
             }
         } catch (e) { console.error('Gagal mengambil pengaturan', e); }
     }

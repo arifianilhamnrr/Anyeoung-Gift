@@ -39,15 +39,20 @@ class ProductService
                 }
             }
 
-            // Simpan Data Utama ke tabel 'products' (Tambahkan $namaFileGambar di akhir)
+            // Simpan Data Utama ke tabel 'products'
             $productId = $this->productModel->insertProduct(
                 $data['name'],
                 $data['category'] ?? 'Uncategorized',
                 $data['product_type'] ?? 'custom_full',
                 $data['description'] ?? '',
-                $data['base_price'],
-                $namaFileGambar
+                $data['base_price']
             );
+
+            // Jika ada gambar, simpan ke tabel product_images
+            if ($namaFileGambar) {
+                // Gunakan path relatif dari struktur tabel image_path
+                $this->productModel->insertProductImage($productId, $namaFileGambar, 1);
+            }
 
             // ... (Biarkan kode looping insertProductOption dan Values di bawahnya sama persis seperti sebelumnya) ...
 

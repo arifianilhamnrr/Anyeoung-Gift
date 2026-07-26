@@ -50,13 +50,14 @@ $router->post('/api/orders/update-status', 'OrderController@updateStatus');
 $router->post('/api/products/delete', 'ProductController@delete');
 $router->get('/api/payment-methods', 'PaymentMethodController@index');
 $router->post('/api/payment-methods', 'PaymentMethodController@store');
+$router->post('/api/payment-methods/update', 'PaymentMethodController@update');
+$router->post('/api/payment-methods/delete', 'PaymentMethodController@delete');
 $router->get('/api/settings', 'StoreSettingController@index');
 $router->post('/api/settings', 'StoreSettingController@update');
 $router->get('/api/settings/brevo-usage', 'StoreSettingController@brevoUsage');
 $router->get('/api/orders/details', 'OrderController@details');
 $router->get('/api/products/details', 'ProductController@details');
 $router->post('/api/products/update', 'ProductController@update');
-$router->post('/api/payment-methods/update', 'PaymentMethodController@update');
 $router->post('/api/admin/password', 'AuthController@updatePassword');
 
 $router->run();

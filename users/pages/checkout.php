@@ -236,10 +236,88 @@ $selectedPaymentId = !empty($paymentMethods) ? $paymentMethods[0]['id'] : null;
                     Rincian Pembayaran
                 </div>
                 <div class="space-y-2.5 text-[12px] sm:text-[13px]">
-                    <div class="flex justify-between text-gray-400">
-                        <span>Subtotal Produk</span>
-                        <span class="text-gray-300">Rp <?= number_format($grandTotal, 0, ',', '.'); ?></span>
-                    </div>
+                    <?php foreach ($cart as $item): ?>
+                        <?php
+                            $opsiTextStr = '';
+                            if (!empty($item['options']) && is_array($item['options'])) {
+                                $opsiArr = [];
+                                foreach($item['options'] as $v) {
+                                    $opsiArr[] = is_array($v) ? implode(', ', $v) : $v;
+                                }
+                                $opsiTextStr = ' (' . implode(', ', $opsiArr) . ')';
+                            }
+                        ?>
+                        <div class="border-b border-white/5 pb-2 mb-2">
+                            <div class="flex justify-between text-gray-400">
+                                <span class="w-[70%] leading-relaxed font-semibold"><?= htmlspecialchars($item['product_name']); ?><span class="text-gray-500 font-normal italic"><?= htmlspecialchars($opsiTextStr); ?></span></span>
+                                <span class="w-[30%] text-right text-gray-300"></span>
+                            </div>
+                            <?php
+                                $productId = $item['product_id'] ?? 0;
+                                $stmtBasePrice = $pdo->prepare("SELECT base_price FROM products WHERE id = ?");
+                                $stmtBasePrice->execute([$productId]);
+                                $productRow = $stmtBasePrice->fetch();
+                                $basePrice = $productRow ? (int)$productRow['base_price'] : 0;
+                                
+                                if ($basePrice > 0):
+                            ?>
+                                <div class="flex justify-between text-gray-500 text-[11px] sm:text-xs mt-1">
+                                    <span class="pl-2">- Harga Dasar</span>
+                                    <span>Rp <?= number_format($basePrice, 0, ',', '.'); ?></span>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <?php
+                            if (!empty($item['options']) && is_array($item['options'])):
+                                // Cari tahu nominal uang dan jumlah lembar untuk Custom Money
+                                $nominal = 0;
+                                $qty = 0;
+                                
+                                foreach($item['options'] as $optName => $v):
+                                    // Tangani input berupa array (misal dari checkbox: multiple options)
+                                    $valuesArr = is_array($v) ? $v : [$v];
+                                    
+                                    foreach($valuesArr as $valText):
+                                        $stmtVal = $pdo->prepare("SELECT additional_price, extra_data FROM product_option_values pov JOIN product_options po ON pov.option_id = po.id WHERE po.product_id = ? AND po.option_name = ? AND pov.value_name = ?");
+                                        $stmtVal->execute([$productId, $optName, $valText]);
+                                        $valRow = $stmtVal->fetch();
+                                        $addPrice = $valRow ? (int)$valRow['additional_price'] : 0;
+                                        
+                                        // Parse extra_data untuk mencari nominal dan qty
+                                        if ($valRow && !empty($valRow['extra_data'])) {
+                                            $extra = json_decode($valRow['extra_data'], true);
+                                            if (is_array($extra)) {
+                                                if (isset($extra['nominal'])) $nominal = (int)$extra['nominal'];
+                                                if (isset($extra['qty'])) $qty = (int)$extra['qty'];
+                                            }
+                                        }
+                                        
+                                        // Hanya tampilkan di rincian breakdown jika harganya > 0
+                                        if ($addPrice > 0):
+                            ?>
+                                <div class="flex justify-between text-gray-500 text-[11px] sm:text-xs mt-1">
+                                    <span class="pl-2">- <?= htmlspecialchars($valText); ?></span>
+                                    <span>+Rp <?= number_format($addPrice, 0, ',', '.') ?></span>
+                                </div>
+                            <?php 
+                                        endif;
+                                    endforeach;
+                                endforeach;
+                                
+                                // Tampilkan kalkulasi total nominal uang jika product_type custom_money
+                                if ($nominal > 0 && $qty > 0):
+                                    $totalNominal = $nominal * $qty;
+                            ?>
+                                <div class="flex justify-between text-gray-500 text-[11px] sm:text-xs mt-1">
+                                    <span class="pl-2 italic">- Nominal Uang (<?= number_format($nominal, 0, ',', '.') ?> x <?= $qty ?>)</span>
+                                    <span>+Rp <?= number_format($totalNominal, 0, ',', '.') ?></span>
+                                </div>
+                            <?php
+                                endif;
+                            endif;
+                            ?>
+                        </div>
+                    <?php endforeach; ?>
                     <div class="flex justify-between text-white font-bold pt-3 border-t border-white/5 mt-3 items-center">
                         <span class="text-[13px] sm:text-sm">Total Pembayaran</span>
                         <span class="text-gold text-base sm:text-lg">Rp <?= number_format($grandTotal, 0, ',', '.'); ?></span>

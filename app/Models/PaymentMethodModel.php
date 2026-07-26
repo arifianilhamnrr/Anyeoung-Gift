@@ -67,4 +67,10 @@ class PaymentMethodModel extends Model {
         $this->bind(':info', $this->packPayload($info, $image));
         return $this->execute();
     }
+
+    public function softDeleteMethod($id) {
+        $this->query("UPDATE payment_methods SET is_active = 0 WHERE id = :id");
+        $this->bind(':id', $id);
+        return $this->execute();
+    }
 }

@@ -18,11 +18,11 @@ class ProductModel extends Model
         $this->query($sql);
         return $this->resultSet();
     }
-
-    public function insertProduct($name, $category, $productType, $description, $basePrice, $image = null)
+    // Method untuk menyimpan data utama produk
+    public function insertProduct($name, $category, $productType, $description, $basePrice)
     {
-        $sql = "INSERT INTO products (name, category, product_type, description, base_price, image) 
-                VALUES (:name, :category, :type, :desc, :price, :image)";
+        $sql = "INSERT INTO products (name, category, product_type, description, base_price) 
+                VALUES (:name, :category, :type, :desc, :price)";
 
         $this->query($sql);
         $this->bind(':name', $name);
@@ -30,12 +30,25 @@ class ProductModel extends Model
         $this->bind(':type', $productType);
         $this->bind(':desc', $description);
         $this->bind(':price', $basePrice);
-        $this->bind(':image', $image); // Bind data gambar
-
+        
         $this->execute();
+        
         return $this->lastInsertId();
     }
-
+    
+    // Method untuk menyimpan gambar produk
+    public function insertProductImage($productId, $imagePath, $isPrimary = 0)
+    {
+        $sql = "INSERT INTO product_images (product_id, image_path, is_primary) 
+                VALUES (:pid, :img, :primary)";
+                
+        $this->query($sql);
+        $this->bind(':pid', $productId);
+        $this->bind(':img', $imagePath);
+        $this->bind(':primary', $isPrimary);
+        
+        return $this->execute();
+    }
     // 2. Insert ke tabel product_options
     public function insertProductOption($productId, $optionName, $optionType, $isRequired)
     {

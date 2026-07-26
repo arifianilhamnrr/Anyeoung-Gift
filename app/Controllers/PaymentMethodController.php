@@ -66,6 +66,24 @@ class PaymentMethodController extends Controller {
         }
     }
 
+    // Endpoint API: POST /api/payment-methods/delete
+    public function delete() {
+        if (!isset($_SESSION['admin_logged_in'])) return $this->jsonResponse(['status' => 'error'], 401);
+
+        $data = $this->getJsonInput();
+        if (empty($data['id'])) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'ID wajib diisi!'], 400);
+        }
+
+        try {
+            $model = new PaymentMethodModel();
+            $model->softDeleteMethod($data['id']);
+            return $this->jsonResponse(['status' => 'success', 'message' => 'Metode Pembayaran berhasil dihapus!']);
+        } catch (\Exception $e) {
+            return $this->jsonResponse(['status' => 'error', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // Dukung dua format: multipart (form admin baru) atau JSON body (kompatibilitas
     // lama). Ini memudahkan migrasi tanpa memecah klien.
     private function extractPayload() {
