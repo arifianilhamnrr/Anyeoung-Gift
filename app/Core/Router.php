@@ -56,6 +56,8 @@ class Router
     // Mengeksekusi Controller dan Method
     private function dispatch($controllerAction)
     {
+        http_response_code(200);
+
         list($controllerName, $method) = explode('@', $controllerAction);
 
         $controllerClass = "App\\Controllers\\" . $controllerName;

@@ -1,4 +1,5 @@
 <?php
+ob_start();
 require_once '../config/database.php';
 require_once __DIR__ . '/actions/cart-helper.php';
 
@@ -27,6 +28,7 @@ try {
 }
 
 $page = $_GET['page'] ?? 'home';
+if ($page === 'products' && !is_file(__DIR__ . '/pages/products.php')) { $page = 'home'; }
 
 $allowed_pages = [
     'home',

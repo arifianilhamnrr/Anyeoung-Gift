@@ -9,6 +9,8 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 $userId = $_SESSION['user_id'];
+$log = static function ($event, $data = []) { error_log('anyeong_upload ' . $event . ' ' . json_encode($data, JSON_UNESCAPED_SLASHES)); };
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') { $log('invalid_method', ['method' => $_SERVER['REQUEST_METHOD'] ?? '']); $_SESSION['upload_error'] = 'Permintaan upload tidak valid.'; header('Location: ../index.php?page=orders'); exit; }
 $orderId = (int) ($_POST['order_id'] ?? 0);
 
 if ($orderId <= 0) {
@@ -44,14 +46,16 @@ if ($order['payment_method_type'] === 'onsite') {
     exit;
 }
 
-if (!isset($_FILES['proof_image']) || $_FILES['proof_image']['error'] !== UPLOAD_ERR_OK) {
+if (!isset($_FILES['proof_image'])) {
+    $log('missing_file', ['order_id' => $orderId, 'user_id' => $userId]);
     $_SESSION['upload_error'] = 'File bukti pembayaran wajib diupload.';
     header('Location: ../index.php?page=payment_upload&order_id=' . $orderId);
     exit;
 }
 
 $file = $_FILES['proof_image'];
-$maxSize = 2 * 1024 * 1024;
+if ($file['error'] !== UPLOAD_ERR_OK) { $codes = [UPLOAD_ERR_INI_SIZE => 'Ukuran file melebihi batas server.', UPLOAD_ERR_FORM_SIZE => 'Ukuran file terlalu besar.', UPLOAD_ERR_PARTIAL => 'Upload terputus.', UPLOAD_ERR_NO_TMP_DIR => 'Folder sementara server tidak tersedia.', UPLOAD_ERR_CANT_WRITE => 'Server gagal menulis file.']; $msg = $codes[$file['error']] ?? ('Upload gagal (kode ' . (int)$file['error'] . ').'); $log('file_error', ['order_id'=>$orderId, 'user_id'=>$userId, 'code'=>$file['error']]); $_SESSION['upload_error']=$msg; header('Location: ../index.php?page=payment_upload&order_id=' . $orderId); exit; }
+$maxSize = 5 * 1024 * 1024;
 $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
 
 $originalName = $file['name'];
@@ -66,7 +70,7 @@ if (!in_array($extension, $allowedExtensions, true)) {
 }
 
 if ($fileSize > $maxSize) {
-    $_SESSION['upload_error'] = 'Ukuran file maksimal 2MB.';
+    $_SESSION['upload_error'] = 'Ukuran file maksimal 5MB.';
     header('Location: ../index.php?page=payment_upload&order_id=' . $orderId);
     exit;
 }
@@ -109,6 +113,7 @@ $stmt = $pdo->prepare("
     WHERE id = ?
 ");
 $stmt->execute([$newFileName, $order['payment_id']]);
+$log('success', ['order_id'=>$orderId,'user_id'=>$userId,'size'=>$fileSize,'file'=>$newFileName]);
 
 // Siapkan email notifikasi (dikirim setelah response di-flush ke browser).
 $emailJob = null;
