@@ -20,6 +20,10 @@ class OrderService {
         return $this->orderModel->getDashboardSummary($month, $year);
     }
 
+    public function getIncomeRows(?int $month = null, ?int $year = null): array {
+        return $this->orderModel->getIncomeRows($month, $year);
+    }
+
     public function getRecentOrdersForDashboard(?int $month = null, ?int $year = null, int $limit = 5) {
         return $this->orderModel->getRecentOrdersForDashboard($month, $year, $limit);
     }

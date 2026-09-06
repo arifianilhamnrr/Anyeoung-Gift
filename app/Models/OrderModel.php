@@ -99,6 +99,17 @@ class OrderModel extends Model
         return $this->resultSet();
     }
 
+    public function getIncomeRows(?int $month = null, ?int $year = null): array
+    {
+        $where = "WHERE o.status IN ('paid', 'ready_pickup', 'completed')";
+        if ($month !== null && $year !== null) $where .= ' AND MONTH(o.created_at) = :month AND YEAR(o.created_at) = :year';
+        $this->query("SELECT o.id, o.total_price, o.status, o.created_at, u.name AS customer_name, pm.name AS payment_method_name
+                      FROM orders o LEFT JOIN users u ON u.id = o.user_id LEFT JOIN payments p ON p.order_id = o.id
+                      LEFT JOIN payment_methods pm ON pm.id = p.payment_method_id $where ORDER BY o.created_at DESC");
+        if ($month !== null && $year !== null) { $this->bind(':month', $month); $this->bind(':year', $year); }
+        return $this->resultSet();
+    }
+
     // ==========================================
     // WRITE METHODS (Untuk Sistem Snapshot)
     // ==========================================

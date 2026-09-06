@@ -42,6 +42,7 @@ $router->post('/api/logout', 'AuthController@logout');
 
 // Daftarkan Rute API (Untuk dipanggil oleh Fetch API Javascript)
 $router->get('/api/dashboard/summary', 'DashboardController@getSummaryData');
+$router->get('/api/dashboard/export-income', 'DashboardController@exportIncome');
 $router->get('/api/products', 'ProductController@index');
 $router->post('/api/products', 'ProductController@store');
 $router->post('/api/products/toggle-status', 'ProductController@toggleStatus');

@@ -35,6 +35,10 @@ $bulanLabels = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                 <?php endforeach; ?>
             </select>
         </div>
+        <div class="flex gap-2">
+            <button type="button" onclick="exportIncome('csv')" class="px-3 py-2 rounded-lg border border-green-500/40 text-green-400 text-sm font-semibold">Export Excel</button>
+            <button type="button" onclick="exportIncome('pdf')" class="px-3 py-2 rounded-lg border border-red-500/40 text-red-400 text-sm font-semibold">Export PDF</button>
+        </div>
     </div>
 </div>
 

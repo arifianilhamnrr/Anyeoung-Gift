@@ -265,6 +265,14 @@
         }
     }
 
+    function exportIncome(format) {
+        const month = document.getElementById('dashboardMonthFilter')?.value || 'all';
+        const year = document.getElementById('dashboardYearFilter')?.value || 'all';
+        const params = new URLSearchParams({ format });
+        if (month !== 'all' && year !== 'all') { params.set('month', month); params.set('year', year); }
+        window.location.href = `${BASE_URL}/api/dashboard/export-income?${params.toString()}`;
+    }
+
     // --- DASHBOARD ---
     const BULAN_LABELS_ID = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
 
