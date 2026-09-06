@@ -124,8 +124,8 @@ class AuthController extends Controller
             return $this->jsonResponse(['status' => 'error', 'message' => 'Semua field password wajib diisi.'], 400);
         }
 
-        if (strlen($newPassword) < 6) {
-            return $this->jsonResponse(['status' => 'error', 'message' => 'Password baru minimal 6 karakter.'], 400);
+        if (strlen($newPassword) < 4 || strlen($newPassword) > 16) {
+            return $this->jsonResponse(['status' => 'error', 'message' => 'Password baru harus 4-16 karakter.'], 400);
         }
 
         if ($newPassword !== $confirm) {

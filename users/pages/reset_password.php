@@ -60,7 +60,7 @@ if ($token !== '') {
                 <div>
                     <label class="block text-xs font-medium mb-2 text-gray-400 uppercase tracking-wider">Password Baru</label>
                     <div class="relative">
-                        <input type="password" name="new_password" id="new_password" required minlength="6"
+                        <input type="password" name="new_password" id="new_password" required minlength="4" maxlength="16" oninput="validateResetPassword(this, 'new-password-error')"
                             class="w-full p-3 pr-12 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
                         <button type="button" onclick="toggleResetPwd('new_password', this)"
                             class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gold-500 hover:bg-gold-500/10 transition"
@@ -73,11 +73,12 @@ if ($token !== '') {
                             </svg>
                         </button>
                     </div>
+                    <p id="new-password-error" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
                 </div>
                 <div>
                     <label class="block text-xs font-medium mb-2 text-gray-400 uppercase tracking-wider">Konfirmasi Password</label>
                     <div class="relative">
-                        <input type="password" name="confirm_password" id="confirm_password" required minlength="6"
+                        <input type="password" name="confirm_password" id="confirm_password" required minlength="4" maxlength="16" oninput="validateResetPassword(this, 'confirm-password-error')"
                             class="w-full p-3 pr-12 bg-dark-base border border-dark-border rounded-xl text-sm text-gray-200 focus:border-gold-500 focus:ring-1 outline-none transition">
                         <button type="button" onclick="toggleResetPwd('confirm_password', this)"
                             class="absolute right-1.5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full flex items-center justify-center text-gray-400 hover:text-gold-500 hover:bg-gold-500/10 transition"
@@ -90,6 +91,7 @@ if ($token !== '') {
                             </svg>
                         </button>
                     </div>
+                    <p id="confirm-password-error" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
                 </div>
                 <button type="submit"
                     class="w-full bg-gold-500 text-gray-900 font-bold py-3 rounded-xl hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(245,158,11,0.3)] transition">
@@ -104,6 +106,13 @@ if ($token !== '') {
     </div>
 
     <script>
+        function validateResetPassword(input, errorId) {
+            const error = document.getElementById(errorId);
+            if (!error) return;
+            const length = input.value.length;
+            error.textContent = length > 0 && (length < 4 || length > 16) ? 'Password harus 4-16 karakter.' : '';
+        }
+
         // Toggle show/hide password untuk form reset password.
         function toggleResetPwd(inputId, btn) {
             const input = document.getElementById(inputId);

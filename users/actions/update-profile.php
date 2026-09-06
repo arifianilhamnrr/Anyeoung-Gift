@@ -55,8 +55,8 @@ if ($formType === 'update_password') {
         exit;
     }
 
-    if (strlen($newPassword) < 6) {
-        $_SESSION['profile_error'] = 'Password baru minimal 6 karakter.';
+    if (strlen($newPassword) < 4 || strlen($newPassword) > 16) {
+        $_SESSION['profile_error'] = 'Password baru harus 4-16 karakter.';
         header('Location: ../index.php?page=profile');
         exit;
     }

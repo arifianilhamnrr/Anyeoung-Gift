@@ -215,7 +215,8 @@ $authStoreName = storeNameRaw($pdo ?? null);
                             Sandi</label>
                         <div class="password-wrapper">
                             <input type="password" name="password" id="register-password" placeholder="Buat kata sandi"
-                                class="custom-input" required minlength="6">
+                                class="custom-input" required minlength="4" maxlength="16" oninput="validatePasswordLength(this, 'register-password-error')">
+                            <p id="register-password-error" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
                             <button type="button" class="toggle-password"
                                 onclick="togglePassword('register-password', this)"
                                 aria-label="Tampilkan kata sandi">
@@ -486,6 +487,13 @@ $authStoreName = storeNameRaw($pdo ?? null);
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }, 300);
+        }
+        function validatePasswordLength(input, errorId) {
+            const error = document.getElementById(errorId);
+            if (!error) return;
+            const length = input.value.length;
+            error.textContent = length > 0 && (length < 4 || length > 16)
+                ? 'Password harus 4-16 karakter.' : '';
         }
     </script>
 

@@ -18,8 +18,8 @@ if ($newPassword === '' || $confirmPassword === '') {
     exit;
 }
 
-if (strlen($newPassword) < 6) {
-    $_SESSION['reset_password_error'] = 'Password baru minimal 6 karakter.';
+if (strlen($newPassword) < 4 || strlen($newPassword) > 16) {
+    $_SESSION['reset_password_error'] = 'Password baru harus 4-16 karakter.';
     header('Location: ../index.php?page=reset_password&token=' . urlencode($token));
     exit;
 }

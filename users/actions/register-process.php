@@ -27,8 +27,8 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit;
 }
 
-if (strlen($password) < 6) {
-    $_SESSION['error'] = 'Password minimal 6 karakter.';
+if (strlen($password) < 4 || strlen($password) > 16) {
+    $_SESSION['error'] = 'Password harus 4-16 karakter.';
     $_SESSION['active_auth_view'] = 'register';
     header('Location: ../index.php?page=login');
     exit;

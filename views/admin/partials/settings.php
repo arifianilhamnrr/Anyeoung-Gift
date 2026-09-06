@@ -211,7 +211,7 @@
         <div class="p-6">
             <div class="flex items-center gap-4 text-sm text-gray-400">
                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m0 0v2m0-2h2m-2 0H10m9-7V9a7 7 0 10-14 0v1M5 12h14a1 1 0 011 1v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6a1 1 0 011-1z"/></svg>
-                Password disimpan secara aman menggunakan hashing. Gunakan minimal 6 karakter.
+                Password disimpan secara aman menggunakan hashing. Gunakan 4-16 karakter.
             </div>
         </div>
     </div>

@@ -377,13 +377,15 @@
                         <label class="block text-sm text-gray-400 font-medium mb-1.5">Password Baru</label>
                         <input type="password" id="admin_new_password"
                             class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
-                            minlength="6" required>
+                            minlength="4" maxlength="16" oninput="validateAdminPassword(this, 'admin-password-error')" required>
+                        <p id="admin-password-error" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
                     </div>
                     <div>
                         <label class="block text-sm text-gray-400 font-medium mb-1.5">Konfirmasi Password Baru</label>
                         <input type="password" id="admin_confirm_password"
                             class="w-full p-3 bg-dark-base border border-dark-border text-gray-200 rounded-xl text-sm focus:border-gold-500 focus:ring-1 outline-none transition"
-                            minlength="6" required>
+                            minlength="4" maxlength="16" oninput="validateAdminPassword(this, 'admin-confirm-password-error')" required>
+                        <p id="admin-confirm-password-error" class="text-red-400 text-xs mt-1 min-h-[1rem]"></p>
                     </div>
                 </div>
                 <div class="flex gap-3 mt-6">

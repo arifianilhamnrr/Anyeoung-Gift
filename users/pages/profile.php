@@ -200,7 +200,7 @@ unset($_SESSION['profile_success'], $_SESSION['profile_error']);
 
         <div class="p-6 md:p-8">
             <h3 class="text-2xl font-title text-gold mb-1 text-center">Ubah Password</h3>
-            <p class="text-gray-400 text-sm text-center mb-6">Gunakan kombinasi minimal 6 karakter.</p>
+            <p class="text-gray-400 text-sm text-center mb-6">Password harus 4-16 karakter.</p>
 
             <form action="actions/update-profile.php" method="POST" class="space-y-4">
                 <input type="hidden" name="form_type" value="update_password">
@@ -211,14 +211,16 @@ unset($_SESSION['profile_success'], $_SESSION['profile_error']);
                 </div>
 
                 <div class="space-y-1">
-                    <input type="password" name="new_password" required minlength="6" placeholder="Password Baru"
+                    <input type="password" name="new_password" required minlength="4" maxlength="16" oninput="validateProfilePassword(this, 'profile-password-error')" placeholder="Password Baru"
                         class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
+                    <p id="profile-password-error" class="text-red-400 text-xs min-h-[1rem]"></p>
                 </div>
 
                 <div class="space-y-1">
-                    <input type="password" name="confirm_password" required minlength="6"
+                    <input type="password" name="confirm_password" required minlength="4" maxlength="16" oninput="validateProfilePassword(this, 'profile-confirm-password-error')"
                         placeholder="Konfirmasi Password Baru"
                         class="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition-colors">
+                    <p id="profile-confirm-password-error" class="text-red-400 text-xs min-h-[1rem]"></p>
                 </div>
 
                 <div class="pt-4 flex gap-3">
@@ -283,5 +285,11 @@ unset($_SESSION['profile_success'], $_SESSION['profile_error']);
             passwordModal.classList.add('hidden');
             passwordModal.classList.remove('flex');
         }, 300);
+    }
+    function validateProfilePassword(input, errorId) {
+        const error = document.getElementById(errorId);
+        if (!error) return;
+        const length = input.value.length;
+        error.textContent = length > 0 && (length < 4 || length > 16) ? 'Password harus 4-16 karakter.' : '';
     }
 </script>

@@ -1637,6 +1637,13 @@
         toggleModal('adminPasswordModal', true);
     }
 
+    function validateAdminPassword(input, errorId) {
+        const error = document.getElementById(errorId);
+        if (!error) return;
+        const length = input.value.length;
+        error.textContent = length > 0 && (length < 4 || length > 16) ? 'Password harus 4-16 karakter.' : '';
+    }
+
     /** Submit form ubah password admin */
     async function submitAdminPasswordForm(e) {
         e.preventDefault();
